@@ -1,7 +1,7 @@
 import { getLogs } from "../api";
 import { appendLogEntry } from "./LogEntry";
 
-class LogViewer extends HTMLElement {
+export class LogViewer extends HTMLElement {
 
     async connectedCallback() {
         this.innerHTML = `<h1>Loading...</h1>`

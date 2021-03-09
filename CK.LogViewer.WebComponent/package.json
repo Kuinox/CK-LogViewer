@@ -1,25 +1,18 @@
 {
-  "name": "ck.logviewer.webcomponent",
+  "name": "ck.logviewer.webcomponent2",
+  "version": "1.0.0",
+  "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "webpack --env.MODE=production",
-    "lint": "tslint -c tslint.json 'src/**/*.ts'",
+    "build": "webpack",
     "start": "webpack serve"
   },
+  "dependencies": {},
   "devDependencies": {
-    "clean-webpack-plugin": "^3.0.0",
-    "copy-webpack-plugin": "^8.0.0",
-    "html-loader": "^2.1.1",
-    "html-webpack-plugin": "^5.3.0",
     "ts-loader": "^8.0.17",
-    "ts-node": "^9.1.1",
-    "tslib": "^2.1.0",
     "typescript": "^4.2.3",
-    "webpack": "^5.24.3",
+    "webpack": "^5.24.4",
     "webpack-cli": "^4.5.0",
     "webpack-dev-server": "^3.11.2"
-  },
-  "dependencies": {
-    "@webcomponents/custom-elements": "^1.4.3"
   }
 }
