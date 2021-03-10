@@ -3,10 +3,12 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -36,7 +38,11 @@ namespace CK.LogViewer.WebApp
             }
 
             app.UseRouting();
-
+            app.UseDefaultFiles();
+            app.UseStaticFiles( new StaticFileOptions()
+            {
+                FileProvider = new PhysicalFileProvider( Path.GetFullPath( "../CK.LogViewer.WebComponent/public/" ) )
+            } );
             app.UseAuthorization();
             app.UseCors( ( policy ) =>
              {

@@ -14,7 +14,7 @@ export class LogViewer extends HTMLElement {
 
         }
         html.push("</log-list>");
-        this.innerHTML = html.join();
+        this.innerHTML = html.join("");
     }
 
 }
