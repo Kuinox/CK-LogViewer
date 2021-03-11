@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@300&display=swap');
+body{
+  font-family: 'Inconsolata', monospace;
+  background-color: #1e1e1e;
+  color: white;
+}
+log-viewer {
+  display: flex;
+  flex-direction: column;
+}
+log-group {
+  display: flex;
+  flex-direction: row;
+}
+
+.group-tab{
+  height: auto;
+  min-width: 10px;
+  margin-left: 5px;
+  margin-right: 5px;
+  display: flex;
+}
+
+.group-tab div {
+  height: auto;
+  width: 50%;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.group-ruler {
+  border:solid;
+  border-right: none;
+  border-width: 0.5px;
+}
+
+.group-content{
+  display: flex;
+  flex-direction: column;
+}
+
+.group-tab:hover{
+  background-color: rgba(255, 255, 255, 0.2)
+}
+
+log-entry:hover {
+  background-color: rgba(255, 255, 255, 0.2)
+}

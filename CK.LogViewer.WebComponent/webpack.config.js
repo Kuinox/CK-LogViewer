@@ -1,5 +1,6 @@
 const path = require('path');
 var glob = require("glob");
+
 const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
@@ -34,8 +35,12 @@ module.exports = {
                     to: "node_modules/@webcomponents/custom-elements/"
                 },
                 {
-                    from: "index.html",
+                    from: "src/index.html",
                     to: "index.html"
+                },
+                {
+                    from: "src/styles.css",
+                    to: "styles.css"
                 }]
         })
     ]
