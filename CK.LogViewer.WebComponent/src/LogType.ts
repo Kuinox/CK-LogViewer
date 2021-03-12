@@ -12,7 +12,16 @@ export type SimpleLog = {
     logTime: string,
     monitorId: string,
     isGroup: false,
-    text: string
+    text: string,
+    exception: CKExceptionData
 }
+
+export type CKExceptionData = {
+    stackTrace: string,
+    typeException: string,
+    message: string
+}
+
+
 
 export type LogEntry = GroupLog | SimpleLog;
