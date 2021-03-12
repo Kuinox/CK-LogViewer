@@ -1,3 +1,4 @@
+using CK.Core;
 using CK.Monitoring;
 using System;
 using System.Collections.Generic;
@@ -51,6 +52,16 @@ namespace CK.LogViewer
             writer.WriteNumber( "logLevel", (byte)logEntry.Entry.LogLevel );
             writer.WriteString( "logTime", logEntry.Entry.LogTime.ToString() );
             writer.WriteString( "monitorId", logEntry.Entry.MonitorId );
+
+            if( logEntry.Entry.Exception != null )
+            {
+
+                WriteException( writer, logEntry.Entry.Exception );
+
+
+            }
+
+
         }
 
         static void WriteLog( Utf8JsonWriter writer, MulticastLogEntryWithOffset logEntry )
@@ -59,6 +70,15 @@ namespace CK.LogViewer
             WriteCommonProperties( writer, logEntry );
             writer.WriteBoolean( "isGroup", false );
             writer.WriteString( "text", logEntry.Entry.Text );
+            writer.WriteEndObject();
+        }
+
+        static void WriteException( Utf8JsonWriter writer, CKExceptionData exceptionData )
+        {
+            writer.WriteStartObject( "exception" );
+            writer.WriteString( "stackTrace", exceptionData.StackTrace );
+            writer.WriteString( "typeException", exceptionData.ExceptionTypeName );
+            writer.WriteString( "message", exceptionData.Message );
             writer.WriteEndObject();
         }
 
