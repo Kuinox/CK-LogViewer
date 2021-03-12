@@ -1,8 +1,12 @@
 import { LogEntry, SimpleLog } from "../LogType";
 
 export class LogEntryElement extends HTMLElement {
+    constructor() {
+        super();
+    }
+
     static create(log: SimpleLog) {
-        const entry = document.createElement("log-entry");
+        const entry = new LogEntryElement();
         const span = document.createElement("span");
         span.innerHTML = log.text;
         entry.appendChild(span);

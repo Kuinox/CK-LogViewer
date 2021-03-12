@@ -6,6 +6,11 @@ export interface GroupLog {
 }
 
 export type SimpleLog = {
+    offset: number,
+    logOffset: number,
+    logLevel: number,
+    logTime: string,
+    monitorId: string,
     isGroup: false,
     text: string
 }

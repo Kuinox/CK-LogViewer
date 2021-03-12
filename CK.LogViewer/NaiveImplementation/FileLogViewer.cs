@@ -19,15 +19,16 @@ namespace CK.LogViewer
             writer.WriteStartArray();
             while( _logReader.MoveNext() )
             {
-                ILogEntry curr = _logReader.Current;
+                MulticastLogEntryWithOffset curr = _logReader.CurrentMulticastWithOffset;
 
-                switch( curr.LogType )
+                switch( curr.Entry.LogType )
                 {
                     case LogEntryType.Line:
                         WriteLog( writer, curr );
                         break;
                     case LogEntryType.OpenGroup:
                         writer.WriteStartObject();
+                        WriteCommonProperties( writer, curr );
                         writer.WriteBoolean( "isGroup", true );
                         writer.WritePropertyName( "openLog" );
                         WriteLog( writer, curr );
@@ -44,11 +45,20 @@ namespace CK.LogViewer
             writer.WriteEndArray();
         }
 
-        void WriteLog( Utf8JsonWriter writer, ILogEntry logEntry )
+        static void WriteCommonProperties( Utf8JsonWriter writer, MulticastLogEntryWithOffset logEntry )
+        {
+            writer.WriteNumber( "offset", logEntry.Offset ); ;
+            writer.WriteNumber( "logLevel", (byte)logEntry.Entry.LogLevel );
+            writer.WriteString( "logTime", logEntry.Entry.LogTime.ToString() );
+            writer.WriteString( "monitorId", logEntry.Entry.MonitorId );
+        }
+
+        static void WriteLog( Utf8JsonWriter writer, MulticastLogEntryWithOffset logEntry )
         {
             writer.WriteStartObject();
+            WriteCommonProperties( writer, logEntry );
             writer.WriteBoolean( "isGroup", false );
-            writer.WriteString( "text", logEntry.Text );
+            writer.WriteString( "text", logEntry.Entry.Text );
             writer.WriteEndObject();
         }
 

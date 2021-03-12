@@ -41,7 +41,7 @@ export class LogGroupElement extends HTMLElement {
             const element = log.groupLogs[i];
             list.appendChild(element.isGroup ? this.create(element) : LogEntryElement.create(element));
         }
-        const close = LogEntryElement.create(log.openLog);
+        const close = LogEntryElement.create(log.closeLog);
         close.className = "close-log";
         contentDiv.appendChild(close);
         const group = new LogGroupElement(collapseDiv, list);
