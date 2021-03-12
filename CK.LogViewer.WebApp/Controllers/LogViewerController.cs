@@ -24,7 +24,7 @@ namespace CK.LogViewer.WebApp.Controllers
         [HttpGet]
         public async Task GetLogJson()
         {
-            string path = @"C:\dev\CK-LogViewer\CK.LogViewer.WebApp\2016-01-20 18h59.18.2215043.ckmon";
+            string path = @$"{Directory.GetCurrentDirectory()}\2016-01-20 18h59.18.2215043.ckmon";
             FileLogViewer logViewer = new( path );
             HttpContext.Response.ContentType = "application/json";
             var writer = new Utf8JsonWriter( HttpContext.Response.Body );
