@@ -6,11 +6,22 @@ body{
 }
 log-viewer {
   display: flex;
-  flex-direction: column;
+  white-space: nowrap;
+  padding-left: 245px;
 }
 log-group {
   display: flex;
   flex-direction: row;
+}
+
+log-exception {
+  margin-right: 0.5em;
+}
+
+.log-timestamp {
+  position: absolute;
+  left: 0;
+  background-color: inherit;
 }
 
 .group-tab{
@@ -39,12 +50,21 @@ log-group {
   flex-direction: column;
 }
 
-.group-tab:hover{
-  background-color: rgba(255, 255, 255, 0.2)
+.group-tab:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+.group-tab:hover ~ .group-content{
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 log-entry:hover {
-  background-color: rgba(255, 255, 255, 0.2)
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+log-entry {
+  height: 1.1em;
+  line-height: 1em;
+  display: flex;
 }
 
 .modal {
@@ -83,3 +103,30 @@ log-entry:hover {
   cursor: pointer;
 }
 
+
+
+.error {
+  color: red;
+}
+
+.info {
+  color: #00a6e3;
+}
+
+.debug {
+  color: #5c5c5c;
+}
+
+.trace {
+  color: #cccccc;
+}
+
+.warn {
+  color: rgb(221, 199, 2);
+}
+
+.fatal {
+  color: darkred;
+  background-color: yellow;
+  font-weight: bold;
+}

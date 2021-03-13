@@ -2,6 +2,7 @@ using CK.Core;
 using CK.Monitoring;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Text.Json;
 
@@ -55,13 +56,8 @@ namespace CK.LogViewer
 
             if( logEntry.Entry.Exception != null )
             {
-
                 WriteException( writer, logEntry.Entry.Exception );
-
-
             }
-
-
         }
 
         static void WriteLog( Utf8JsonWriter writer, MulticastLogEntryWithOffset logEntry )

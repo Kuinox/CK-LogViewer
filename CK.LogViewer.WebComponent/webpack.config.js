@@ -1,5 +1,6 @@
 const path = require('path');
 var glob = require("glob");
+const ESLintPlugin = require('eslint-webpack-plugin');
 
 const CopyPlugin = require("copy-webpack-plugin");
 
@@ -42,6 +43,10 @@ module.exports = {
                     from: "src/styles.css",
                     to: "styles.css"
                 }]
+        }),
+        new ESLintPlugin({
+            context: "src",
+            extensions: "ts"
         })
     ]
 };
