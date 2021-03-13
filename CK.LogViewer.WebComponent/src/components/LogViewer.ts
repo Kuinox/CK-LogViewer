@@ -7,6 +7,7 @@ export class LogViewer extends HTMLElement {
     constructor() {
         super();
         document.addEventListener("pass-log-data", (event) => {
+            this.innerHTML = "";
             const eventAny = event as any;
             const { logs } = eventAny.detail;
             const groups = document.createElement("div");

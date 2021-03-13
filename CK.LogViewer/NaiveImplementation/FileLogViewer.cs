@@ -8,17 +8,12 @@ using System.Text.Json;
 
 namespace CK.LogViewer
 {
-    public class FileLogViewer
+    public class FileLogViewer : IDisposable
     {
         readonly LogReader _logReader;
         public FileLogViewer( string logPath )
         {
             _logReader = LogReader.Open( logPath );
-        }
-
-        public FileLogViewer( Stream log )
-        {
-            _logReader = LogReader.Open( log );
         }
 
         public void NaiveJSONDump( Utf8JsonWriter writer )
@@ -83,5 +78,9 @@ namespace CK.LogViewer
             writer.WriteEndObject();
         }
 
+        public void Dispose()
+        {
+            _logReader.Dispose();
+        }
     }
 }
