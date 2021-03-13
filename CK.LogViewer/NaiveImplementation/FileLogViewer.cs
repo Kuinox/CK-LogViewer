@@ -16,6 +16,11 @@ namespace CK.LogViewer
             _logReader = LogReader.Open( logPath );
         }
 
+        public FileLogViewer( Stream log )
+        {
+            _logReader = LogReader.Open( log );
+        }
+
         public void NaiveJSONDump( Utf8JsonWriter writer )
         {
             writer.WriteStartArray();

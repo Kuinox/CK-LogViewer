@@ -4,16 +4,18 @@ import { LogGroupElement } from "./LogGroupElement";
 
 export class LogViewer extends HTMLElement {
 
-    async connectedCallback(): Promise<void> {
-        this.innerHTML = `<h1>Loading...</h1>`;
-        const logs = await getLogs();
-        this.innerHTML = "";
-        const groups = document.createElement("div");
-        for (let i = 0; i < logs.length; i++) {
-            const curr = logs[i];
-            groups.appendChild(curr.isGroup ? LogGroupElement.create(curr) : LogEntryElement.create(curr));
-        }
-        this.appendChild(groups);
+    constructor() {
+        super();
+        document.addEventListener("pass-log-data", (event) => {
+            const eventAny = event as any;
+            const { logs } = eventAny.detail;
+            const groups = document.createElement("div");
+            for (let i = 0; i < logs.length; i++) {
+                const curr = logs[i];
+                groups.appendChild(curr.isGroup ? LogGroupElement.create(curr) : LogEntryElement.create(curr));
+            }
+            this.appendChild(groups);
+        });
     }
 }
 
