@@ -5,18 +5,18 @@ export interface GroupLog {
     closeLog: SimpleLog
 }
 
-export type SimpleLog = {
+export interface SimpleLog {
+    isGroup: false,
     offset: number,
     logOffset: number,
     logLevel: number,
     logTime: string,
     monitorId: string,
-    isGroup: false,
     text: string,
-    exception: CKExceptionData
+    exception?: CKExceptionData
 }
 
-export type CKExceptionData = {
+export interface CKExceptionData {
     stackTrace: string,
     typeException: string,
     message: string

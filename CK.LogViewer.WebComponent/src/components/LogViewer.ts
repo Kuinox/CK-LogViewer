@@ -1,4 +1,4 @@
-import { getLogs } from "../api";
+import { getLogs } from "../backend/api";
 import { LogEntryElement } from "./LogEntryElement";
 import { LogGroupElement } from "./LogGroupElement";
 
