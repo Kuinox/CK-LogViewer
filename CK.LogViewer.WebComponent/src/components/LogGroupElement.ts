@@ -1,11 +1,15 @@
-import { GroupLog } from "../LogType";
+import { GroupLog } from "../backend/GroupLog";
+import { LogEntry } from "../backend/LogEntry";
+import { SimpleLog } from "../backend/SimpleLog";
+import { createDiv } from "../helpers/domHelpers";
 import { LogEntryElement } from "./LogEntryElement";
 
 export class LogGroupElement extends HTMLElement {
-    private collapsed = false;
+    private collapsed;
     private contentDiv: HTMLElement;
-    constructor(collapseDiv: HTMLElement, contentDiv: HTMLElement) {
+    constructor(collapseDiv: HTMLElement, contentDiv: HTMLElement, collapsed: boolean) {
         super();
+        this.collapsed = collapsed;
         collapseDiv.addEventListener("click", this.toggleExpand);
         this.contentDiv = contentDiv;
     }
@@ -18,34 +22,45 @@ export class LogGroupElement extends HTMLElement {
             this.contentDiv.style.removeProperty("display");
         }
     };
+    private static fromLogEntry(log: LogEntry) {
+        return log.isGroup ? this.create(log) : LogEntryElement.create(log);
+    }
 
     static create(log: GroupLog): HTMLElement {
-        const contentDiv = document.createElement("div");
-        contentDiv.classList.add("group-content");
-
-        const open = LogEntryElement.create(log.openLog);
-        open.classList.add("open-log");
-        contentDiv.appendChild(open);
-        const list = document.createElement("div");
-        const collapseDiv = document.createElement("div");
-        {
-            collapseDiv.classList.add("group-tab");
-            const leftCollapse = document.createElement("div");
-            const rightCollapse = document.createElement("div");
-            rightCollapse.classList.add("group-ruler");
-            collapseDiv.appendChild(leftCollapse);
-            collapseDiv.appendChild(rightCollapse);
+        const list = createDiv({
+            childNodes: log.groupLogs.map(this.fromLogEntry)
+        });
+        const contentDiv = createDiv({
+            className: "group-content",
+            childNodes: [LogEntryElement.create(log.openLog, {
+                className: "open-log"
+            }),
+                list,
+            LogEntryElement.create(log.closeLog, {
+                className: "close-log"
+            })
+            ]
+        });
+        const collapseDiv = createDiv({
+            className: "group-tab",
+            childNodes: [
+                createDiv(),
+                createDiv({
+                    className: "group-ruler"
+                })
+            ]
+        });
+        let logCount = 0;
+        for (const key in log.groupStats) {
+            if (Object.prototype.hasOwnProperty.call(log.groupStats, key)) {
+                const element = log.groupStats[key];
+                if(element === undefined) continue;
+                logCount += element;
+            }
         }
-        contentDiv.appendChild(list);
 
-        for (let i = 0; i < log.groupLogs.length; i++) {
-            const element = log.groupLogs[i];
-            list.appendChild(element.isGroup ? this.create(element) : LogEntryElement.create(element));
-        }
-        const close = LogEntryElement.create(log.closeLog);
-        close.classList.add("close-log");
-        contentDiv.appendChild(close);
-        const group = new LogGroupElement(collapseDiv, list);
+        const isCollapsed = logCount > 0 && log.groupLogs.length === 0;
+        const group = new LogGroupElement(collapseDiv, list, isCollapsed);
         group.append(collapseDiv);
         group.appendChild(contentDiv);
         return group;

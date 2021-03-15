@@ -1,4 +1,6 @@
+using CK.Core;
 using CK.Monitoring;
+using System.Collections.Generic;
 using System.IO;
 
 namespace CK.LogViewer
@@ -6,6 +8,7 @@ namespace CK.LogViewer
     public class LogVisitor
     {
         protected readonly LogReader _logReader;
+        protected readonly Stack<Dictionary<LogLevel, int>> Stats;
 
         public LogVisitor( LogReader logReader )
             => _logReader = logReader;
@@ -21,17 +24,6 @@ namespace CK.LogViewer
             }
         }
 
-        protected bool SkipCurrentGroup()
-        {
-            int currentDepth = _logReader.CurrentMulticast.GroupDepth;
-            bool next = _logReader.MoveNext();
-            while( next && _logReader.CurrentMulticast.GroupDepth >= currentDepth )
-            {
-                next = _logReader.MoveNext();
-            }
-            return next;
-        }
-
         protected virtual bool VisitLogEntry( MulticastLogEntryWithOffset entry )
             => entry.Entry.LogType switch
             {
@@ -41,10 +33,37 @@ namespace CK.LogViewer
                 _ => throw new InvalidDataException( "Invalid log type." ),
             };
 
-        protected virtual bool VisitOpenGroup( MulticastLogEntryWithOffset entry ) => true;
 
-        protected virtual bool VisitCloseGroup( MulticastLogEntryWithOffset entry ) => true;
+        void IncrementStat( LogLevel logLevel )
+        {
+            var currStat = Stats.Peek();
+            if( !currStat.TryGetValue( logLevel, out int currCount ) )
+            {
+                currStat[logLevel] = 1;
+            }
+            else
+            {
+                currStat[logLevel] = currCount + 1;
+            }
+        }
 
-        protected virtual bool VisitLogLine( MulticastLogEntryWithOffset entry ) => true;
+        protected virtual bool VisitOpenGroup( MulticastLogEntryWithOffset entry )
+        {
+            IncrementStat( entry.Entry.LogLevel );
+            Stats.Push( new Dictionary<LogLevel, int>() );
+            return true;
+        }
+
+        protected virtual bool VisitCloseGroup( MulticastLogEntryWithOffset entry )
+        {
+            Stats.Pop();
+            return true;
+        }
+
+        protected virtual bool VisitLogLine( MulticastLogEntryWithOffset entry )
+        {
+            IncrementStat( entry.Entry.LogLevel );
+            return true;
+        }
     }
 }

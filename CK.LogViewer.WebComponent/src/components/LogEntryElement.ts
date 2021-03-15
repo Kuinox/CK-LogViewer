@@ -1,5 +1,6 @@
 import { LogLevel, logLevelToString } from "../backend/LogLevel";
-import { SimpleLog } from "../LogType";
+import { SimpleLog } from "../backend/SimpleLog";
+import { setElementOptions, ClassOptions } from "../helpers/domHelpers";
 import { LogExceptionElement } from "./LogExceptionElement";
 
 export class LogEntryElement extends HTMLElement {
@@ -7,8 +8,9 @@ export class LogEntryElement extends HTMLElement {
         super();
     }
 
-    static create(log: SimpleLog): LogEntryElement {
+    static create(log: SimpleLog, options?: ClassOptions): LogEntryElement {
         const entryElement = new LogEntryElement();
+        setElementOptions(entryElement, options);
         const logLevel = logLevelToString.get(log.logLevel & LogLevel.Mask);
         if (logLevel === undefined) throw Error("Invalid log level.");
         const time = document.createElement("span");

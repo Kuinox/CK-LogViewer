@@ -1,5 +1,7 @@
 using CK.Core;
 using CK.Monitoring;
+using System.Collections;
+using System.Collections.Generic;
 using System.Text.Json;
 
 namespace CK.LogViewer
@@ -7,9 +9,11 @@ namespace CK.LogViewer
     public class JSONLogVisitor : ShallowLogVisitor
     {
         readonly Utf8JsonWriter _writer;
-
         public JSONLogVisitor( Utf8JsonWriter utf8JsonWriter, int unfoldedDepth, LogReader logReader ) : base( unfoldedDepth, logReader )
-            => _writer = utf8JsonWriter;
+        {
+            _writer = utf8JsonWriter;
+        }
+
 
         public override void Visit()
         {
@@ -23,6 +27,13 @@ namespace CK.LogViewer
             _writer.WriteEndArray();
             _writer.WritePropertyName( "closeLog" );
             WriteLog( entry );
+            _writer.WriteStartObject( "stats" );
+            var stats = Stats.Peek();
+            foreach( KeyValuePair<LogLevel, int> statPair in stats )
+            {
+                _writer.WriteNumber( statPair.Key.ToString().ToLower(), statPair.Value );
+            }
+            _writer.WriteEndObject();
             _writer.WriteEndObject();
             return base.VisitCloseGroup( entry );
         }
