@@ -1,6 +1,5 @@
 import { getLogs } from "../backend/api";
-import { LogEntryElement } from "./LogEntryElement";
-import { LogGroupElement } from "./LogGroupElement";
+import { LogGroupElement } from "./GroupElement/LogGroupElement";
 
 export class LogViewer extends HTMLElement {
 
@@ -11,7 +10,7 @@ export class LogViewer extends HTMLElement {
         const groups = document.createElement("div");
         for (let i = 0; i < logs.length; i++) {
             const curr = logs[i];
-            groups.appendChild(curr.isGroup ? LogGroupElement.create(curr) : LogEntryElement.create(curr));
+            groups.appendChild(LogGroupElement.fromLogEntry(curr));
         }
         this.appendChild(groups);
     }

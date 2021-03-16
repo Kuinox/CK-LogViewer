@@ -6,6 +6,6 @@ export interface GroupLog {
     isGroup: true,
     openLog: SimpleLog,
     groupLogs: LogEntry[],
-    groupStats: GroupStats,
+    stats: GroupStats,
     closeLog: SimpleLog
 }

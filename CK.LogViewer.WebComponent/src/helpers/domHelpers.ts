@@ -1,8 +1,11 @@
 import { XOR } from "./types";
 
-export function createDiv(options?: NodeOptions & ElementOptions): HTMLDivElement {
+export function createDiv(options?: DivOptions): HTMLDivElement {
     const div = document.createElement("div");
     setElementOptions(div, options);
+    if (options?.onClick !== undefined) {
+        div.addEventListener("click", options.onClick);
+    }
     return div;
 }
 
@@ -25,8 +28,17 @@ export function setElementOptions(element: Element, options?: ElementOptions): v
     }
 }
 
-export type ElementOptions = NodeOptions & ClassOptions;
+export function setChild(base: HTMLElement, newChild: HTMLElement, oldChild: HTMLElement | undefined): HTMLElement {
+    if (oldChild === undefined) {
+        base.appendChild(newChild);
+    } else {
+        base.replaceChild(newChild, oldChild);
+    }
+    return newChild;
+}
 
+export type ElementOptions = NodeOptions & ClassOptions;
+export type DivOptions = ElementOptions & DivListenerOptions;
 export type NodeOptions = XOR<{
     childNodes?: Node[]
 }, {
@@ -36,4 +48,8 @@ export type NodeOptions = XOR<{
 export interface ClassOptions {
     classList?: string[],
     className?: string
+}
+
+export interface DivListenerOptions {
+    onClick?: (this: HTMLDivElement, ev: MouseEvent) => any;
 }

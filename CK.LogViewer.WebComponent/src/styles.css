@@ -45,11 +45,6 @@ log-exception {
   border-width: 0.5px;
 }
 
-.group-content{
-  display: flex;
-  flex-direction: column;
-}
-
 .group-tab:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }

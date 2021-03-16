@@ -16,7 +16,9 @@ module.exports = {
     rules:{
         "@typescript-eslint/no-explicit-any": 0,
         "semi": "off",
-        "@typescript-eslint/semi": ["error"]
+        "@typescript-eslint/semi": ["error"],
+        "@typescript-eslint/no-non-null-assertion": 0,
+        "no-debugger": 0
     }
 
 };

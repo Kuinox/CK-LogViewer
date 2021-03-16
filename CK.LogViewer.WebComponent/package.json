@@ -23,6 +23,7 @@
     "webpack-dev-server": "^3.11.2"
   },
   "dependencies": {
-    "@webcomponents/custom-elements": "^1.4.3"
+    "@webcomponents/custom-elements": "^1.4.3",
+    "ts-toolbelt": "^9.6.0"
   }
 }

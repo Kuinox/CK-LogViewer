@@ -31,7 +31,7 @@ namespace CK.LogViewer
             var stats = Stats.Peek();
             foreach( KeyValuePair<LogLevel, int> statPair in stats )
             {
-                _writer.WriteNumber( statPair.Key.ToString().ToLower(), statPair.Value );
+                _writer.WriteNumber( statPair.Key.ToString(), statPair.Value );
             }
             _writer.WriteEndObject();
             _writer.WriteEndObject();

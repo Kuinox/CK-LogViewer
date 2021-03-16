@@ -11,7 +11,12 @@ namespace CK.LogViewer
         protected readonly Stack<Dictionary<LogLevel, int>> Stats;
 
         public LogVisitor( LogReader logReader )
-            => _logReader = logReader;
+        {
+            _logReader = logReader;
+            Stats = new Stack<Dictionary<LogLevel, int>>();
+            Stats.Push( new Dictionary<LogLevel, int>() );
+        }
+
         protected MulticastLogEntryWithOffset Current { get; private set; }
 
         public virtual void Visit()
@@ -36,6 +41,7 @@ namespace CK.LogViewer
 
         void IncrementStat( LogLevel logLevel )
         {
+            logLevel &= LogLevel.Mask;
             var currStat = Stats.Peek();
             if( !currStat.TryGetValue( logLevel, out int currCount ) )
             {
