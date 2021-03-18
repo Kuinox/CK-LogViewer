@@ -42,15 +42,19 @@ namespace CK.LogViewer
         void IncrementStat( LogLevel logLevel )
         {
             logLevel &= LogLevel.Mask;
-            var currStat = Stats.Peek();
-            if( !currStat.TryGetValue( logLevel, out int currCount ) )
+            foreach( Dictionary<LogLevel, int> stat in Stats )
             {
-                currStat[logLevel] = 1;
+                if( !stat.TryGetValue( logLevel, out int currCount ) )
+                {
+                    stat[logLevel] = 1;
+                }
+                else
+                {
+                    stat[logLevel] = currCount + 1;
+                }
             }
-            else
-            {
-                currStat[logLevel] = currCount + 1;
-            }
+
+            
         }
 
         protected virtual bool VisitOpenGroup( MulticastLogEntryWithOffset entry )

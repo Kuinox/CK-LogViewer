@@ -17,7 +17,9 @@ export class GroupSummary extends HTMLElement { //TODO: @Hugo I was lazy, I let 
 
     private static createBadge(level: string, qty: number): HTMLElement {
         const span = document.createElement("span");
-        span.innerHTML = level+": "+qty+", ";
+        span.classList.add("summary-badge");
+        span.classList.add(level.toLowerCase());
+        span.innerHTML = qty + " " + level;
         return span;
     }
 }
