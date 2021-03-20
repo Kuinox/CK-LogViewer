@@ -24,9 +24,9 @@ module.exports = {
         extensions: ['.tsx', '.ts', '.js'],
     },
     output: {
-        publicPath: 'public',
+        publicPath: '',
         filename: 'bundle.js',
-        path: path.resolve(__dirname, 'public'),
+        path: path.resolve('../CK.LogViewer.WebApp/wwwroot')
     },
     plugins: [
         new CopyPlugin({

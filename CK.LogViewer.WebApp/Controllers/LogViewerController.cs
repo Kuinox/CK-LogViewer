@@ -37,6 +37,20 @@ namespace CK.LogViewer.WebApp.Controllers
             }
         }
 
+        [HttpGet( "{logName}" )]
+        public async Task GetExistLogJson( string logName )
+        {
+            string path = @$"{Directory.GetCurrentDirectory()}\saveLog\{logName}.ckmon";
+            using( FileLogViewer logViewer = new( path ) )
+            {
+                HttpContext.Response.ContentType = "application/json";
+                var writer = new Utf8JsonWriter( HttpContext.Response.Body );
+                logViewer.NaiveJSONDump( writer );
+                await writer.FlushAsync();
+            }
+
+        }
+
         [HttpPost]
         public async Task UploadLog( IList<IFormFile> files )
         {
