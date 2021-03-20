@@ -1,5 +1,6 @@
 using CK.Core;
 using Microsoft.AspNetCore.Http;
+using CK.Monitoring;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -13,7 +14,7 @@ using System.Threading.Tasks;
 namespace CK.LogViewer.WebApp.Controllers
 {
     [ApiController]
-    [Route( "[controller]" )]
+    [Route( "/api/[controller]" )]
     public class LogViewerController : ControllerBase
     {
         readonly IActivityMonitor _m;
@@ -23,36 +24,24 @@ namespace CK.LogViewer.WebApp.Controllers
             _m = m;
         }
 
-        [HttpGet]
-        public async Task GetLogJson()
-        {
-            string path = @$"{Directory.GetCurrentDirectory()}\2016-01-20 18h59.18.2215043.ckmon";
-            using( FileLogViewer logViewer = new( path ) )
-            {
-                HttpContext.Response.ContentType = "application/json";
-                var writer = new Utf8JsonWriter( HttpContext.Response.Body );
-                logViewer.NaiveJSONDump( writer );
-                await writer.FlushAsync();
-
-            }
-        }
 
         [HttpGet( "{logName}" )]
-        public async Task GetExistLogJson( string logName )
+        public async Task GetLogJson( [FromQuery] int depth ,string logName )
         {
             string path = @$"{Directory.GetCurrentDirectory()}\saveLog\{logName}.ckmon";
-            using( FileLogViewer logViewer = new( path ) )
+            using( LogReader logReader = LogReader.Open( path ) )
             {
-                HttpContext.Response.ContentType = "application/json";
                 var writer = new Utf8JsonWriter( HttpContext.Response.Body );
-                logViewer.NaiveJSONDump( writer );
+                HttpContext.Response.ContentType = "application/json";
+                JSONLogVisitor logViewer = new( writer, depth, logReader );
+                logViewer.Visit();
                 await writer.FlushAsync();
             }
 
         }
 
         [HttpPost]
-        public async Task UploadLog( IList<IFormFile> files )
+        public async Task<string> UploadLog( IList<IFormFile> files )
         {
             SHA512Value finalResult;
             using( TemporaryFile temporaryFile = new TemporaryFile() )
@@ -77,13 +66,7 @@ namespace CK.LogViewer.WebApp.Controllers
 
             }
 
-            using( FileLogViewer logViewer = new( $@"{Directory.GetCurrentDirectory()}\saveLog\{finalResult}.ckmon" ) )
-            {
-                HttpContext.Response.ContentType = "application/json";
-                var writer = new Utf8JsonWriter( HttpContext.Response.Body );
-                logViewer.NaiveJSONDump( writer );
-                await writer.FlushAsync();
-            }
+            return finalResult.ToString();
 
         }
     }

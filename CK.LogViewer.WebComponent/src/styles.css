@@ -28,7 +28,7 @@ log-exception {
   height: auto;
   min-width: 10px;
   margin-left: 5px;
-  margin-right: 5px;
+  padding-right: 5px;
   display: flex;
 }
 
@@ -51,14 +51,14 @@ log-exception {
 }
 
 .group-tab:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 .group-tab:hover ~ .group-content{
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 log-entry:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 log-entry {

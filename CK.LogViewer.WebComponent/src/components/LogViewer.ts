@@ -1,4 +1,4 @@
-import { getLogs } from "../api";
+import { getLogs } from "../backend/api";
 import { LogEntryElement } from "./LogEntryElement";
 import { LogGroupElement } from "./LogGroupElement";
 
@@ -9,15 +9,9 @@ export class LogViewer extends HTMLElement {
     }
 
     async connectedCallback(): Promise<void> {
-        document.addEventListener("pass-log-data", (event) => {
-            this.innerHTML = "";
-            const eventAny = event as any;
-            const { logs } = eventAny.detail;
-            this.render(logs);
-        });
 
         if (window.location.hash.length > 1) {
-            const name = window.location.pathname.substring(2);
+            const name = window.location.hash.substring(2);
             const logs = await getLogs(name);
             this.render(logs);
         }

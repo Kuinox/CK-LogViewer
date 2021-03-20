@@ -1,4 +1,4 @@
-import { LogLevel, logLevelToString } from "../backend-types/LogLevel";
+import { LogLevel, logLevelToString } from "../backend/LogLevel";
 import { SimpleLog } from "../LogType";
 import { LogExceptionElement } from "./LogExceptionElement";
 

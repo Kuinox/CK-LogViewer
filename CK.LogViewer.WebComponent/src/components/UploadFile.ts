@@ -1,4 +1,4 @@
-import { getLogs, uploadLog } from "../api";
+import { getLogs, uploadLog } from "../backend/api";
 import { LogEntryElement } from "./LogEntryElement";
 import { LogGroupElement } from "./LogGroupElement";
 
@@ -38,16 +38,9 @@ export class UploadFile extends HTMLElement {
             formData.append("files", files[i]);
         }
 
-        const logs = await uploadLog(formData);
-        const myEvent = new CustomEvent('pass-log-data', {
-            bubbles: true,
-            composed: true,
-            detail: {
-                logs: logs,
-            }
-        });
-
-        document.dispatchEvent(myEvent);
+        const hash = await uploadLog(formData);
+        window.location.replace(`http://localhost:5000/#/${hash}`);
+        window.location.reload();
 
     }
 
