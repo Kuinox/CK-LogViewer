@@ -1,9 +1,11 @@
 using CK.Core;
+using Microsoft.AspNetCore.Http;
 using CK.Monitoring;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -22,21 +24,50 @@ namespace CK.LogViewer.WebApp.Controllers
             _m = m;
         }
 
-        [HttpGet("/group")]
-        public async Task GetGroupLogs( long logOffset )
+
+        [HttpGet( "{logName}" )]
+        public async Task GetLogJson( [FromQuery] int depth ,string logName )
         {
+            string path = @$"{Directory.GetCurrentDirectory()}\saveLog\{logName}.ckmon";
+            using( LogReader logReader = LogReader.Open( path ) )
+            {
+                var writer = new Utf8JsonWriter( HttpContext.Response.Body );
+                HttpContext.Response.ContentType = "application/json";
+                JSONLogVisitor logViewer = new( writer, depth, logReader );
+                logViewer.Visit();
+                await writer.FlushAsync();
+            }
 
         }
 
-        [HttpGet]
-        public async Task GetLogJson( int depth, int preloadDepth )
+        [HttpPost]
+        public async Task<string> UploadLog( IList<IFormFile> files )
         {
-            string path = @$"{Directory.GetCurrentDirectory()}\2016-01-20 18h59.18.2215043.ckmon";
-            var writer = new Utf8JsonWriter( HttpContext.Response.Body );
-            HttpContext.Response.ContentType = "application/json";
-            JSONLogVisitor logViewer = new( writer, depth, LogReader.Open( path ) );
-            logViewer.Visit();
-            await writer.FlushAsync();
+            SHA512Value finalResult;
+            using( TemporaryFile temporaryFile = new TemporaryFile() )
+            {
+                using( var stream = files[0].OpenReadStream() )
+                {
+                    using( var tempStream = System.IO.File.OpenWrite( temporaryFile.Path ) )
+                    using( SHA512Stream sHA512Stream = new SHA512Stream( stream, true, true ) )
+                    {
+                        await sHA512Stream.CopyToAsync( tempStream );
+                        finalResult = sHA512Stream.GetFinalResult();
+                    }
+                }
+
+                if( !Directory.Exists( $@"{Directory.GetCurrentDirectory()}\saveLog" ) )
+                {
+                    Directory.CreateDirectory( $@"{ Directory.GetCurrentDirectory()}\saveLog" );
+                }
+
+                System.IO.File.Move( temporaryFile.Path, $@"{Directory.GetCurrentDirectory()}\saveLog\{finalResult}.ckmon", true );
+                temporaryFile.Detach();
+
+            }
+
+            return finalResult.ToString();
+
         }
     }
 }

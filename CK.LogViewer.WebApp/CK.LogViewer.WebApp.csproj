@@ -14,5 +14,9 @@
     <ProjectReference Include="..\CK.LogViewer\CK.LogViewer.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
 
 </Project>

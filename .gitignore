@@ -258,3 +258,5 @@ Tests/**/TestResult*.xml
 /CodeCakeBuilder/MemoryKey.*.txt
 /CK.LogViewer.WebComponent/dist/
 /CK.LogViewer.WebComponent/public/
+/CK.LogViewer.WebApp/saveLog
+/CK.LogViewer.WebApp/wwwroot/

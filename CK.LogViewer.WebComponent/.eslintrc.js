@@ -13,7 +13,7 @@ module.exports = {
         browser: true,
         es6: true
     },
-    rules:{
+    rules: {
         "@typescript-eslint/no-explicit-any": 0,
         "semi": "off",
         "@typescript-eslint/semi": ["error"],
