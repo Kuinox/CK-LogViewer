@@ -22,6 +22,12 @@ namespace CK.LogViewer.WebApp.Controllers
             _m = m;
         }
 
+        [HttpGet("/group")]
+        public async Task GetGroupLogs( long logOffset )
+        {
+
+        }
+
         [HttpGet]
         public async Task GetLogJson( int depth, int preloadDepth )
         {

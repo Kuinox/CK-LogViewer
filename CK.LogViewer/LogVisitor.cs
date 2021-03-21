@@ -30,14 +30,15 @@ namespace CK.LogViewer
         }
 
         protected virtual bool VisitLogEntry( MulticastLogEntryWithOffset entry )
-            => entry.Entry.LogType switch
+        {
+            return entry.Entry.LogType switch
             {
                 LogEntryType.Line => VisitLogLine( entry ),
                 LogEntryType.OpenGroup => VisitOpenGroup( entry ),
                 LogEntryType.CloseGroup => VisitCloseGroup( entry ),
                 _ => throw new InvalidDataException( "Invalid log type." ),
             };
-
+        }
 
         void IncrementStat( LogLevel logLevel )
         {
@@ -53,8 +54,6 @@ namespace CK.LogViewer
                     stat[logLevel] = currCount + 1;
                 }
             }
-
-            
         }
 
         protected virtual bool VisitOpenGroup( MulticastLogEntryWithOffset entry )
