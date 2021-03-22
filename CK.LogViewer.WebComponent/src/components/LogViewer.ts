@@ -1,4 +1,5 @@
 import { getLogs } from "../backend/api";
+import { LogEntry } from "../backend/LogEntry";
 import { LogGroupElement } from "./GroupElement/LogGroupElement";
 
 export class LogViewer extends HTMLElement {
@@ -8,16 +9,14 @@ export class LogViewer extends HTMLElement {
     }
 
     async connectedCallback(): Promise<void> {
-
         if (window.location.hash.length > 1) {
             const name = window.location.hash.substring(2);
             const logs = await getLogs(name);
             this.render(logs);
         }
-
     }
 
-    render(logs: any) {
+    render(logs: LogEntry[]): void {
         const groups = document.createElement("div");
         for (let i = 0; i < logs.length; i++) {
             const curr = logs[i];

@@ -9,6 +9,15 @@ export function createDiv(options?: DivOptions): HTMLDivElement {
     return div;
 }
 
+export function createButton(options?: ButtonOptions): HTMLButtonElement {
+    const button = document.createElement("button");
+    setElementOptions(button, options);
+    if (options?.onClick !== undefined) {
+        button.addEventListener("click", options.onClick);
+    }
+    return button;
+}
+
 export function setElementOptions(element: Element, options?: ElementOptions): void {
     if (options === undefined) return;
     if (options.classList !== undefined) {
@@ -26,9 +35,12 @@ export function setElementOptions(element: Element, options?: ElementOptions): v
             element.appendChild(options.childNodes[i]);
         }
     }
+    if(options.innerHTML !== undefined) {
+        element.innerHTML = options.innerHTML;
+    }
 }
 
-export function setChild(base: HTMLElement, newChild: HTMLElement, oldChild: HTMLElement | undefined): HTMLElement {
+export function setChildOf(base: HTMLElement, newChild: HTMLElement, oldChild: HTMLElement | undefined): HTMLElement {
     if (oldChild === undefined) {
         base.appendChild(newChild);
     } else {
@@ -39,10 +51,13 @@ export function setChild(base: HTMLElement, newChild: HTMLElement, oldChild: HTM
 
 export type ElementOptions = NodeOptions & ClassOptions;
 export type DivOptions = ElementOptions & DivListenerOptions;
-export type NodeOptions = XOR<{
+export type ButtonOptions = ElementOptions & ButtonListenerOptions;
+export type NodeOptions = XOR<XOR<{
     childNodes?: Node[]
 }, {
     childNode?: Node
+}>, {
+    innerHTML?: string
 }>;
 
 export interface ClassOptions {
@@ -52,4 +67,8 @@ export interface ClassOptions {
 
 export interface DivListenerOptions {
     onClick?: (this: HTMLDivElement, ev: MouseEvent) => any;
+}
+
+export interface ButtonListenerOptions {
+    onClick?: (this: HTMLButtonElement, ev: MouseEvent) => any;
 }

@@ -2,7 +2,7 @@ import { GroupStats } from "../../backend/GroupStats";
 import { LogLevel } from "../../backend/LogLevel";
 
 export class GroupSummary extends HTMLElement { //TODO: @Hugo I was lazy, I let you fix this tricky typing :D.
-    constructor(stats: GroupStats) {
+    constructor(stats: GroupStats, onClick: () => void) {
         super();
         this.append(...
             Object.keys(LogLevel)
@@ -11,6 +11,7 @@ export class GroupSummary extends HTMLElement { //TODO: @Hugo I was lazy, I let 
                 .filter((key: any) => stats[key] !== undefined)
                 .map((s: string & any) => GroupSummary.createBadge(s, stats[s]!))
         );
+        this.addEventListener("click", onClick);
     }
 
 

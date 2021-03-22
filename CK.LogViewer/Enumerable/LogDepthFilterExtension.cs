@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CK.LogViewer
 {
-    public static class EnumerableLogDepthFilterExtension
+    public static class LogDepthFilterExtension
     {
         public static IEnumerable<T> FilterDepth<T>( this IEnumerable<T> @this, int unfoldedDepth ) where T : IMulticastLogEntry
             => @this.Where( entry =>

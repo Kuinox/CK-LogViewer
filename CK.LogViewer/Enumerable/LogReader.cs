@@ -9,15 +9,15 @@ namespace CK.LogViewer
 {
     public static class EnumerableLogReaderExtensions
     {
-        public static IEnumerable<IMulticastLogEntryWithOffset> ToEnumerable( this LogReader @this ) => new EnumerableLogReader( @this );
+        public static IEnumerable<IMulticastLogEntryWithOffset> ToEnumerable( this Monitoring.LogReader @this ) => new LogReader( @this );
     }
 
-    class EnumerableLogReader : IEnumerable<IMulticastLogEntryWithOffset>
+    class LogReader : IEnumerable<IMulticastLogEntryWithOffset>
     {
         public struct Enumerator : IEnumerator<IMulticastLogEntryWithOffset>
         {
-            readonly LogReader _logReader;
-            public Enumerator( LogReader logReader ) => _logReader = logReader;
+            readonly Monitoring.LogReader _logReader;
+            public Enumerator( Monitoring.LogReader logReader ) => _logReader = logReader;
 
             public IMulticastLogEntryWithOffset Current => new MulticastLogEntryWithOffsetImpl( _logReader.CurrentMulticastWithOffset );
 
@@ -31,7 +31,7 @@ namespace CK.LogViewer
         }
 
         readonly Enumerator _logReader;
-        public EnumerableLogReader( LogReader logReader ) => _logReader = new Enumerator( logReader );
+        public LogReader( Monitoring.LogReader logReader ) => _logReader = new Enumerator( logReader );
 
         public IEnumerator<IMulticastLogEntryWithOffset > GetEnumerator() => _logReader;
 

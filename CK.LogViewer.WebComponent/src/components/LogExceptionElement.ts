@@ -1,27 +1,21 @@
 import { CKExceptionData } from "../backend/CKExceptionData";
 
 export class LogExceptionElement extends HTMLElement {
-    constructor() {
+    constructor(log: CKExceptionData) {
         super();
-    }
-
-    static create(log: CKExceptionData): LogExceptionElement {
-        const entry = new LogExceptionElement();
         const a = document.createElement("a");
         a.innerHTML = log.typeException;
         a.href = "";
         a.addEventListener('click', (e) => {
             e.preventDefault();
-            this.createModal(log, entry);
-
+            this.appendChild(LogExceptionElement.createModal(log));
         });
         const br = document.createElement("br");
-        entry.appendChild(a);
-        entry.appendChild(br);
-        return entry;
+        this.appendChild(a);
+        this.appendChild(br);
     }
 
-    static createModal(log: CKExceptionData, entry: LogExceptionElement): void {
+    private static createModal(log: CKExceptionData ): HTMLElement {
         const modal = document.createElement('div');
         modal.setAttribute("class", "modal");
         modal.addEventListener("click", (event) => {
@@ -49,7 +43,7 @@ export class LogExceptionElement extends HTMLElement {
         modalContent.appendChild(content);
         modal.appendChild(modalContent);
 
-        entry.appendChild(modal);
+        return modal;
     }
 
 }

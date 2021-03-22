@@ -17,13 +17,12 @@ namespace CK.LogViewer.WebApp.Controllers
     public class HomeController : ControllerBase
     {
         readonly IActivityMonitor _m;
-        public IHostingEnvironment HostingEnv { get; }
+        public IWebHostEnvironment HostingEnv { get; }
 
-        public HomeController( IActivityMonitor m , IHostingEnvironment env )
+        public HomeController( IActivityMonitor m , IWebHostEnvironment env )
         {
             _m = m;
             HostingEnv = env;
-
         }
 
 

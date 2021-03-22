@@ -3,26 +3,24 @@ using CK.Monitoring;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace CK.LogViewer
 {
     public static class EnumerableLogStatsExtensions
     {
-        public static IEnumerable<LogEntryWithStats> ComputeStats( IEnumerable<IMulticastLogEntryWithOffset> @this ) => new Enumerable( @this );
-        struct Enumerable : IEnumerable<LogEntryWithStats>
+        public static IEnumerable<LogEntryWithState> AddState( this IEnumerable<IMulticastLogEntryWithOffset> @this ) => new Enumerable( @this );
+        struct Enumerable : IEnumerable<LogEntryWithState>
         {
             readonly Enumerator _enumerator;
             public Enumerable( IEnumerable<IMulticastLogEntryWithOffset> enumerable ) => _enumerator = new Enumerator( enumerable.GetEnumerator() );
 
-            public IEnumerator<LogEntryWithStats> GetEnumerator() => _enumerator;
+            public IEnumerator<LogEntryWithState> GetEnumerator() => _enumerator;
 
             IEnumerator IEnumerable.GetEnumerator() => _enumerator;
         }
 
-        struct Enumerator : IEnumerator<LogEntryWithStats>
+        struct Enumerator : IEnumerator<LogEntryWithState>
         {
             readonly IEnumerator<IMulticastLogEntryWithOffset> _enumerator;
             readonly Stack<Dictionary<LogLevel, int>> _stats;
@@ -32,10 +30,11 @@ namespace CK.LogViewer
                 _enumerator = enumerator;
                 _stats = new Stack<Dictionary<LogLevel, int>>();
                 _stats.Push( new Dictionary<LogLevel, int>() );
+                _currentStats = null!;
             }
 
-            public LogEntryWithStats Current => new( _enumerator.Current, _stats.Peek() );
-
+            public LogEntryWithState Current => new( _enumerator.Current, _currentStats );
+            Dictionary<LogLevel, int> _currentStats;
             object IEnumerator.Current => Current;
 
             public void Dispose() => _enumerator.Dispose();
@@ -44,6 +43,7 @@ namespace CK.LogViewer
             public bool MoveNext()
             {
                 if( !_enumerator.MoveNext() ) return false;
+                _currentStats = _stats.Peek();
                 switch( _enumerator.Current.LogType )
                 {
                     case LogEntryType.Line:
@@ -78,16 +78,23 @@ namespace CK.LogViewer
         }
     }
 
-    public class LogEntryWithStats : IMulticastLogEntryWithOffset
+    // OK this class is for all entries but it's state is for all entries.
+    public class LogEntryWithState : IMulticastLogEntryWithOffset
     {
         readonly IMulticastLogEntryWithOffset _multicastLogEntryWithOffset;
 
-        public LogEntryWithStats( IMulticastLogEntryWithOffset multicastLogEntryWithOffset, Dictionary<LogLevel, int> stats )
+        public LogEntryWithState( IMulticastLogEntryWithOffset multicastLogEntryWithOffset, Dictionary<LogLevel, int> stats )
         {
+            Debug.Assert( stats != null );
             _multicastLogEntryWithOffset = multicastLogEntryWithOffset;
             Stats = stats;
         }
+
         public IReadOnlyDictionary<LogLevel, int> Stats { get; }
+
+        public bool Folded { get; set; }
+
+        #region InterfaceImpl
         public long Offset => _multicastLogEntryWithOffset.Offset;
         public int GroupDepth => _multicastLogEntryWithOffset.GroupDepth;
         public LogEntryType LogType => _multicastLogEntryWithOffset.LogType;
@@ -102,9 +109,9 @@ namespace CK.LogViewer
         public Guid MonitorId => _multicastLogEntryWithOffset.MonitorId;
         public LogEntryType PreviousEntryType => _multicastLogEntryWithOffset.PreviousEntryType;
         public DateTimeStamp PreviousLogTime => _multicastLogEntryWithOffset.PreviousLogTime;
-
-
         public ILogEntry CreateUnicastLogEntry() => _multicastLogEntryWithOffset.CreateUnicastLogEntry();
         public void WriteLogEntry( CKBinaryWriter w ) => _multicastLogEntryWithOffset.WriteLogEntry( w );
+        #endregion
+
     }
 }

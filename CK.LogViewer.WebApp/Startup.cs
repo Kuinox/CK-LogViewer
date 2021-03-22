@@ -48,13 +48,6 @@ namespace CK.LogViewer.WebApp
             app.UseMvc( builder =>
             {
                 builder.MapRoute( "default", "{controller}/{action}/{id?}" );
-
-                //builder.MapRoute(
-                //     name: "catch-all",
-                //     template: "{*url}",
-                //     defaults: new { controller = "Home", action = "RedirectIndex" }
-                // );
-
             }
             );
 

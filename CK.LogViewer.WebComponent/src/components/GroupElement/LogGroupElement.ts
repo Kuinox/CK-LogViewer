@@ -1,13 +1,15 @@
 import { GroupLog } from "../../backend/GroupLog";
 import { GroupStats } from "../../backend/GroupStats";
 import { LogEntry } from "../../backend/LogEntry";
-import { createDiv, setChild as setChildOf } from "../../helpers/domHelpers";
+import { LogLevel, logLevelToString } from "../../backend/LogLevel";
+import { createDiv, setChildOf } from "../../helpers/domHelpers";
+import { LoadingIcon } from "../LoadingIcon";
 import { LogEntryElement } from "../LogEntryElement";
 import { GroupList } from "./GroupList";
 import { GroupSummary } from "./GroupSummary";
 
 export class LogGroupElement extends HTMLElement {
-    private collapsed: boolean;
+    private folded: boolean;
     private contentDiv: HTMLElement;
     private contentDivChild: HTMLElement | undefined;
     private serverOmittedData: boolean;
@@ -27,7 +29,7 @@ export class LogGroupElement extends HTMLElement {
             childNodes: [
                 createDiv(),
                 createDiv({
-                    className: "group-ruler"
+                    classList: ["group-ruler", logLevelToString.get(log.openLog.logLevel & LogLevel.Mask)!]
                 })
             ],
             onClick: this.toggleExpand
@@ -54,17 +56,26 @@ export class LogGroupElement extends HTMLElement {
             }
         }
         this.serverOmittedData = log.groupLogs.length == 0 && logCount > 0;
-        this.collapsed = this.serverOmittedData;
+        this.folded = log.isFolded || this.serverOmittedData;
         this.displayExpand();
     }
 
     private toggleExpand = (): void => {
-        this.collapsed = !this.collapsed;
+        this.folded = !this.folded;
         this.displayExpand();
     };
 
     private displayExpand(): void {
-        const newChild = this.collapsed ? new GroupSummary(this.groupStats) : new GroupList(this.logs);
+        let newChild = undefined;
+        if (this.folded) {
+            newChild = new GroupSummary(this.groupStats, this.toggleExpand);
+        } else {
+            if (this.serverOmittedData) {
+                newChild = new LoadingIcon();
+            } else {
+                newChild = new GroupList(this.logs);
+            }
+        }
         this.contentDivChild = setChildOf(this.contentDiv, newChild, this.contentDivChild);
     }
 }

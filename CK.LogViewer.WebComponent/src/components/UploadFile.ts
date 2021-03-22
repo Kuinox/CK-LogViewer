@@ -1,35 +1,31 @@
-import { getLogs, uploadLog } from "../backend/api";
-import { LogEntryElement } from "./LogEntryElement";
-import { LogGroupElement } from "./LogGroupElement";
+import { uploadLog } from "../backend/api";
+import { createButton } from "../helpers/domHelpers";
 
 export class UploadFile extends HTMLElement {
 
-    async connectedCallback(): Promise<void> {
+    constructor() {
+        super();
         const fileUploadForm = document.createElement("form");
         const inputFileUpload = document.createElement("input");
         inputFileUpload.setAttribute("id", "files");
         inputFileUpload.setAttribute("name", "files");
         inputFileUpload.setAttribute("type", "file");
         inputFileUpload.setAttribute("size", "1");
-
-        const buttonFileUpload = document.createElement("button");
-        buttonFileUpload.innerHTML = "Upload";
-        buttonFileUpload.addEventListener("click", async (event) => {
-            event.preventDefault();
-            await this.uploadFiles();
-            // fileUploadForm.remove();
-        });
-
-
         fileUploadForm.appendChild(inputFileUpload);
-        fileUploadForm.appendChild(buttonFileUpload);
+
+        fileUploadForm.appendChild(createButton({
+            innerHTML: "Upload",
+            onClick: async (event) => {
+                event.preventDefault();
+                this.uploadFiles();
+                // fileUploadForm.remove();
+            }
+        }));
 
         this.appendChild(fileUploadForm);
-
-
     }
 
-    async uploadFiles() {
+    async uploadFiles(): Promise<void> {
         const input = document.getElementById('files') as any;
         const files = input.files;
         const formData = new FormData();

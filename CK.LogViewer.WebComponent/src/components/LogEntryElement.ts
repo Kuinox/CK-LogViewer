@@ -18,8 +18,7 @@ export class LogEntryElement extends HTMLElement {
         time.classList.add("log-timestamp");
         entryElement.appendChild(time);
         if (log.exception != null) {
-            const exception = LogExceptionElement.create(log.exception);
-            entryElement.appendChild(exception);
+            entryElement.appendChild(new LogExceptionElement(log.exception));
         }
 
         entryElement.classList.add(logLevel);

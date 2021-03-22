@@ -9,11 +9,12 @@ using System.Threading.Tasks;
 
 namespace CK.LogViewer
 {
-    public static class EnumerableLogToJson
+    public static class EnumerableLogToJsonExtensions
     {
-        public static void WriteTo( this IEnumerable<LogEntryWithStats> @this, Utf8JsonWriter writer )
+        public static void WriteTo( this IEnumerable<LogEntryWithState> @this, Utf8JsonWriter writer )
         {
-            foreach( LogEntryWithStats entry in @this )
+            writer.WriteStartArray();
+            foreach( LogEntryWithState entry in @this )
             {
                 switch( entry.LogType )
                 {
@@ -21,16 +22,18 @@ namespace CK.LogViewer
                         WriteLog( entry, writer );
                         break;
                     case LogEntryType.OpenGroup:
-                        VisitOpenGroup( entry, writer );
+                        WriteOpenGroup( entry, writer );
                         break;
                     case LogEntryType.CloseGroup:
-                        VisitCloseGroup( entry, writer );
+                        WriteCloseGroup( entry, writer );
                         break;
                 };
             }
+            writer.WriteEndArray();
+
         }
 
-        static void VisitCloseGroup( LogEntryWithStats entry, Utf8JsonWriter writer )
+        static void WriteCloseGroup( LogEntryWithState entry, Utf8JsonWriter writer )
         {
             writer.WriteEndArray();
             writer.WritePropertyName( "closeLog" );
@@ -45,17 +48,18 @@ namespace CK.LogViewer
             writer.WriteEndObject();
         }
 
-        static void VisitOpenGroup( LogEntryWithStats entry, Utf8JsonWriter writer )
+        static void WriteOpenGroup( LogEntryWithState entry, Utf8JsonWriter writer )
         {
             writer.WriteStartObject();
             WriteCommonProperties( entry, writer );
             writer.WriteBoolean( "isGroup", true );
+            writer.WriteBoolean( "isFolded", entry.Folded );
             writer.WritePropertyName( "openLog" );
             WriteLog( entry, writer );
             writer.WriteStartArray( "groupLogs" );
         }
 
-        static void WriteLog( LogEntryWithStats entry, Utf8JsonWriter writer )
+        static void WriteLog( LogEntryWithState entry, Utf8JsonWriter writer )
         {
             writer.WriteStartObject();
             WriteCommonProperties( entry, writer );
@@ -65,7 +69,7 @@ namespace CK.LogViewer
         }
 
 
-        static void WriteCommonProperties( LogEntryWithStats entry, Utf8JsonWriter writer )
+        static void WriteCommonProperties( LogEntryWithState entry, Utf8JsonWriter writer )
         {
             writer.WriteNumber( "depth", entry.GroupDepth );
             writer.WriteNumber( "offset", entry.Offset ); ;

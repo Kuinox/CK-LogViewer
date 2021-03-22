@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using CK.LogViewer.Enumerable;
 
 namespace CK.LogViewer.WebApp.Controllers
 {
@@ -24,17 +25,37 @@ namespace CK.LogViewer.WebApp.Controllers
             _m = m;
         }
 
+        [HttpGet( "{logName}/group/{groupOffset}" )]
+        public async Task GetGroupJson( string logName, long groupOffset )
+        {
+            string path = @$"{Directory.GetCurrentDirectory()}\saveLog\{logName}.ckmon";
+            using( LogReader logReader = LogReader.Open( path, dataOffset: groupOffset ) )
+            {
+                var writer = new Utf8JsonWriter( HttpContext.Response.Body );
+                HttpContext.Response.ContentType = "application/json";
+                logReader.ToEnumerable()
+                    .AddState()
+                    .TakeOnlyGroup()
+                    .WriteTo( writer );
+                await writer.FlushAsync();
+            }
+        }
 
         [HttpGet( "{logName}" )]
-        public async Task GetLogJson( [FromQuery] int depth ,string logName )
+        public async Task GetLogJson( [FromQuery] int depth, string logName )
         {
             string path = @$"{Directory.GetCurrentDirectory()}\saveLog\{logName}.ckmon";
             using( LogReader logReader = LogReader.Open( path ) )
             {
                 var writer = new Utf8JsonWriter( HttpContext.Response.Body );
                 HttpContext.Response.ContentType = "application/json";
-                JSONLogVisitor logViewer = new( writer, depth, logReader );
-                logViewer.Visit();
+
+                logReader.ToEnumerable()
+                    .AddState()
+                    .FilterDepth( depth + 1 )
+                    .FoldAtDepth( depth )
+                    .WriteTo( writer );
+
                 await writer.FlushAsync();
             }
 
