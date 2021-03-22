@@ -14,8 +14,6 @@ export class GroupSummary extends HTMLElement { //TODO: @Hugo I was lazy, I let 
         this.addEventListener("click", onClick);
     }
 
-
-
     private static createBadge(level: string, qty: number): HTMLElement {
         const span = document.createElement("span");
         span.classList.add("summary-badge");

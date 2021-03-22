@@ -33,6 +33,25 @@ namespace CK.LogViewer
 
         }
 
+        public static void WriteSingleGroupOrEntry( this IEnumerable<LogEntryWithState> @this, Utf8JsonWriter writer )
+        {
+            foreach( LogEntryWithState entry in @this )
+            {
+                switch( entry.LogType )
+                {
+                    case LogEntryType.Line:
+                        WriteLog( entry, writer );
+                        break;
+                    case LogEntryType.OpenGroup:
+                        WriteOpenGroup( entry, writer );
+                        break;
+                    case LogEntryType.CloseGroup:
+                        WriteCloseGroup( entry, writer );
+                        break;
+                };
+            }
+        }
+
         static void WriteCloseGroup( LogEntryWithState entry, Utf8JsonWriter writer )
         {
             writer.WriteEndArray();

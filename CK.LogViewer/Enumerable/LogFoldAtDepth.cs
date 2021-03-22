@@ -12,7 +12,7 @@ namespace CK.LogViewer.Enumerable
         public static IEnumerable<LogEntryWithState> FoldAtDepth( this IEnumerable<LogEntryWithState> @this, int depthToFold )
             => @this.Select( s =>
             {
-                if( s.LogType == LogEntryType.OpenGroup && s.GroupDepth == depthToFold )
+                if( s.LogType == LogEntryType.OpenGroup && s.GroupDepth >= depthToFold )
                 {
                     s.Folded = true;
                 }

@@ -4,31 +4,24 @@ import { setElementOptions, ClassOptions } from "../helpers/domHelpers";
 import { LogExceptionElement } from "./LogExceptionElement";
 
 export class LogEntryElement extends HTMLElement {
-    constructor() {
+    public isGroup = false;
+    constructor(log: SimpleLog, options?: ClassOptions) {
         super();
-    }
-
-    static create(log: SimpleLog, options?: ClassOptions): LogEntryElement {
-        const entryElement = new LogEntryElement();
-        setElementOptions(entryElement, options);
+        setElementOptions(this, options);
         const logLevel = logLevelToString.get(log.logLevel & LogLevel.Mask);
         if (logLevel === undefined) throw Error("Invalid log level.");
         const time = document.createElement("span");
         time.innerHTML = log.logTime;
         time.classList.add("log-timestamp");
-        entryElement.appendChild(time);
+        this.appendChild(time);
         if (log.exception != null) {
-            entryElement.appendChild(new LogExceptionElement(log.exception));
+            this.appendChild(new LogExceptionElement(log.exception));
         }
 
-        entryElement.classList.add(logLevel);
+        this.classList.add(logLevel);
         const span = document.createElement("span");
         span.innerHTML = log.text;
-        entryElement.appendChild(span);
-
-
-
-        return entryElement;
+        this.appendChild(span);
     }
 }
 

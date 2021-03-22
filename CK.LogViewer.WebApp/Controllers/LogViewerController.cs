@@ -36,7 +36,7 @@ namespace CK.LogViewer.WebApp.Controllers
                 logReader.ToEnumerable()
                     .AddState()
                     .TakeOnlyGroup()
-                    .WriteTo( writer );
+                    .WriteSingleGroupOrEntry( writer );
                 await writer.FlushAsync();
             }
         }
