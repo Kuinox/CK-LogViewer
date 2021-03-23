@@ -9,7 +9,6 @@ import { GroupList } from "./GroupList";
 import { GroupSummary } from "./GroupSummary";
 
 export class LogGroupElement extends HTMLElement {
-    private folded: boolean;
     private contentDiv: HTMLElement;
     private contentDivChild: HTMLElement | undefined;
     private groupLog: GroupLog;
@@ -47,11 +46,11 @@ export class LogGroupElement extends HTMLElement {
                 })
             ]
         }));
-        this.folded = log.isFolded || this.serverOmittedData;
+        this.groupLog.isFolded = log.isFolded || this.serverOmittedData;
         this.displayExpand();
     }
 
-    get serverOmittedData(): boolean{
+    get serverOmittedData(): boolean {
         let logCount = 0;
         for (const key in this.groupLog.stats) {
             if (Object.prototype.hasOwnProperty.call(this.groupLog.stats, key)) {
@@ -65,32 +64,25 @@ export class LogGroupElement extends HTMLElement {
 
 
     private toggleExpand = (): void => {
-        this.folded = !this.folded;
+        this.groupLog.isFolded = !this.groupLog.isFolded;
         this.displayExpand();
     };
 
     private displayExpand(): void {
         let newChild = undefined;
-        if (this.folded) {
+        if (this.groupLog.isFolded) {
             newChild = new GroupSummary(this.groupLog.stats, this.toggleExpand);
         } else {
             if (this.serverOmittedData) {
                 newChild = new LoadingIcon();
             } else {
                 newChild = new GroupList(this.groupLog.groupLogs, this.filename);
-                if(newChild.containLazyInitChild) {
+                if (newChild.containLazyInitChild) {
                     getGroupLogs(this.filename, this.groupLog.openLog.offset).then(
                         groupLogs => {
                             const oldGroup = this.groupLog;
                             this.groupLog = groupLogs;
-                            for (let i = 0; i < oldGroup.groupLogs.length; i++) {
-                                const old = oldGroup.groupLogs[i];
-                                const newE = this.groupLog.groupLogs[i];
-                                if(old.isGroup){
-                                    if(!newE.isGroup) throw new Error("Log data has changed !");
-                                    newE.isFolded = old.isFolded;
-                                }
-                            }
+                            LogGroupElement.setFolded(this.groupLog, oldGroup);
                             this.displayExpand();
                         }
                     );
@@ -98,6 +90,22 @@ export class LogGroupElement extends HTMLElement {
             }
         }
         this.contentDivChild = setChildOf(this.contentDiv, newChild, this.contentDivChild);
+    }
+
+    private static setFolded(newGroup: GroupLog, oldGroup: GroupLog | undefined) {
+        for (let i = 0; i < newGroup.groupLogs.length; i++) {
+            const old = oldGroup?.groupLogs[i];
+            const newE = newGroup.groupLogs[i];
+            if (newE.isGroup) {
+                if (old === undefined) {
+                    newE.isFolded = true;
+                } else {
+                    if (!old.isGroup) throw new Error("Log data has changed !");
+                    newE.isFolded = old.isFolded;
+                }
+                LogGroupElement.setFolded(newE, old);
+            }
+        }
     }
 }
 
