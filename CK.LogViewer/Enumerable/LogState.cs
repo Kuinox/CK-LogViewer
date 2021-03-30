@@ -9,7 +9,7 @@ namespace CK.LogViewer
 {
     public static class EnumerableLogStatsExtensions
     {
-        public static IEnumerable<LogEntryWithState> AddState( this IEnumerable<IMulticastLogEntryWithOffset> @this ) => new Enumerable( @this );
+        public static IEnumerable<LogEntryWithState> ComputeState( this IEnumerable<IMulticastLogEntryWithOffset> @this ) => new Enumerable( @this );
         struct Enumerable : IEnumerable<LogEntryWithState>
         {
             readonly Enumerator _enumerator;

@@ -3,7 +3,7 @@ import { LogLevel } from "./LogLevel";
 
 export interface SimpleLog {
     isGroup: false,
-    offset: number,
+    id: number,
     logOffset: number,
     logLevel: LogLevel,
     logTime: string,

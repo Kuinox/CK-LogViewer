@@ -10,7 +10,8 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using CK.LogViewer.Enumerable;
+using CK.Text;
+using Lucene.Net.Documents;
 
 namespace CK.LogViewer.WebApp.Controllers
 {
@@ -25,70 +26,59 @@ namespace CK.LogViewer.WebApp.Controllers
             _m = m;
         }
 
-        [HttpGet( "{logName}/group/{groupOffset}" )]
-        public async Task GetGroupJson( string logName, long groupOffset )
+        Task DocumentsToJson( Utf8JsonWriter writer, IEnumerable<(int, Document)> documents )
         {
-            string path = @$"{Directory.GetCurrentDirectory()}\saveLog\{logName}.ckmon";
-            using( LogReader logReader = LogReader.Open( path, dataOffset: groupOffset ) )
+            writer.WriteStartArray();
+            foreach( var log in documents )
             {
-                var writer = new Utf8JsonWriter( HttpContext.Response.Body );
-                HttpContext.Response.ContentType = "application/json";
-                logReader.ToEnumerable()
-                    .AddState()
-                    .TakeOnlyGroup()
-                    .WriteSingleGroupOrEntry( writer );
-                await writer.FlushAsync();
+                SerializeDoc.Convert( log.Item1, log.Item2, writer );
             }
+            writer.WriteEndArray();
+            return writer.FlushAsync();
         }
 
         [HttpGet( "{logName}" )]
-        public async Task GetLogJson( [FromQuery] int depth, string logName )
+        public async Task GetLogJson( string logName, [FromQuery] int depth = 2, int scopedOnGroupId = -1 )
         {
-            string path = @$"{Directory.GetCurrentDirectory()}\saveLog\{logName}.ckmon";
-            using( LogReader logReader = LogReader.Open( path ) )
+            NormalizedPath logFolder = "saveLog";
+            NormalizedPath indexPaths = logFolder.AppendPart( logName ).AppendPart( "indexes" );
+            await using( Utf8JsonWriter writer = new( HttpContext.Response.Body ) )
+            using( LogSearcher searcher = LogSearcher.Create( indexPaths ) )
             {
-                var writer = new Utf8JsonWriter( HttpContext.Response.Body );
-                HttpContext.Response.ContentType = "application/json";
-
-                logReader.ToEnumerable()
-                    .AddState()
-                    .FilterDepth( depth + 1 )
-                    .FoldAtDepth( depth )
-                    .WriteTo( writer );
-
-                await writer.FlushAsync();
+                var docs = searcher.FilteredLogs( depth, scopedOnGroupId );
+                await DocumentsToJson( writer, docs );
             }
-
         }
 
         [HttpPost]
         public async Task<string> UploadLog( IList<IFormFile> files )
         {
-            SHA512Value finalResult;
-            using( TemporaryFile temporaryFile = new TemporaryFile() )
+            SHA1Value finalResult;
+            using( TemporaryFile temporaryFile = new() )
             {
                 using( var stream = files[0].OpenReadStream() )
                 {
                     using( var tempStream = System.IO.File.OpenWrite( temporaryFile.Path ) )
-                    using( SHA512Stream sHA512Stream = new SHA512Stream( stream, true, true ) )
+                    using( SHA1Stream sHA512Stream = new( stream, true, true ) )
                     {
                         await sHA512Stream.CopyToAsync( tempStream );
                         finalResult = sHA512Stream.GetFinalResult();
                     }
                 }
-
-                if( !Directory.Exists( $@"{Directory.GetCurrentDirectory()}\saveLog" ) )
+                NormalizedPath storagePath = "saveLog";
+                string shaString = finalResult.ToString();
+                NormalizedPath logFolder = storagePath.AppendPart( shaString );
+                NormalizedPath logPath = logFolder.AppendPart( "log.ckmon" );
+                Directory.CreateDirectory( logFolder );
+                System.IO.File.Move( temporaryFile.Path, logPath, true );
+                using( LogIndexer indexer = LogIndexer.Create( logFolder.AppendPart( "indexes" ) ) )
+                using( LogReader reader = LogReader.Open( logPath ) )
                 {
-                    Directory.CreateDirectory( $@"{ Directory.GetCurrentDirectory()}\saveLog" );
+                    indexer.IndexLogs( reader.ToEnumerable().ComputeState() );
                 }
-
-                System.IO.File.Move( temporaryFile.Path, $@"{Directory.GetCurrentDirectory()}\saveLog\{finalResult}.ckmon", true );
                 temporaryFile.Detach();
-
             }
-
             return finalResult.ToString();
-
         }
     }
 }

@@ -4,7 +4,8 @@ import { setElementOptions, ClassOptions } from "../helpers/domHelpers";
 import { LogExceptionElement } from "./LogExceptionElement";
 
 export class LogEntryElement extends HTMLElement {
-    public isGroup = false;
+    public readonly isGroup = false;
+
     constructor(log: SimpleLog, options?: ClassOptions) {
         super();
         setElementOptions(this, options);
@@ -20,6 +21,7 @@ export class LogEntryElement extends HTMLElement {
 
         this.classList.add(logLevel);
         const span = document.createElement("span");
+        span.className="log-text";
         span.innerHTML = log.text;
         this.appendChild(span);
     }

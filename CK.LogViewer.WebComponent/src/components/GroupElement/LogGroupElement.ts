@@ -12,7 +12,8 @@ export class LogGroupElement extends HTMLElement {
     private contentDiv: HTMLElement;
     private contentDivChild: HTMLElement | undefined;
     private groupLog: GroupLog;
-    public isGroup = true;
+    public readonly isGroup = true;
+    public isFolded: boolean;
     private filename;
     static fromLogEntry(log: LogEntry, filename: string): LogEntryElement | LogGroupElement {
         return log.isGroup ? new LogGroupElement(log, filename) : new LogEntryElement(log);
@@ -46,31 +47,39 @@ export class LogGroupElement extends HTMLElement {
                 })
             ]
         }));
-        this.groupLog.isFolded = log.isFolded || this.serverOmittedData;
+        this.isFolded = this.serverOmittedData || this.directChildHaveDataOmitted;
         this.displayExpand();
     }
 
-    get serverOmittedData(): boolean {
+    get directChildHaveDataOmitted(): boolean {
+        return this.groupLog.groupLogs.some(s => s.isGroup && LogGroupElement.didServerOmittedData(s));
+    }
+
+    static didServerOmittedData(groupLog: GroupLog): boolean {
         let logCount = 0;
-        for (const key in this.groupLog.stats) {
-            if (Object.prototype.hasOwnProperty.call(this.groupLog.stats, key)) {
-                const element = this.groupLog.stats[key];
+        for (const key in groupLog.stats) {
+            if (Object.prototype.hasOwnProperty.call(groupLog.stats, key)) {
+                const element = groupLog.stats[key];
                 if (element === undefined) continue;
                 logCount += element;
             }
         }
-        return this.groupLog.groupLogs.length == 0 && logCount > 0;
+        return groupLog.groupLogs.length == 0 && logCount > 0;
+    }
+
+    get serverOmittedData(): boolean {
+        return LogGroupElement.didServerOmittedData(this.groupLog);
     }
 
 
     private toggleExpand = (): void => {
-        this.groupLog.isFolded = !this.groupLog.isFolded;
+        this.isFolded = !this.isFolded;
         this.displayExpand();
     };
 
-    private displayExpand(): void {
+    private async displayExpand(): Promise<void> {
         let newChild = undefined;
-        if (this.groupLog.isFolded) {
+        if (this.isFolded) {
             newChild = new GroupSummary(this.groupLog.stats, this.toggleExpand);
         } else {
             if (this.serverOmittedData) {
@@ -78,34 +87,26 @@ export class LogGroupElement extends HTMLElement {
             } else {
                 newChild = new GroupList(this.groupLog.groupLogs, this.filename);
                 if (newChild.containLazyInitChild) {
-                    getGroupLogs(this.filename, this.groupLog.openLog.offset).then(
-                        groupLogs => {
-                            const oldGroup = this.groupLog;
-                            this.groupLog = groupLogs;
-                            LogGroupElement.setFolded(this.groupLog, oldGroup);
-                            this.displayExpand();
+                    const newLogs = await getGroupLogs(this.filename, this.groupLog.openLog.id);
+                    if (newLogs.length != newChild.childs.length) throw new Error("Invalid data");
+                    for (let i = 0; i < newLogs.length; i++) {
+                        const update = newLogs[i];
+                        const old = newChild.childs[i];
+                        if (update === undefined || old === undefined) throw new Error("bug.");
+                        if (update.isGroup != old.isGroup) throw new Error("bug.");
+                        if (old.isGroup && update.isGroup) {
+                            old.updateContent(update.groupLogs);
                         }
-                    );
+                    }
                 }
             }
         }
         this.contentDivChild = setChildOf(this.contentDiv, newChild, this.contentDivChild);
     }
 
-    private static setFolded(newGroup: GroupLog, oldGroup: GroupLog | undefined) {
-        for (let i = 0; i < newGroup.groupLogs.length; i++) {
-            const old = oldGroup?.groupLogs[i];
-            const newE = newGroup.groupLogs[i];
-            if (newE.isGroup) {
-                if (old === undefined) {
-                    newE.isFolded = true;
-                } else {
-                    if (!old.isGroup) throw new Error("Log data has changed !");
-                    newE.isFolded = old.isFolded;
-                }
-                LogGroupElement.setFolded(newE, old);
-            }
-        }
+    public updateContent(logs: LogEntry[]): void {
+        this.groupLog.groupLogs = logs;
+        this.displayExpand();
     }
 }
 

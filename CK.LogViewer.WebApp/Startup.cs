@@ -44,7 +44,7 @@ namespace CK.LogViewer.WebApp
 
             app.UseStaticFiles();
             app.UseFileServer();
-           
+
             app.UseMvc( builder =>
             {
                 builder.MapRoute( "default", "{controller}/{action}/{id?}" );
