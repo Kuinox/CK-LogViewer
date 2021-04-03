@@ -11,10 +11,19 @@ export class LogEntryElement extends HTMLElement {
         setElementOptions(this, options);
         const logLevel = logLevelToString.get(log.logLevel & LogLevel.Mask);
         if (logLevel === undefined) throw Error("Invalid log level.");
+        const leftContent = document.createElement("div");
+        leftContent.classList.add("left-content");
+
         const time = document.createElement("span");
         time.innerHTML = log.logTime;
-        time.classList.add("log-timestamp");
-        this.appendChild(time);
+        leftContent.appendChild(time);
+
+        const monitor = document.createElement("span");
+        monitor.innerHTML = "#" + log.monitorId;
+        leftContent.appendChild(monitor);
+
+
+        this.appendChild(leftContent);
         if (log.exception != null) {
             this.appendChild(new LogExceptionElement(log.exception));
         }

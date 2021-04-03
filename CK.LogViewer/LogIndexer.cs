@@ -24,12 +24,14 @@ namespace CK.LogViewer
         readonly FSDirectory _fSDirectory;
         readonly StandardAnalyzer _analyzer;
         readonly IndexWriter _writer;
+        Dictionary<Guid, int> _monitors;
 
         LogIndexer( FSDirectory fSDirectory, StandardAnalyzer analyzer, IndexWriter writer )
         {
             _fSDirectory = fSDirectory;
             _analyzer = analyzer;
             _writer = writer;
+            _monitors = new Dictionary<Guid, int>();
         }
 
         public static LogIndexer Create( string indexesPath )
@@ -96,7 +98,7 @@ namespace CK.LogViewer
                 new StoredField( "logTimeUniquifier", log.LogTime.Uniquifier ),
                 new NumericDocValuesField( "offset", log.Offset ),
                 new StoredField( "offset", log.Offset ),
-                new TextField( "monitorId", log.MonitorId.ToString(), Field.Store.YES ),
+                new TextField( "monitorId", GetMonitorId( log.MonitorId ), Field.Store.YES ),
                 new Int32Field( "depth", log.LogType != LogEntryType.CloseGroup ? log.GroupDepth : log.GroupDepth - 1, Field.Store.YES ),
                 new TextField( "groupPath", currentPath, Field.Store.YES ),
                 new TextField( "groupPath", new PathHierarchyTokenizer( new StringReader( currentPath ) ) )
@@ -120,6 +122,21 @@ namespace CK.LogViewer
                 }
             }
             _writer.AddDocument( doc );
+        }
+
+        private string GetMonitorId( Guid monitorId )
+        {
+            int value;
+            if( _monitors.TryGetValue( monitorId, out value ) )
+            {
+                return value.ToString();
+            }
+            else
+            {
+                var newId = _monitors.Count + 1;
+                _monitors.Add(monitorId, newId);
+                return newId.ToString();
+            }
         }
 
         public void Dispose()
