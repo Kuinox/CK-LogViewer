@@ -7,7 +7,7 @@ body{
 log-viewer {
   display: flex;
   white-space: nowrap;
-  padding-left: 245px;
+  padding-left: 300px;
 }
 log-group {
   display: flex;
@@ -18,10 +18,13 @@ log-exception {
   margin-right: 0.5em;
 }
 
-.log-timestamp {
+.left-content {
+  display: flex;
+  justify-content: space-between;
   position: absolute;
   left: 0;
   background-color: inherit;
+  width: 275px;
 }
 
 .group-tab{
