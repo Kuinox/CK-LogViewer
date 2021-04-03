@@ -1,6 +1,6 @@
-import { getLogs } from "../backend/api";
-import { LogEntry } from "../backend/LogEntry";
-import { LogGroupElement } from "./GroupElement/LogGroupElement";
+import { getLogs } from "../../backend/api";
+import { LogEntry } from "../../backend/LogEntry";
+import { LogGroupElement } from "./LogGroup/LogGroupElement";
 
 export class LogViewer extends HTMLElement {
 

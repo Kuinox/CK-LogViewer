@@ -1,5 +1,5 @@
-import { GroupStats } from "../../backend/GroupStats";
-import { LogLevel } from "../../backend/LogLevel";
+import { GroupStats } from "../../../backend/GroupStats";
+import { LogLevel } from "../../../backend/LogLevel";
 
 export class GroupSummary extends HTMLElement { //TODO: @Hugo I was lazy, I let you fix this tricky typing :D.
     constructor(stats: GroupStats, onClick: () => void) {
@@ -16,7 +16,7 @@ export class GroupSummary extends HTMLElement { //TODO: @Hugo I was lazy, I let 
 
     private static createBadge(level: string, qty: number): HTMLElement {
         const span = document.createElement("span");
-        span.classList.add("summary-badge");
+        span.classList.add("badge");
         span.classList.add(level.toLowerCase());
         span.innerHTML = qty + " " + level;
         return span;

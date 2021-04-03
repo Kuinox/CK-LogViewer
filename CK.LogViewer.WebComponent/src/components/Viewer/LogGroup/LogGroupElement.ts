@@ -1,9 +1,9 @@
-import { getGroupLogs } from "../../backend/api";
-import { GroupLog } from "../../backend/GroupLog";
-import { LogEntry } from "../../backend/LogEntry";
-import { LogLevel, logLevelToString } from "../../backend/LogLevel";
-import { createDiv, setChildOf } from "../../helpers/domHelpers";
-import { LoadingIcon } from "../LoadingIcon";
+import { getGroupLogs } from "../../../backend/api";
+import { GroupLog } from "../../../backend/GroupLog";
+import { LogEntry } from "../../../backend/LogEntry";
+import { LogLevel, logLevelToString } from "../../../backend/LogLevel";
+import { createDiv, setChildOf } from "../../../helpers/domHelpers";
+import { LoadingIcon } from "../../Common/LoadingIcon";
 import { LogEntryElement } from "../LogEntryElement";
 import { GroupList } from "./GroupList";
 import { GroupSummary } from "./GroupSummary";

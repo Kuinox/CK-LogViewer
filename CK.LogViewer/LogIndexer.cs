@@ -1,6 +1,7 @@
 using CK.Core;
 using CK.Monitoring;
 using CK.Text;
+using J2N.Text;
 using Lucene.Net.Analysis.Path;
 using Lucene.Net.Analysis.Reverse;
 using Lucene.Net.Analysis.Standard;
@@ -101,7 +102,7 @@ namespace CK.LogViewer
                 new TextField( "monitorId", GetMonitorId( log.MonitorId ), Field.Store.YES ),
                 new Int32Field( "depth", log.LogType != LogEntryType.CloseGroup ? log.GroupDepth : log.GroupDepth - 1, Field.Store.YES ),
                 new TextField( "groupPath", currentPath, Field.Store.YES ),
-                new TextField( "groupPath", new PathHierarchyTokenizer( new StringReader( currentPath ) ) )
+                new TextField( "groupPath", new PathHierarchyTokenizer( new StringReader( currentPath ) ) ),
             };
 
 
