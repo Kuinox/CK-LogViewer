@@ -78,14 +78,14 @@ export class LogGroupElement extends HTMLElement {
     };
 
     private async displayExpand(): Promise<void> {
-        let newChild = undefined;
         if (this.isFolded) {
-            newChild = new GroupSummary(this.groupLog.stats, this.toggleExpand);
+            this.contentDivChild = setChildOf(this.contentDiv, new GroupSummary(this.groupLog.stats, this.toggleExpand), this.contentDivChild);
         } else {
             if (this.serverOmittedData) {
-                newChild = new LoadingIcon();
+                this.contentDivChild = setChildOf(this.contentDiv, new LoadingIcon(), this.contentDivChild);
             } else {
-                newChild = new GroupList(this.groupLog.groupLogs, this.filename);
+                const newChild = new GroupList(this.groupLog.groupLogs, this.filename);
+                this.contentDivChild = setChildOf(this.contentDiv, newChild, this.contentDivChild);
                 if (newChild.containLazyInitChild) {
                     const newLogs = await getGroupLogs(this.filename, this.groupLog.openLog.id);
                     if (newLogs.length != newChild.childs.length) throw new Error("Invalid data");
@@ -101,7 +101,6 @@ export class LogGroupElement extends HTMLElement {
                 }
             }
         }
-        this.contentDivChild = setChildOf(this.contentDiv, newChild, this.contentDivChild);
     }
 
     public updateContent(logs: LogEntry[]): void {
