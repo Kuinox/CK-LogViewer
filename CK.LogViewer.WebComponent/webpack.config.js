@@ -3,9 +3,8 @@ var glob = require("glob");
 const ESLintPlugin = require('eslint-webpack-plugin');
 
 const CopyPlugin = require("copy-webpack-plugin");
-
 module.exports = {
-    entry: glob.sync("./src/components/*.ts"),
+    entry: glob.sync("./src/components/**/*.ts"),
     module: {
         rules: [
             {
