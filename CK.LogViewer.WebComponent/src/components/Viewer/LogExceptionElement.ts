@@ -1,4 +1,4 @@
-import { CKExceptionData } from "../backend/CKExceptionData";
+import { CKExceptionData } from "../../backend/CKExceptionData";
 
 export class LogExceptionElement extends HTMLElement {
     constructor(log: CKExceptionData) {

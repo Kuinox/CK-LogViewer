@@ -1,6 +1,6 @@
-import { LogLevel, logLevelToString } from "../backend/LogLevel";
-import { SimpleLog } from "../backend/SimpleLog";
-import { setElementOptions, ClassOptions } from "../helpers/domHelpers";
+import { LogLevel, logLevelToString } from "../../backend/LogLevel";
+import { SimpleLog } from "../../backend/SimpleLog";
+import { setElementOptions, ClassOptions } from "../../helpers/domHelpers";
 import { LogExceptionElement } from "./LogExceptionElement";
 
 export class LogEntryElement extends HTMLElement {

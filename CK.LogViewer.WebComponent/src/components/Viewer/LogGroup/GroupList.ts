@@ -1,4 +1,4 @@
-import { LogEntry } from "../../backend/LogEntry";
+import { LogEntry } from "../../../backend/LogEntry";
 import { LogEntryElement } from "../LogEntryElement";
 import { LogGroupElement } from "./LogGroupElement";
 
