@@ -99,6 +99,7 @@ namespace CK.LogViewer
                 new StoredField( "logTimeUniquifier", log.LogTime.Uniquifier ),
                 new NumericDocValuesField( "offset", log.Offset ),
                 new StoredField( "offset", log.Offset ),
+                new TextField( "monitorGuid", log.MonitorId.ToString(), Field.Store.YES ),
                 new Int32Field( "monitorId", GetMonitorId( log.MonitorId ), Field.Store.YES ),
                 new Int32Field( "depth", log.LogType != LogEntryType.CloseGroup ? log.GroupDepth : log.GroupDepth - 1, Field.Store.YES ),
                 new TextField( "groupPath", currentPath, Field.Store.YES ),

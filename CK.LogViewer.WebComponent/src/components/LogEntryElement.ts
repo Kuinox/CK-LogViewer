@@ -27,15 +27,14 @@ export class LogEntryElement extends HTMLElement {
 
             const toolTip = document.createElement("span");
             toolTip.classList.add("tags-tooltip");
-            toolTip.classList.add("summary-badge");
+            toolTip.classList.add("small-badge");
             toolTip.innerHTML = log.tags.split(" ").length.toString() + " tags";
 
             const toolTipContent = document.createElement("span");
             toolTipContent.classList.add("tags-tooltip-content");
             toolTipContent.innerHTML = log.tags;
-
-            toolTip.appendChild(toolTipContent);
             leftContent.appendChild(toolTip);
+            leftContent.appendChild(toolTipContent);
         }
 
 
