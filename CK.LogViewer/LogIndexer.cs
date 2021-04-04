@@ -84,6 +84,7 @@ namespace CK.LogViewer
                     throw new InvalidDataException();
             }
 
+
             Document doc = new()
             {
                 new NumericDocValuesField( "logType", (byte)log.LogType ),
@@ -99,12 +100,21 @@ namespace CK.LogViewer
                 new StoredField( "logTimeUniquifier", log.LogTime.Uniquifier ),
                 new NumericDocValuesField( "offset", log.Offset ),
                 new StoredField( "offset", log.Offset ),
-                new TextField( "monitorId", GetMonitorId( log.MonitorId ), Field.Store.YES ),
+                new TextField( "monitorGuid", log.MonitorId.ToString(), Field.Store.YES ),
+                new Int32Field( "monitorId", GetMonitorId( log.MonitorId ), Field.Store.YES ),
                 new Int32Field( "depth", log.LogType != LogEntryType.CloseGroup ? log.GroupDepth : log.GroupDepth - 1, Field.Store.YES ),
                 new TextField( "groupPath", currentPath, Field.Store.YES ),
                 new TextField( "groupPath", new PathHierarchyTokenizer( new StringReader( currentPath ) ) ),
             };
 
+
+            if( log.Tags != "" )
+            {
+                var tags = log.Tags.ToString();
+                tags = tags.Replace( "|", " " );
+
+                doc.Add( new TextField( "tags", tags, Field.Store.YES ) );
+            }
 
             bool hasException = log.Exception != null;
             doc.Add( new StringField( "hasException", hasException.ToString(), Field.Store.YES ) );
@@ -125,18 +135,19 @@ namespace CK.LogViewer
             _writer.AddDocument( doc );
         }
 
-        private string GetMonitorId( Guid monitorId )
+        private int GetMonitorId( Guid monitorId )
         {
+            if( monitorId == Guid.Empty ) return 0;
             int value;
             if( _monitors.TryGetValue( monitorId, out value ) )
             {
-                return value.ToString();
+                return value;
             }
             else
             {
                 var newId = _monitors.Count + 1;
-                _monitors.Add(monitorId, newId);
-                return newId.ToString();
+                _monitors.Add( monitorId, newId );
+                return newId;
             }
         }
 

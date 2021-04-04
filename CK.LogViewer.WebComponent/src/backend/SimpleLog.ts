@@ -9,5 +9,6 @@ export interface SimpleLog {
     logTime: string,
     monitorId: string,
     text: string,
+    tags: string,
     exception?: CKExceptionData
 }

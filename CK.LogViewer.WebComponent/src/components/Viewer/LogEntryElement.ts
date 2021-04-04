@@ -19,8 +19,24 @@ export class LogEntryElement extends HTMLElement {
         leftContent.appendChild(time);
 
         const monitor = document.createElement("span");
+        monitor.classList.add("monitorId");
         monitor.innerHTML = "#" + log.monitorId;
         leftContent.appendChild(monitor);
+
+        if (log.tags != null) {
+
+            const toolTip = document.createElement("span");
+            toolTip.classList.add("tags-tooltip");
+            toolTip.classList.add("small-badge");
+            toolTip.innerHTML = log.tags.split(" ").length.toString() + " tags";
+
+            const toolTipContent = document.createElement("span");
+            toolTipContent.classList.add("tags-tooltip-content");
+            toolTipContent.innerHTML = log.tags;
+            leftContent.appendChild(toolTip);
+            leftContent.appendChild(toolTipContent);
+        }
+
 
 
         this.appendChild(leftContent);
@@ -30,7 +46,7 @@ export class LogEntryElement extends HTMLElement {
 
         this.classList.add(logLevel);
         const span = document.createElement("span");
-        span.className="log-text";
+        span.className = "log-text";
         span.innerHTML = log.text;
         this.appendChild(span);
     }

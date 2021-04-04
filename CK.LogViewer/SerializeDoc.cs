@@ -75,6 +75,7 @@ namespace CK.LogViewer
             byte uniquifer = doc.GetField( "logTimeUniquifier" ).GetByteValue()!.Value;
             writer.WriteString( "logTime", new DateTimeStamp( new DateTime( ticks, DateTimeKind.Utc ), uniquifer ).ToString() );
             writer.WriteString( "monitorId", doc.Get( "monitorId" ) );
+            writer.WriteString( "tags", doc.Get( "tags" ) );
 
             if( doc.Get( "hasException" ) == "True" )
             {
