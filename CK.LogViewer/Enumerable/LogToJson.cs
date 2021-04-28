@@ -95,7 +95,7 @@ namespace CK.LogViewer
             writer.WriteNumber( "offset", entry.Offset ); ;
             writer.WriteNumber( "logLevel", (byte)entry.LogLevel );
             writer.WriteString( "logTime", entry.LogTime.ToString() );
-            writer.WriteString( "monitorId", entry.MonitorId );
+            writer.WriteString( "monitorId", entry.MonitorSimpleId.ToString() );
 
             if( entry.Exception != null )
             {

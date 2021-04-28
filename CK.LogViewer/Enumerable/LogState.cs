@@ -30,16 +30,33 @@ namespace CK.LogViewer
             {
                 _enumerator = enumerator;
                 _stats = new Stack<Dictionary<LogLevel, int>>();
+                _monitors = new Dictionary<Guid, int>();
                 _stats.Push( new Dictionary<LogLevel, int>() );
                 _currentStats = null!;
             }
 
-            public LogEntryWithState Current => new( _enumerator.Current, _currentStats );
+            public LogEntryWithState Current => new( _enumerator.Current, _currentStats, GetMonitorId( _enumerator.Current.MonitorId ) );
             Dictionary<LogLevel, int> _currentStats;
             object IEnumerator.Current => Current;
 
             public void Dispose() => _enumerator.Dispose();
             public void Reset() => _enumerator.Reset();
+
+            int GetMonitorId( Guid monitorId )
+            {
+                if( monitorId == Guid.Empty ) return 0;
+                int value;
+                if( _monitors.TryGetValue( monitorId, out value ) )
+                {
+                    return value;
+                }
+                else
+                {
+                    var newId = _monitors.Count + 1;
+                    _monitors.Add( monitorId, newId );
+                    return newId;
+                }
+            }
 
             public bool MoveNext()
             {
@@ -78,22 +95,23 @@ namespace CK.LogViewer
             }
         }
 
-    public static IEnumerable<LogEntryWithState> ComputeState( this IEnumerable<IMulticastLogEntryWithOffset> @this ) => new Enumerable( @this );
+        public static IEnumerable<LogEntryWithState> ComputeState( this IEnumerable<IMulticastLogEntryWithOffset> @this ) => new Enumerable( @this );
 
         // OK this class is for all entries but it's state is for all entries.
         public class LogEntryWithState : IMulticastLogEntryWithOffset
         {
             readonly IMulticastLogEntryWithOffset _multicastLogEntryWithOffset;
 
-            public LogEntryWithState( IMulticastLogEntryWithOffset multicastLogEntryWithOffset, Dictionary<LogLevel, int> stats )
+            public LogEntryWithState( IMulticastLogEntryWithOffset multicastLogEntryWithOffset, Dictionary<LogLevel, int> stats, int monitorSimpleId )
             {
                 Debug.Assert( stats != null );
                 _multicastLogEntryWithOffset = multicastLogEntryWithOffset;
                 Stats = stats;
+                MonitorSimpleId = monitorSimpleId;
             }
 
             public IReadOnlyDictionary<LogLevel, int> Stats { get; }
-
+            public int MonitorSimpleId { get; }
             public bool Folded { get; set; }
 
             #region InterfaceImpl
