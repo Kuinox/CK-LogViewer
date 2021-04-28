@@ -1,4 +1,5 @@
 using CK.Core;
+using CK.LogViewer;
 using CK.Monitoring;
 using System;
 using System.Collections;
@@ -9,7 +10,7 @@ namespace CK.LogViewer
 {
     public static class EnumerableLogStatsExtensions
     {
-        public static IEnumerable<LogEntryWithState> ComputeState( this IEnumerable<IMulticastLogEntryWithOffset> @this ) => new Enumerable( @this );
+        public static IEnumerable<LogEntryWithState> AddState( this IEnumerable<IMulticastLogEntryWithOffset> @this ) => new Enumerable( @this );
         struct Enumerable : IEnumerable<LogEntryWithState>
         {
             readonly Enumerator _enumerator;
@@ -24,7 +25,7 @@ namespace CK.LogViewer
         {
             readonly IEnumerator<IMulticastLogEntryWithOffset> _enumerator;
             readonly Stack<Dictionary<LogLevel, int>> _stats;
-
+            readonly Dictionary<Guid, int> _monitors;
             public Enumerator( IEnumerator<IMulticastLogEntryWithOffset> enumerator )
             {
                 _enumerator = enumerator;
@@ -76,42 +77,43 @@ namespace CK.LogViewer
                 }
             }
         }
-    }
 
-    // OK this class is for all entries but it's state is for all entries.
-    public class LogEntryWithState : IMulticastLogEntryWithOffset
-    {
-        readonly IMulticastLogEntryWithOffset _multicastLogEntryWithOffset;
+    public static IEnumerable<LogEntryWithState> ComputeState( this IEnumerable<IMulticastLogEntryWithOffset> @this ) => new Enumerable( @this );
 
-        public LogEntryWithState( IMulticastLogEntryWithOffset multicastLogEntryWithOffset, Dictionary<LogLevel, int> stats )
+        // OK this class is for all entries but it's state is for all entries.
+        public class LogEntryWithState : IMulticastLogEntryWithOffset
         {
-            Debug.Assert( stats != null );
-            _multicastLogEntryWithOffset = multicastLogEntryWithOffset;
-            Stats = stats;
+            readonly IMulticastLogEntryWithOffset _multicastLogEntryWithOffset;
+
+            public LogEntryWithState( IMulticastLogEntryWithOffset multicastLogEntryWithOffset, Dictionary<LogLevel, int> stats )
+            {
+                Debug.Assert( stats != null );
+                _multicastLogEntryWithOffset = multicastLogEntryWithOffset;
+                Stats = stats;
+            }
+
+            public IReadOnlyDictionary<LogLevel, int> Stats { get; }
+
+            public bool Folded { get; set; }
+
+            #region InterfaceImpl
+            public long Offset => _multicastLogEntryWithOffset.Offset;
+            public int GroupDepth => _multicastLogEntryWithOffset.GroupDepth;
+            public LogEntryType LogType => _multicastLogEntryWithOffset.LogType;
+            public LogLevel LogLevel => _multicastLogEntryWithOffset.LogLevel;
+            public string Text => _multicastLogEntryWithOffset.Text;
+            public CKTrait Tags => _multicastLogEntryWithOffset.Tags;
+            public DateTimeStamp LogTime => _multicastLogEntryWithOffset.LogTime;
+            public CKExceptionData? Exception => _multicastLogEntryWithOffset.Exception;
+            public string? FileName => _multicastLogEntryWithOffset.FileName;
+            public int LineNumber => _multicastLogEntryWithOffset.LineNumber;
+            public IReadOnlyList<ActivityLogGroupConclusion>? Conclusions => _multicastLogEntryWithOffset.Conclusions;
+            public Guid MonitorId => _multicastLogEntryWithOffset.MonitorId;
+            public LogEntryType PreviousEntryType => _multicastLogEntryWithOffset.PreviousEntryType;
+            public DateTimeStamp PreviousLogTime => _multicastLogEntryWithOffset.PreviousLogTime;
+            public ILogEntry CreateUnicastLogEntry() => _multicastLogEntryWithOffset.CreateUnicastLogEntry();
+            public void WriteLogEntry( CKBinaryWriter w ) => _multicastLogEntryWithOffset.WriteLogEntry( w );
+            #endregion
         }
-
-        public IReadOnlyDictionary<LogLevel, int> Stats { get; }
-
-        public bool Folded { get; set; }
-
-        #region InterfaceImpl
-        public long Offset => _multicastLogEntryWithOffset.Offset;
-        public int GroupDepth => _multicastLogEntryWithOffset.GroupDepth;
-        public LogEntryType LogType => _multicastLogEntryWithOffset.LogType;
-        public LogLevel LogLevel => _multicastLogEntryWithOffset.LogLevel;
-        public string Text => _multicastLogEntryWithOffset.Text;
-        public CKTrait Tags => _multicastLogEntryWithOffset.Tags;
-        public DateTimeStamp LogTime => _multicastLogEntryWithOffset.LogTime;
-        public CKExceptionData? Exception => _multicastLogEntryWithOffset.Exception;
-        public string? FileName => _multicastLogEntryWithOffset.FileName;
-        public int LineNumber => _multicastLogEntryWithOffset.LineNumber;
-        public IReadOnlyList<ActivityLogGroupConclusion>? Conclusions => _multicastLogEntryWithOffset.Conclusions;
-        public Guid MonitorId => _multicastLogEntryWithOffset.MonitorId;
-        public LogEntryType PreviousEntryType => _multicastLogEntryWithOffset.PreviousEntryType;
-        public DateTimeStamp PreviousLogTime => _multicastLogEntryWithOffset.PreviousLogTime;
-        public ILogEntry CreateUnicastLogEntry() => _multicastLogEntryWithOffset.CreateUnicastLogEntry();
-        public void WriteLogEntry( CKBinaryWriter w ) => _multicastLogEntryWithOffset.WriteLogEntry( w );
-        #endregion
-
     }
 }

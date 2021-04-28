@@ -1,4 +1,4 @@
-import { getGroupLogs } from "../../../backend/api";
+import { Api } from "../../../backend/api";
 import { GroupLog } from "../../../backend/GroupLog";
 import { LogEntry } from "../../../backend/LogEntry";
 import { LogLevel, logLevelToString } from "../../../backend/LogLevel";
@@ -14,14 +14,14 @@ export class LogGroupElement extends HTMLElement {
     private groupLog: GroupLog;
     public readonly isGroup = true;
     public isFolded: boolean;
-    private filename;
-    static fromLogEntry(log: LogEntry, filename: string): LogEntryElement | LogGroupElement {
-        return log.isGroup ? new LogGroupElement(log, filename) : new LogEntryElement(log);
+    private api: Api;
+    static fromLogEntry(log: LogEntry, api: Api): LogEntryElement | LogGroupElement {
+        return log.isGroup ? new LogGroupElement(log, api) : new LogEntryElement(log);
     }
 
-    constructor(log: GroupLog, filename: string) {
+    constructor(log: GroupLog, api: Api) {
         super();
-        this.filename = filename;
+        this.api = api;
         this.groupLog = log;
         this.contentDiv = createDiv();
         const collapseDiv = createDiv({
@@ -84,10 +84,10 @@ export class LogGroupElement extends HTMLElement {
             if (this.serverOmittedData) {
                 this.contentDivChild = setChildOf(this.contentDiv, new LoadingIcon(), this.contentDivChild);
             } else {
-                const newChild = new GroupList(this.groupLog.groupLogs, this.filename);
+                const newChild = new GroupList(this.groupLog.groupLogs, this.api);
                 this.contentDivChild = setChildOf(this.contentDiv, newChild, this.contentDivChild);
                 if (newChild.containLazyInitChild) {
-                    const newLogs = await getGroupLogs(this.filename, this.groupLog.openLog.id);
+                    const newLogs = await this.api.getGroupLogs(this.groupLog.openLog.id);
                     if (newLogs.length != newChild.childs.length) throw new Error("Invalid data");
                     for (let i = 0; i < newLogs.length; i++) {
                         const update = newLogs[i];

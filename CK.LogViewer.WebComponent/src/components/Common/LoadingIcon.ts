@@ -1,11 +1,20 @@
 export class LoadingIcon extends HTMLElement {
+    interval!: NodeJS.Timeout;
     constructor() {
         super();
-        this.innerHTML = "/";
-        setInterval(this.spin, 100);
+
     }
+    connectedCallback(): void {
+        this.innerHTML = "/";
+        this.interval = setInterval(this.spin, 100);
+    }
+
+    disconnectedCallback(): void {
+        clearInterval(this.interval);
+    }
+
     step = 0;
-    spin = () : void => {
+    spin = (): void => {
         switch (this.step) {
             case 0:
                 this.innerHTML = "/";
@@ -23,5 +32,7 @@ export class LoadingIcon extends HTMLElement {
         }
         this.step++;
     };
+
+
 }
 customElements.define('loading-icon', LoadingIcon);

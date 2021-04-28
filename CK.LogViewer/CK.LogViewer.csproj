@@ -8,11 +8,6 @@
 
   <ItemGroup>
     <PackageReference Include="CK.Monitoring" Version="14.0.0" />
-    <PackageReference Include="Lucene.Net" Version="4.8.0-beta00013" />
-    <PackageReference Include="Lucene.Net.Analysis.Common" Version="4.8.0-beta00013" />
-    <PackageReference Include="Lucene.Net.Expressions" Version="4.8.0-beta00013" />
-    <PackageReference Include="Lucene.Net.Facet" Version="4.8.0-beta00013" />
-    <PackageReference Include="Lucene.Net.QueryParser" Version="4.8.0-beta00013" />
   </ItemGroup>
 
 

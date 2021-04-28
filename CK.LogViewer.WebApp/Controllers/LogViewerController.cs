@@ -2,16 +2,12 @@ using CK.Core;
 using Microsoft.AspNetCore.Http;
 using CK.Monitoring;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using CK.Text;
-using Lucene.Net.Documents;
+using CK.LogViewer.Enumerable;
 
 namespace CK.LogViewer.WebApp.Controllers
 {
@@ -21,32 +17,21 @@ namespace CK.LogViewer.WebApp.Controllers
     {
         readonly IActivityMonitor _m;
 
-        public LogViewerController( IActivityMonitor m )
-        {
-            _m = m;
-        }
-
-        Task DocumentsToJson( Utf8JsonWriter writer, IEnumerable<(int, Document)> documents )
-        {
-            writer.WriteStartArray();
-            foreach( var log in documents )
-            {
-                SerializeDoc.Convert( log.Item1, log.Item2, writer );
-            }
-            writer.WriteEndArray();
-            return writer.FlushAsync();
-        }
+        public LogViewerController( IActivityMonitor m ) => _m = m;
 
         [HttpGet( "{logName}" )]
         public async Task GetLogJson( string logName, [FromQuery] int depth = 2, int scopedOnGroupId = -1 )
         {
-            NormalizedPath logFolder = "saveLog";
-            NormalizedPath indexPaths = logFolder.AppendPart( logName ).AppendPart( "indexes" );
             await using( Utf8JsonWriter writer = new( HttpContext.Response.Body ) )
-            using( LogSearcher searcher = LogSearcher.Create( indexPaths ) )
+            using( LogReader logReader = LogReader.Open( "saveLog/" + logName + "/log.ckmon" ) )
             {
-                var docs = searcher.FilteredLogs( depth, scopedOnGroupId );
-                await DocumentsToJson( writer, docs );
+                HttpContext.Response.ContentType = "application/json";
+                logReader.ToEnumerable()
+                   .AddState()
+                   .FilterDepth( depth + 1 )
+                   .FoldAtDepth( depth )
+                   .WriteTo( writer );
+                await writer.FlushAsync();
             }
         }
 
@@ -71,11 +56,6 @@ namespace CK.LogViewer.WebApp.Controllers
                 NormalizedPath logPath = logFolder.AppendPart( "log.ckmon" );
                 Directory.CreateDirectory( logFolder );
                 System.IO.File.Move( temporaryFile.Path, logPath, true );
-                using( LogIndexer indexer = LogIndexer.Create( logFolder.AppendPart( "indexes" ) ) )
-                using( LogReader reader = LogReader.Open( logPath ) )
-                {
-                    indexer.IndexLogs( reader.ToEnumerable().ComputeState() );
-                }
                 temporaryFile.Detach();
             }
             return finalResult.ToString();
