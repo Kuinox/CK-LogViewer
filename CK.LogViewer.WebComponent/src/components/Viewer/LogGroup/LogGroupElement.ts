@@ -87,7 +87,7 @@ export class LogGroupElement extends HTMLElement {
                 const newChild = new GroupList(this.groupLog.groupLogs, this.api);
                 this.contentDivChild = setChildOf(this.contentDiv, newChild, this.contentDivChild);
                 if (newChild.containLazyInitChild) {
-                    const newLogs = await this.api.getGroupLogs(this.groupLog.openLog.id);
+                    const newLogs = await this.api.getGroupLogs(this.groupLog.openLog.offset);
                     if (newLogs.length != newChild.childs.length) throw new Error("Invalid data");
                     for (let i = 0; i < newLogs.length; i++) {
                         const update = newLogs[i];

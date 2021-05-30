@@ -11,7 +11,8 @@ export class LogViewer extends HTMLElement {
 
     async connectedCallback(): Promise<void> {
         if (window.location.hash.length > 1) {
-            const filename = window.location.hash.substring(2);
+            const filename = window.location.hash.substring(1);
+            console.log("filename:"+filename);
             if (filename !== undefined) {
                 this.render(filename);
             }
@@ -47,7 +48,7 @@ export class LogViewer extends HTMLElement {
                 if (this.aborter.signal.aborted) {
                     return;
                 }
-                if (i % 100 === 0) {
+                if (i % 100 === 99) {
                     load.remove();
                     await this.sleep(0);
                 }

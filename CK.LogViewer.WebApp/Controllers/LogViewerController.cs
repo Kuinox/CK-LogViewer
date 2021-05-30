@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using CK.Text;
 using CK.LogViewer.Enumerable;
+using System;
 
 namespace CK.LogViewer.WebApp.Controllers
 {
@@ -20,17 +21,25 @@ namespace CK.LogViewer.WebApp.Controllers
         public LogViewerController( IActivityMonitor m ) => _m = m;
 
         [HttpGet( "{logName}" )]
-        public async Task GetLogJson( string logName, [FromQuery] int depth = 2, int scopedOnGroupId = -1 )
+        public async Task GetLogJson( string logName, [FromQuery] int depth = -1, int groupOffset = -1 )
         {
             await using( Utf8JsonWriter writer = new( HttpContext.Response.Body ) )
-            using( LogReader logReader = LogReader.Open( "saveLog/" + logName + "/log.ckmon" ) )
+            using( LogReader logReader = LogReader.Open( "saveLog/" + logName + "/log.ckmon", groupOffset < 0 ? 0 : groupOffset ) )
             {
                 HttpContext.Response.ContentType = "application/json";
-                logReader.ToEnumerable()
-                   .AddState()
-                   .FilterDepth( depth + 1 )
-                   .FoldAtDepth( depth )
-                   .WriteTo( writer );
+                var logsToWrite = logReader
+                    .ToEnumerable()
+                    .AddState();
+                if( depth >= 0 )
+                {
+                    logsToWrite = logsToWrite.FilterDepth( depth + 1 );
+                }
+
+                if( groupOffset >= 0 )
+                {
+                    logsToWrite = logsToWrite.TakeOnlyCurrentGroupContent();
+                }
+                logsToWrite.WriteTo( writer );
                 await writer.FlushAsync();
             }
         }

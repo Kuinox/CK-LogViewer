@@ -71,9 +71,8 @@ namespace CK.LogViewer
         static void WriteOpenGroup( LogEntryWithState entry, Utf8JsonWriter writer )
         {
             writer.WriteStartObject();
-            WriteCommonProperties( entry, writer );
+            //WriteCommonProperties( entry, writer );
             writer.WriteBoolean( "isGroup", true );
-            writer.WriteBoolean( "isFolded", entry.Folded );
             writer.WritePropertyName( "openLog" );
             WriteLog( entry, writer );
             writer.WriteStartArray( "groupLogs" );

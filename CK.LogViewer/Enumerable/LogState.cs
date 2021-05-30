@@ -112,7 +112,6 @@ namespace CK.LogViewer
 
             public IReadOnlyDictionary<LogLevel, int> Stats { get; }
             public int MonitorSimpleId { get; }
-            public bool Folded { get; set; }
 
             #region InterfaceImpl
             public long Offset => _multicastLogEntryWithOffset.Offset;

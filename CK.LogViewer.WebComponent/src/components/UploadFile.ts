@@ -25,7 +25,7 @@ export class UploadFile extends HTMLElement {
             formData.append("files", files[i]);
         }
         const hash = await uploadLog(formData);
-        window.location.replace(`http://localhost:5000/#/${hash}`);
+        window.location.hash = hash;
         (document.getElementsByTagName("log-viewer")[0] as LogViewer).render(hash);
     };
 

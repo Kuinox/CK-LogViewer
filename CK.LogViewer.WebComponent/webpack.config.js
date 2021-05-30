@@ -31,8 +31,8 @@ module.exports = {
         new CopyPlugin({
             patterns: [
                 {
-                    from: "node_modules/@webcomponents/custom-elements/",
-                    to: "node_modules/@webcomponents/custom-elements/"
+                    from: "node_modules/@webcomponents/custom-elements/src/native-shim.js",
+                    to: "native-shim.js"
                 },
                 {
                     from: "src/index.html",
