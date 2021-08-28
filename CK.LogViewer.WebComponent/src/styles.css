@@ -31,19 +31,22 @@ log-exception {
   width: 380px;
 }
 
-.group-tab{
-  height: auto;
+.group-tab {
   min-width: 15px;
-  margin-right: 5px;
   display: flex;
+  position: absolute;
+
 }
 .group-tab div {
   height: auto;
   margin-left: 50%;
   border-left: solid;
-  border-width: 0.5px;
+  border-top: solid;
+  border-bottom: solid;
+  border-width: 1px;
   width: 100%;
-
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 .group-tab-line div {
 }

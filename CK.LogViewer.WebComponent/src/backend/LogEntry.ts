@@ -12,7 +12,7 @@ export interface LogEntry {
     exception?: CKExceptionData,
     parentsLogLevel: {
         logLevel: LogLevel,
-        offset: number
+        groupOffset: number
     }[],
     logType: LogType
 }
