@@ -4,7 +4,9 @@ using CK.Monitoring;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Linq;
 
 namespace CK.LogViewer
 {
@@ -21,22 +23,45 @@ namespace CK.LogViewer
             IEnumerator IEnumerable.GetEnumerator() => _enumerator;
         }
 
-        struct Enumerator : IEnumerator<LogEntryWithState>
+        class Enumerator : IEnumerator<LogEntryWithState>
         {
+            class GroupData
+            {
+                public readonly Dictionary<LogLevel, int> LogLevelSummary = new();
+                public readonly ImmutableArray<(LogLevel logLevel, long groupOffset)> ParentsGroupLevels;
+                public readonly long GroupOffset;
+
+                public GroupData()
+                {
+                    ParentsGroupLevels = ImmutableArray<(LogLevel, long)>.Empty;
+                    GroupOffset = 0;
+                }
+
+                public GroupData( GroupData parent, IMulticastLogEntryWithOffset entry )
+                {
+                    ParentsGroupLevels = parent.ParentsGroupLevels.Add( (entry.LogLevel, entry.Offset) );
+                }
+            }
             readonly IEnumerator<IMulticastLogEntryWithOffset> _enumerator;
-            readonly Stack<Dictionary<LogLevel, int>> _stats;
+            readonly Stack<GroupData> _dataStack;
             readonly Dictionary<Guid, int> _monitors;
             public Enumerator( IEnumerator<IMulticastLogEntryWithOffset> enumerator )
             {
                 _enumerator = enumerator;
-                _stats = new Stack<Dictionary<LogLevel, int>>();
+                _dataStack = new Stack<GroupData>();
                 _monitors = new Dictionary<Guid, int>();
-                _stats.Push( new Dictionary<LogLevel, int>() );
-                _currentStats = null!;
+                _dataStack.Push( new GroupData() );
+                _currentData = null!;
             }
 
-            public LogEntryWithState Current => new( _enumerator.Current, _currentStats, GetMonitorId( _enumerator.Current.MonitorId ) );
-            Dictionary<LogLevel, int> _currentStats;
+            public LogEntryWithState Current => new(
+                _enumerator.Current,
+                _currentData.LogLevelSummary,
+                GetMonitorId( _enumerator.Current.MonitorId ),
+                _currentData.ParentsGroupLevels,
+                _currentData.GroupOffset
+            );
+            GroupData _currentData;
             object IEnumerator.Current => Current;
 
             public void Dispose() => _enumerator.Dispose();
@@ -61,7 +86,7 @@ namespace CK.LogViewer
             public bool MoveNext()
             {
                 if( !_enumerator.MoveNext() ) return false;
-                _currentStats = _stats.Peek();
+                _currentData = _dataStack.Peek();
                 switch( _enumerator.Current.LogType )
                 {
                     case LogEntryType.Line:
@@ -69,10 +94,12 @@ namespace CK.LogViewer
                         break;
                     case LogEntryType.OpenGroup:
                         IncrementStat( _enumerator.Current.LogLevel );
-                        _stats.Push( new Dictionary<LogLevel, int>() );
+                        _dataStack.Push(
+                            new GroupData( _currentData, _enumerator.Current )
+                        );
                         break;
                     case LogEntryType.CloseGroup:
-                        _stats.Pop();
+                        _dataStack.Pop();
                         break;
                 }
                 return true;
@@ -81,15 +108,15 @@ namespace CK.LogViewer
             void IncrementStat( LogLevel logLevel )
             {
                 logLevel &= LogLevel.Mask;
-                foreach( Dictionary<LogLevel, int> stat in _stats )
+                foreach( var data in _dataStack )
                 {
-                    if( !stat.TryGetValue( logLevel, out int currCount ) )
+                    if( !data.LogLevelSummary.TryGetValue( logLevel, out int currCount ) )
                     {
-                        stat[logLevel] = 1;
+                        data.LogLevelSummary[logLevel] = 1;
                     }
                     else
                     {
-                        stat[logLevel] = currCount + 1;
+                        data.LogLevelSummary[logLevel] = currCount + 1;
                     }
                 }
             }
@@ -102,16 +129,26 @@ namespace CK.LogViewer
         {
             readonly IMulticastLogEntryWithOffset _multicastLogEntryWithOffset;
 
-            public LogEntryWithState( IMulticastLogEntryWithOffset multicastLogEntryWithOffset, Dictionary<LogLevel, int> stats, int monitorSimpleId )
+            public LogEntryWithState(
+                IMulticastLogEntryWithOffset multicastLogEntryWithOffset,
+                Dictionary<LogLevel, int> stats,
+                int monitorSimpleId,
+                ImmutableArray<LogLevel> parentsLogLevel,
+                long groupOffset
+            )
             {
                 Debug.Assert( stats != null );
                 _multicastLogEntryWithOffset = multicastLogEntryWithOffset;
                 Stats = stats;
                 MonitorSimpleId = monitorSimpleId;
+                ParentsLogLevel = parentsLogLevel;
+                GroupOffset = groupOffset;
             }
 
             public IReadOnlyDictionary<LogLevel, int> Stats { get; }
             public int MonitorSimpleId { get; }
+            public ImmutableArray<LogLevel> ParentsLogLevel { get; }
+            public long GroupOffset { get; }
 
             #region InterfaceImpl
             public long Offset => _multicastLogEntryWithOffset.Offset;

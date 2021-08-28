@@ -53,4 +53,5 @@ export const logLevelToString: ReadonlyMap<LogLevel, string> = new Map([
     [LogLevel.Warn, "warn"],
     [LogLevel.Error, "error"],
     [LogLevel.Fatal, "fatal"],
+    [LogLevel.None, "none"]
 ]);

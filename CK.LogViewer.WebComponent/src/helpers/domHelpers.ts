@@ -35,7 +35,7 @@ export function setElementOptions(element: Element, options?: ElementOptions): v
             element.appendChild(options.childNodes[i]);
         }
     }
-    if(options.innerHTML !== undefined) {
+    if (options.innerHTML !== undefined) {
         element.innerHTML = options.innerHTML;
     }
 }

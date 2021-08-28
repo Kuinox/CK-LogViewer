@@ -14,6 +14,7 @@ export class UploadFile extends HTMLElement {
         fileUploadForm.appendChild(inputFileUpload);
         inputFileUpload.addEventListener("change", this.uploadFiles);
         this.appendChild(fileUploadForm);
+
     }
 
     uploadFiles = async (): Promise<void> => {

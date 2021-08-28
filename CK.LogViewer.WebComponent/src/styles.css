@@ -4,10 +4,16 @@ body{
   background-color: #1e1e1e;
   color: white;
 }
+.metadata-list {
+  display: flex;
+  flex-direction: column;
+  left: 0;
+  padding-right: 15px;
+}
+
 log-viewer {
   display: flex;
   white-space: nowrap;
-  padding-left: 400px;
 }
 log-group {
   display: flex;
@@ -27,24 +33,35 @@ log-exception {
 
 .group-tab{
   height: auto;
-  min-width: 10px;
-  margin-left: 5px;
-  padding-right: 5px;
+  min-width: 15px;
+  margin-right: 5px;
   display: flex;
 }
-
 .group-tab div {
   height: auto;
-  width: 50%;
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
+  margin-left: 50%;
+  border-left: solid;
+  border-width: 0.5px;
+  width: 100%;
+
+}
+.group-tab-line div {
 }
 
-.group-ruler {
-  border:solid;
-  border-right: none;
+.group-tab-open div{
+  border-top: solid;
+  margin-top: 5px;
   border-width: 0.5px;
 }
+
+.group-tab-close div{
+  border-bottom: solid;
+  border-width: 0.5px;
+  margin-bottom: 5px;
+}
+
+
+
 
 .group-tab:hover {
   background-color: rgba(255, 255, 255, 0.1);
@@ -56,7 +73,8 @@ log-exception {
 log-entry:hover, group-summary:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
-group-summary{
+
+.group-tab{
   cursor: pointer;
 }
 
@@ -162,6 +180,11 @@ group-summary {
   border-color: darkred;
   background-color: yellow;
   font-weight: bold;
+}
+
+.none {
+  color: purple;
+  border-color: purple;
 }
 
 .tags-tooltip{

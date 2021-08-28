@@ -1,61 +1,73 @@
 import { Api } from "../../backend/api";
+import { LogEntry } from "../../backend/LogEntry";
 import { LoadingIcon } from "../Common/LoadingIcon";
-import { LogGroupElement } from "./LogGroup/LogGroupElement";
+import { LogMetadata } from "./New/LogMetadataElement";
+import { LogZoneElement } from "./New/LogZoneElement";
 
-export class LogViewer extends HTMLElement {
-    groups: HTMLDivElement | undefined;
-
-    constructor() {
+export class LogViewer extends HTMLElement { //TODO: hide this behind an object, so consumer dont see HTML methods.
+    private loadIcon: LoadingIcon | undefined;
+    private logZone!: LogZoneElement;
+    constructor(displayLoading: boolean) {
         super();
+        this.reset(displayLoading);
     }
 
-    async connectedCallback(): Promise<void> {
-        if (window.location.hash.length > 1) {
-            const filename = window.location.hash.substring(1);
-            console.log("filename:"+filename);
-            if (filename !== undefined) {
-                this.render(filename);
-            }
+    connectedCallback(): void {
+        const hash = window.location.hash;
+        if (hash.length > 1) {
+            this.render(hash.slice(1));
         }
     }
 
     aborter: AbortController | undefined;
-
-    sleep(ms: number) : Promise<void> {
+    sleep(ms: number): Promise<void> {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    async render(filename: string): Promise<void> {
+    async render(filename: string): Promise<void> { //TODO: move this out of the LogViewer component.
         const api = new Api(filename);
         this.aborter?.abort();
         const aborter = new AbortController();
         this.aborter = aborter;
-        const load = new LoadingIcon();
-        load.style.fontSize = "50px";
-        this.appendChild(load);
-        try {
-            this.groups?.remove();
-            const logs = await api.getLogs(aborter.signal);
+        const logs = await api.getLogs(aborter.signal);
+        if (this.aborter.signal.aborted) {
+            return;
+        }
+        this.reset(true);
+        for (let i = 0; i < logs.length; i++) {
+            const curr = logs[i];
+            this.appendEntry(curr);
             if (this.aborter.signal.aborted) {
                 return;
             }
-            const groups = document.createElement("div");
-            this.groups = groups;
-            this.appendChild(groups);
-            for (let i = 0; i < logs.length; i++) {
-                const curr = logs[i];
-                groups.appendChild(LogGroupElement.fromLogEntry(curr, api));
-                if (this.aborter.signal.aborted) {
-                    return;
-                }
-                if (i % 100 === 99) {
-                    load.remove();
-                    await this.sleep(0);
-                }
+            if (i % 100 === 99) {
+                await this.sleep(0);
             }
-        } finally {
-            load.remove();
         }
+        this.removeLoadIcon();
+    }
+
+    public appendEntry(entry: LogEntry): void {
+        this.logZone.appendLog(entry);
+    }
+    /**
+     *
+     * @param displayLoading true => display a loading icon. false => display nothing.
+     */
+    public reset(displayLoading: boolean): void {
+        this.removeLoadIcon();
+        this.logZone?.remove();
+        this.logZone = new LogZoneElement();
+        this.appendChild(this.logZone);
+        if (displayLoading) {
+            this.loadIcon?.remove();
+            this.loadIcon = new LoadingIcon();
+            this.appendChild(this.loadIcon);
+        }
+    }
+
+    public removeLoadIcon(): void {
+        this.loadIcon?.remove();
     }
 }
 
