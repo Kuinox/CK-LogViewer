@@ -133,7 +133,7 @@ namespace CK.LogViewer
                 IMulticastLogEntryWithOffset multicastLogEntryWithOffset,
                 Dictionary<LogLevel, int> stats,
                 int monitorSimpleId,
-                ImmutableArray<LogLevel> parentsLogLevel,
+                ImmutableArray<(LogLevel logLevel, long groupOffset)> parentsLogLevel,
                 long groupOffset
             )
             {
@@ -147,7 +147,7 @@ namespace CK.LogViewer
 
             public IReadOnlyDictionary<LogLevel, int> Stats { get; }
             public int MonitorSimpleId { get; }
-            public ImmutableArray<LogLevel> ParentsLogLevel { get; }
+            public ImmutableArray<(LogLevel logLevel, long groupOffset)> ParentsLogLevel { get; }
             public long GroupOffset { get; }
 
             #region InterfaceImpl

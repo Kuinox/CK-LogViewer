@@ -39,9 +39,14 @@ namespace CK.LogViewer
         {
             writer.WritePropertyName( "parentsLogLevel" );
             writer.WriteStartArray();
-            foreach( LogLevel logLevel in entry.ParentsLogLevel )
+            foreach( var logLevel in entry.ParentsLogLevel )
             {
-                writer.WriteNumberValue( (int)logLevel );
+                writer.WriteStartObject();
+                writer.WritePropertyName( "logLevel" );
+                writer.WriteNumberValue( (int)logLevel.logLevel );
+                writer.WritePropertyName( "groupOffset" );
+                writer.WriteNumberValue( logLevel.groupOffset );
+                writer.WriteEndObject();
             }
             writer.WriteEndArray();
         }

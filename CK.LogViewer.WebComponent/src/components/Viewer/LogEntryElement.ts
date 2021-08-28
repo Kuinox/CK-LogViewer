@@ -8,6 +8,7 @@ export class LogEntryElement extends HTMLElement {
         logLevel: LogLevel,
         offset: number
     }[];
+
     private previous: LogEntryElement | undefined;
     constructor(log: LogEntry, previous: LogEntryElement | undefined) {
         super();
@@ -26,7 +27,7 @@ export class LogEntryElement extends HTMLElement {
                 if (logLevelStr === undefined) throw new Error("Invalid Data: Unknown Log Level.");
                 this.appendRuler(logLevelStr, isLast, log);
             } else {
-
+                this.growRuler(i);
             }
         }
         const logLevel = logLevelToString.get(log.logLevel & LogLevel.Mask);
