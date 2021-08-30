@@ -7,9 +7,11 @@ export class LogEntryElement extends HTMLElement {
     private rulerData: {
         logLevel: LogLevel;
         groupOffset: number;
+        rulerIndex?: number;
     }[];
     private previous: LogEntryElement | undefined;
-    private rulers: HTMLDivElement[] = [];
+    private rulers: { element: HTMLDivElement, offset: number }[] = [];
+
     constructor(elementToAppend: HTMLElement, log: LogEntry, previous: LogEntryElement | undefined) {
         super();
         elementToAppend.append(this);
@@ -22,67 +24,74 @@ export class LogEntryElement extends HTMLElement {
         }
         this.previous = previous;
         const groupParentCount = log.parentsLogLevel.length;
+        const logContent = document.createElement("div");
+        logContent.classList.add("log-content");
+        logContent.style.setProperty("--spacing", groupParentCount.toString());
+
+        this.prepend(logContent);
         const span = document.createElement("span");
         span.className = "log-text";
         span.innerHTML = log.text;
-        this.prepend(span);
+        logContent.prepend(span);
         if (log.exception != null) {
-            this.prepend(new LogExceptionElement(log.exception));
+            logContent.prepend(new LogExceptionElement(log.exception));
         }
-        const spacer = document.createElement("span");
-        spacer.style.width = (groupParentCount * 20) + "px";
-        this.prepend(spacer);
         const logLevel = logLevelToString.get(log.logLevel & LogLevel.Mask);
         if (logLevel === undefined) throw Error("Invalid log level.");
         this.classList.add(logLevel);
-
-        for (let i = groupParentCount - 1; i >= 0; i--) {
-            const parentRuler = previous?.rulerData[i];
-            if (parentRuler === undefined || parentRuler.groupOffset !== log.parentsLogLevel[i]?.groupOffset) {
-                const isLast = i == groupParentCount - 1;
-                const logLevelStr = logLevelToString.get(
-                    (!isLast ?
-                        log.parentsLogLevel[i].logLevel
-                        : log.logLevel) & LogLevel.Mask
-                );
+        if (groupParentCount > 0) {
+            for (let i = 0; i < groupParentCount; i++) {
+                const groupOffset = this.rulerData[i].groupOffset;
+                const previousOffsetIndex = previous?.rulerData.map(s => s.groupOffset).indexOf(groupOffset) ?? -1;
+                const parentRuler = previous?.rulerData[previousOffsetIndex];
+                const logLevelStr = logLevelToString.get(log.parentsLogLevel[i].logLevel & LogLevel.Mask);
                 if (logLevelStr === undefined) throw new Error("Invalid Data: Unknown Log Level.");
-                this.prependRuler(logLevelStr);
-            } else {
-                this.growRuler(i, this.clientHeight);
+                if (parentRuler === undefined || parentRuler.groupOffset !== log.parentsLogLevel[i]?.groupOffset) {
+                    this.appendRuler(logLevelStr, i, groupOffset);
+                } else {
+                    this.growRuler(groupOffset, this.clientHeight);
+                }
             }
         }
 
-
-
-
-
     }
 
-    private prependRuler(logLevelStr: string) {
+    private appendRuler(logLevelStr: string, rulerIndex: number, groupOffset: number) {
         const tabContainer = document.createElement("div");
-        tabContainer.classList.add("group-tab", logLevelStr);
-        const tab = document.createElement("div");
-        tabContainer.style.height = this.offsetHeight + "px";
-        tabContainer.appendChild(tab);
-        this.rulers.push(tabContainer);
+        tabContainer.classList.add("group-tab");
+        tabContainer.style.setProperty("--margin-spacing", rulerIndex.toString());
         this.prepend(tabContainer);
+        const tab = document.createElement("div");
+        tab.classList.add(logLevelStr);
+        tab.style.height = 0 + "px";
+        tabContainer.appendChild(tab);
+        this.rulers.push(
+            {
+                element: tab,
+                offset: groupOffset
+            });
     }
 
-    private growRuler(rulerIndex: number, pixelCount: number) {
-        const targetedGroupOffset = this.rulerData[rulerIndex].groupOffset;
-        const previousGroupOffset = this.previous?.rulerData[rulerIndex]?.groupOffset;
+    private growRuler(targetedGroupOffset: number, pixelCount: number) {
+        const previousIndex = this.previous?.rulerData.map(s => s.groupOffset).indexOf(targetedGroupOffset) ?? -1;
+        if (previousIndex === -1) {
+            this.doGrowRuler(targetedGroupOffset, pixelCount);
+            return;
+        }
+        const previousGroupOffset = this.previous?.rulerData[previousIndex]?.groupOffset;
+        if (previousGroupOffset === undefined) throw new RangeError("Range error. You found a bug.");
         if (previousGroupOffset === undefined || targetedGroupOffset != previousGroupOffset) {
-            this.doGrowRuler(rulerIndex, pixelCount);
+            this.doGrowRuler(targetedGroupOffset, pixelCount);
         } else {
-            this.previous?.growRuler(rulerIndex, pixelCount);
+            this.previous?.growRuler(targetedGroupOffset, pixelCount);
         }
     }
 
-    private doGrowRuler(rulerIndex: number, pixelCount: number) {
-        debugger;
-        const heightString = this.rulers[rulerIndex].style.height;
+    private doGrowRuler(groupOffset: number, pixelCount: number) {
+        const ruler = this.rulers.filter(s => s.offset == groupOffset)[0].element;
+        const heightString = ruler.style.height;
         const height = Number.parseInt(heightString.slice(0, heightString.indexOf("px")));
-        this.rulers[rulerIndex].style.height = (height + pixelCount) + "px";
+        ruler.style.height = (height + pixelCount) + "px";
     }
 }
 

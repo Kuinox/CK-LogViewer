@@ -1,4 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@300&display=swap');
+
+:root {
+  --indentation-spacing: 20px;
+}
+
 body{
   font-family: 'Inconsolata', monospace;
   background-color: #1e1e1e;
@@ -14,6 +19,7 @@ body{
 log-viewer {
   display: flex;
   white-space: nowrap;
+  flex-direction: column;
 }
 log-group {
   display: flex;
@@ -32,22 +38,24 @@ log-exception {
 }
 
 .group-tab {
-  min-width: 15px;
   display: flex;
   position: absolute;
-
+  margin-left: calc(var(--margin-spacing) * var(--indentation-spacing));
 }
 .group-tab div {
   height: auto;
-  margin-left: 50%;
   border-left: solid;
   border-top: solid;
   border-bottom: solid;
   border-width: 1px;
-  width: 100%;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  width: 0px;
+  padding-right: 4px;
+  margin-top: 7px;
+  margin-bottom: 7px;
+  margin-right: 5px;
+  margin-left: 5px;
 }
+
 .group-tab-line div {
 }
 
@@ -66,15 +74,16 @@ log-exception {
 
 
 
-.group-tab:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-.group-tab:hover ~ .group-content{
+.group-tab:hover{
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-log-entry:hover, group-summary:hover {
+.log-content:hover {
   background-color: rgba(255, 255, 255, 0.1);
+}
+
+.log-content {
+  margin-left: calc(var(--spacing) * var(--indentation-spacing) + 5px);
 }
 
 .group-tab{
