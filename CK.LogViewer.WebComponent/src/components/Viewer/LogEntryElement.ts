@@ -3,7 +3,6 @@ import { LogEntry, LogType } from "../../backend/LogEntry";
 import { LogExceptionElement } from "./LogExceptionElement";
 
 export class LogEntryElement extends HTMLElement {
-    public readonly isGroup = false;
     private rulerData: {
         logLevel: LogLevel;
         groupOffset: number;
@@ -11,9 +10,12 @@ export class LogEntryElement extends HTMLElement {
     }[];
     private previous: LogEntryElement | undefined;
     private rulers: { element: HTMLDivElement, offset: number }[] = [];
-
+    private logContent: HTMLDivElement;
+    private next: LogEntryElement | undefined;
+    private logData: LogEntry;
     constructor(elementToAppend: HTMLElement, log: LogEntry, previous: LogEntryElement | undefined) {
         super();
+        this.logData = log;
         elementToAppend.append(this);
         this.rulerData = log.parentsLogLevel;
         if (log.logType === LogType.OpenGroup) {
@@ -23,18 +25,21 @@ export class LogEntryElement extends HTMLElement {
             });
         }
         this.previous = previous;
+        if (this.previous !== undefined) {
+            this.previous.next = this;
+        }
         const groupParentCount = log.parentsLogLevel.length;
-        const logContent = document.createElement("div");
-        logContent.classList.add("log-content");
-        logContent.style.setProperty("--spacing", groupParentCount.toString());
+        this.logContent = document.createElement("div");
+        this.logContent.classList.add("log-content");
+        this.logContent.style.setProperty("--spacing", groupParentCount.toString());
 
-        this.prepend(logContent);
+        this.prepend(this.logContent);
         const span = document.createElement("span");
         span.className = "log-text";
         span.innerHTML = log.text;
-        logContent.prepend(span);
+        this.logContent.prepend(span);
         if (log.exception != null) {
-            logContent.prepend(new LogExceptionElement(log.exception));
+            this.logContent.prepend(new LogExceptionElement(log.exception));
         }
         const logLevel = logLevelToString.get(log.logLevel & LogLevel.Mask);
         if (logLevel === undefined) throw Error("Invalid log level.");
@@ -49,11 +54,46 @@ export class LogEntryElement extends HTMLElement {
                 if (parentRuler === undefined || parentRuler.groupOffset !== log.parentsLogLevel[i]?.groupOffset) {
                     this.appendRuler(logLevelStr, i, groupOffset);
                 } else {
-                    this.growRuler(groupOffset, this.clientHeight);
+                    const divRect = this.getBoundingClientRect();
+                    this.growRuler(groupOffset, divRect.height);
                 }
             }
         }
 
+    }
+
+    toggle(element: HTMLElement): void {
+        if (element.style.display == "none") {
+            element.style.display = "flex";
+        } else {
+            element.style.display == "none";
+        }
+    }
+
+    private collapseLogs(ruler: HTMLDivElement, primary: boolean): any {
+        const thingToEdit = primary ? this.logContent : this;
+        this.toggle(thingToEdit);
+        if (thingToEdit.style.display == "none") {
+            thingToEdit.style.display = "flex";
+
+        } else {
+            thingToEdit.style.display = "none";
+        }
+        if (!primary) {
+            for (let i = 0; i < this.rulers.length; i++) {
+                this.toggle(this.rulers[i].element);
+            }
+            return;
+        }
+        const offset = this.rulers.filter(s => s.element === ruler)[0].offset;
+        let current = this.next;
+        while (current !== undefined) {
+            if (current.logData.parentsLogLevel.filter(s => s.groupOffset == offset)[0] === undefined) {
+                return;
+            }
+            current.collapseLogs(ruler, false);
+            current = current.next;
+        }
     }
 
     private appendRuler(logLevelStr: string, rulerIndex: number, groupOffset: number) {
@@ -70,6 +110,7 @@ export class LogEntryElement extends HTMLElement {
                 element: tab,
                 offset: groupOffset
             });
+        tabContainer.onclick = () => this.collapseLogs(tab, true);
     }
 
     private growRuler(targetedGroupOffset: number, pixelCount: number) {
@@ -90,7 +131,7 @@ export class LogEntryElement extends HTMLElement {
     private doGrowRuler(groupOffset: number, pixelCount: number) {
         const ruler = this.rulers.filter(s => s.offset == groupOffset)[0].element;
         const heightString = ruler.style.height;
-        const height = Number.parseInt(heightString.slice(0, heightString.indexOf("px")));
+        const height = Number.parseFloat(heightString.slice(0, heightString.indexOf("px")));
         ruler.style.height = (height + pixelCount) + "px";
     }
 }
