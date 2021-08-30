@@ -32,6 +32,7 @@ namespace CK.LogViewer.WebApp
                {
                    o.EnableEndpointRouting = false;
                } );
+            services.AddResponseCompression();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -50,7 +51,7 @@ namespace CK.LogViewer.WebApp
                 builder.MapRoute( "default", "{controller}/{action}/{id?}" );
             }
             );
-
+            app.UseResponseCompression();
         }
     }
 }
