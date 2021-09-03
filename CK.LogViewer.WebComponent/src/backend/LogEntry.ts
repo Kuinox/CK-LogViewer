@@ -1,5 +1,7 @@
+import { LogEntryElement } from "../components/Viewer/LogEntryElement";
 import { CKExceptionData } from "./CKExceptionData";
 import { LogLevel } from "./LogLevel";
+import { LogType } from "./LogType";
 
 export interface LogEntry {
     offset: number,
@@ -17,8 +19,3 @@ export interface LogEntry {
     logType: LogType
 }
 
-export enum LogType {
-    Line = 1,
-    OpenGroup = 2,
-    CloseGroup = 3
-}

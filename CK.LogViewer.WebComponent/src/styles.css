@@ -39,43 +39,63 @@ log-exception {
 
 .group-tab {
   display: flex;
-  position: absolute;
-  margin-left: calc(var(--margin-spacing) * var(--indentation-spacing));
+  margin-right: 2px;
+  margin-right: 4px;
 }
 .group-tab div {
   height: auto;
   border-left: solid;
-  border-top: solid;
-  border-bottom: solid;
   border-width: 1px;
   width: 0px;
-  padding-right: 4px;
-  margin-top: 7px;
-  margin-bottom: 7px;
-  margin-right: 5px;
-  margin-left: 5px;
+  padding-left: 4px;
+  margin-left: 4px;
 }
 
-.group-tab-line div {
+.hidden {
+  display: none;
+}
+
+.ruler-unconnected{
+  margin-top: 5px;
+  margin-bottom: 5px;
+  border-top-right-radius: 50%;
+  border-bottom-right-radius: 50%;
+  border-top: solid;
+  border-bottom: solid;
+}
+
+.ruler-unconnected-top {
+  margin-top: 5px;
+  border-top-right-radius: 50%;
+  border-top: solid;
+}
+
+.ruler-unconnected-bottom {
+  margin-bottom: 5px;
+  border-bottom-right-radius: 50%;
+  border-bottom: solid;
+}
+
+.ruler-open {
+  margin-top: 8px;
+  border-top: solid;
+}
+
+.ruler-close {
+  margin-bottom: 8px;
+  border-bottom: solid;
 }
 
 .group-tab-open div{
   border-top: solid;
   margin-top: 5px;
-  border-width: 0.5px;
+  border-width: 1px;
 }
 
 .group-tab-close div{
   border-bottom: solid;
   border-width: 0.5px;
   margin-bottom: 5px;
-}
-
-
-
-
-.group-tab:hover{
-  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .log-content:hover {
@@ -94,6 +114,7 @@ log-entry {
   min-height: 1.1em;
   line-height: 1em;
   display: flex;
+  flex-direction: row;
 }
 
 .log-text {

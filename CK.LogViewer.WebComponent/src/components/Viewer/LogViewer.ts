@@ -1,12 +1,16 @@
 import { Api } from "../../backend/api";
 import { LogEntry } from "../../backend/LogEntry";
+import { LogType } from "../../backend/LogType";
+import { toggleHidden } from "../../helpers/domHelpers";
 import { LoadingIcon } from "../Common/LoadingIcon";
+import { CssClassManager } from "./CssClassManager";
+import { LogEntryElement } from "./LogEntryElement";
 import { LogMetadata } from "./New/LogMetadataElement";
 import { LogZoneElement } from "./New/LogZoneElement";
-
 export class LogViewer extends HTMLElement { //TODO: hide this behind an object, so consumer dont see HTML methods.
     private loadIcon: LoadingIcon | undefined;
     private logZone!: LogZoneElement;
+    private cssClassManager = new CssClassManager();
     constructor(displayLoading: boolean) {
         super();
         this.reset(displayLoading);
@@ -36,7 +40,7 @@ export class LogViewer extends HTMLElement { //TODO: hide this behind an object,
         this.reset(true);
         for (let i = 0; i < logs.length; i++) {
             const curr = logs[i];
-            this.appendEntry(curr);
+            this.appendEntry(curr, this.cssClassManager);
             if (this.aborter.signal.aborted) {
                 return;
             }
@@ -47,8 +51,16 @@ export class LogViewer extends HTMLElement { //TODO: hide this behind an object,
         this.removeLoadIcon();
     }
 
-    public appendEntry(entry: LogEntry): void {
-        this.logZone.appendLog(entry);
+    public appendEntry(entry: LogEntry, cssClassManager: CssClassManager): void {
+        this.logZone.appendLog(entry, cssClassManager, this.rulerClicked);
+    }
+
+    private rulerClicked(entry: LogEntryElement, groupOffset: number) {
+        entry.runOnGroup(groupOffset, (curr) => {
+            if (curr.logData.offset !== groupOffset && !(curr.logData.logType === LogType.CloseGroup && curr.logData.groupOffset === groupOffset)) {
+                toggleHidden(curr);
+            }
+        });
     }
     /**
      *

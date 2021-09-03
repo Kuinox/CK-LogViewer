@@ -36,10 +36,10 @@ namespace CK.LogViewer
                     ParentsGroupLevels = ImmutableArray<(LogLevel, long)>.Empty;
                     GroupOffset = 0;
                 }
-
                 public GroupData( GroupData parent, IMulticastLogEntryWithOffset entry )
                 {
                     ParentsGroupLevels = parent.ParentsGroupLevels.Add( (entry.LogLevel, entry.Offset) );
+                    GroupOffset = entry.Offset;
                 }
             }
             readonly IEnumerator<IMulticastLogEntryWithOffset> _enumerator;

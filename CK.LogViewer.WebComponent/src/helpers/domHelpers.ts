@@ -48,6 +48,14 @@ export function setChildOf(base: HTMLElement, newChild: HTMLElement, oldChild: H
     }
     return newChild;
 }
+export function toggleHidden(element: HTMLElement): void {
+    if (element.classList.contains("hidden")) {
+        element.classList.remove("hidden");
+    } else {
+        element.classList.add("hidden");
+    }
+}
+
 
 export type ElementOptions = NodeOptions & ClassOptions;
 export type DivOptions = ElementOptions & DivListenerOptions;

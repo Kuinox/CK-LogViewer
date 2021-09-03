@@ -1,4 +1,5 @@
 using CK.Core;
+using CK.Monitoring;
 using System.Collections.Generic;
 using System.Text.Json;
 using static CK.LogViewer.EnumerableLogStatsExtensions;
@@ -15,7 +16,6 @@ namespace CK.LogViewer
                 WriteLog( entry, writer );
             }
             writer.WriteEndArray();
-
         }
 
 
@@ -32,6 +32,19 @@ namespace CK.LogViewer
             writer.WriteNumber( "groupOffset", entry.GroupOffset );
             WriteException( entry.Exception, writer );
             WriteParentsLogLevel( entry, writer );
+            WriteStats( entry, writer );
+            writer.WriteEndObject();
+        }
+
+        static void WriteStats( LogEntryWithState entry, Utf8JsonWriter writer )
+        {
+            if( entry.LogType != LogEntryType.OpenGroup ) return;
+            writer.WritePropertyName( "stats" );
+            writer.WriteStartObject();
+            foreach( var stat in entry.Stats )
+            {
+                writer.WriteNumber( stat.Key.ToString(), stat.Value );
+            }
             writer.WriteEndObject();
         }
 
