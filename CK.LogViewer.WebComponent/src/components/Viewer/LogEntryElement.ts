@@ -3,36 +3,39 @@ import { LogEntry } from "../../backend/LogEntry";
 import { LogType } from "../../backend/LogType";
 import { LogExceptionElement } from "./LogExceptionElement";
 import { CssClassManager } from "./CssClassManager";
-import { GroupSummary } from "./LogGroup/GroupSummary";
-import { toggleHidden } from "../../helpers/domHelpers";
 
+const groupTabClassName = "group-tab";
+const rulerGroupClassNamePart = "ruler-group";
 export class LogEntryElement extends HTMLElement {
-    private rulerData: {
-        logLevel: LogLevel;
-        groupOffset: number;
-        element: HTMLElement;
-    }[];
+    // private rulerData: {
+    //     logLevel: LogLevel;
+    //     groupOffset: number;
+    //     element: HTMLElement;
+    // }[];
     private previous: LogEntryElement | undefined;
     private next: LogEntryElement | undefined;
     public logData: LogEntry;
     constructor(log: LogEntry, previous: LogEntryElement | undefined, cssClassManager: CssClassManager, onRulerClick: (entry: LogEntryElement, groupOffset: number) => void) {
         super();
-        this.rulerData = [];
-        for (let i = 0; i < log.parentsLogLevel.length; i++) {
-            this.appendRuler(log.parentsLogLevel[i].logLevel, log.parentsLogLevel[i].groupOffset, cssClassManager, onRulerClick);
-        }
-        if (log.logType === LogType.OpenGroup) {
-            this.appendRuler(log.logLevel, log.offset, cssClassManager, onRulerClick);
-            this.rulerData[this.rulerData.length - 1].element.classList.add("ruler-open");
-        } else if (log.logType === LogType.CloseGroup) {
-            this.rulerData[this.rulerData.length - 1].element.classList.add("ruler-close");
-        }
-        this.updateRulers(true);
-        this.logData = log;
         this.previous = previous;
         if (this.previous !== undefined) {
             this.previous.next = this;
         }
+        for (let i = 0; i < log.parentsLogLevel.length - 1; i++) {
+            this.appendRuler(log.parentsLogLevel[i].logLevel, log.parentsLogLevel[i].groupOffset, cssClassManager, onRulerClick, undefined);
+        }
+        if (log.parentsLogLevel.length > 1) {
+            if (log.logType === LogType.CloseGroup) {
+                this.appendRuler(log.parentsLogLevel[log.parentsLogLevel.length - 1].logLevel, log.parentsLogLevel[log.parentsLogLevel.length - 1].groupOffset, cssClassManager, onRulerClick, "ruler-close");
+            } else {
+                this.appendRuler(log.parentsLogLevel[log.parentsLogLevel.length - 1].logLevel, log.parentsLogLevel[log.parentsLogLevel.length - 1].groupOffset, cssClassManager, onRulerClick, undefined);
+            }
+        }
+        if (log.logType === LogType.OpenGroup) {
+            this.appendRuler(log.logLevel, log.offset, cssClassManager, onRulerClick, "ruler-open");
+        }
+        this.updateRulers(true);
+        this.logData = log;
         const logContent = document.createElement("div");
         logContent.classList.add("log-content");
         this.append(logContent);
@@ -55,34 +58,43 @@ export class LogEntryElement extends HTMLElement {
      *
      * @returns OpenGroup element.
      */
-    public runOnGroup(groupOffset: number, delegate: (entry: LogEntryElement) => void): LogEntryElement {
-        if (!this.isSubGroupOf(groupOffset)) throw Error("This group doesn't have the specified ruler.");
-        let openGroup: LogEntryElement | undefined;
-        if (this.logData.offset === groupOffset) openGroup = this;
-        delegate(this);
-        let curr = this.previous;
-        while (curr?.isSubGroupOf(groupOffset)) {
-            delegate(curr);
-            if (curr.logData.offset === groupOffset) openGroup = curr;
-            curr = curr.previous;
-        }
-        curr = this.next;
-        while (curr?.isSubGroupOf(groupOffset)) {
-            delegate(curr);
-            if (curr.logData.offset === groupOffset) openGroup = curr;
-            curr = curr.next;
-        }
-        if (openGroup === undefined) throw new Error("This group doesn't have any open group.");
-        return openGroup;
+    public static runOnGroup(groupOffset: number, delegate: (entry: LogEntryElement) => void): void {
+        Array.prototype.slice.call<HTMLCollectionOf<Element>, [], Element[]>(
+            document.getElementsByClassName(LogEntryElement.getRulerClassByOffset(groupOffset))
+        ).map<LogEntryElement>(s => s.parentElement as LogEntryElement).forEach(delegate);
     }
 
-    private isSubGroupOf(groupOffset: number): boolean {
-        return this.rulerData.filter(s => s.groupOffset === groupOffset)[0] !== undefined;
+    private static getRulerClassByOffset(groupOffset: number) {
+        return rulerGroupClassNamePart + groupOffset;
     }
-    private appendRuler(logLevel: LogLevel, groupOffset: number, cssClassManager: CssClassManager, onRulerClick: (entry: LogEntryElement, groupOffset: number) => void) {
+    private static getOffsetByRulerClass(rulerClass: string) {
+        return Number.parseInt(rulerClass.slice(rulerGroupClassNamePart.length));
+    }
+
+    private static isOffsetClass(className: string) {
+        return className.startsWith(rulerGroupClassNamePart);
+    }
+
+    private static getOffsetFromRuler(ruler: Element) {
+        let className: string;
+        ruler.classList.forEach(s => {
+            if (this.isOffsetClass(s)) {
+                className = s;
+            }
+        });
+        return this.getOffsetByRulerClass(className!);
+    }
+
+    private appendRuler(
+        logLevel: LogLevel,
+        groupOffset: number,
+        cssClassManager: CssClassManager,
+        onRulerClick: (entry: LogEntryElement, groupOffset: number) => void,
+        classToApply: string | undefined
+    ) {
         const tabContainer = document.createElement("div");
-        const ruleName = "ruler-group" + groupOffset;
-        tabContainer.classList.add("group-tab", ruleName);
+        const ruleName = LogEntryElement.getRulerClassByOffset(groupOffset);
+        tabContainer.classList.add(groupTabClassName, ruleName);
         this.append(tabContainer);
         const rule = "." + ruleName + "{background-color: rgba(255, 255, 255, 0.1);}";
         tabContainer.onmouseenter = () => cssClassManager.requireClass(ruleName, rule);
@@ -92,30 +104,35 @@ export class LogEntryElement extends HTMLElement {
         const logLevelStr = logLevelToString.get(logLevel & LogLevel.Mask);
         if (logLevelStr === undefined) throw new Error("Invalid Data: Unknown Log Level.");
         tab.classList.add(logLevelStr, "ruler-unconnected");
+        if (classToApply !== undefined) {
+            tab.classList.add(classToApply);
+        }
         tabContainer.appendChild(tab);
-        this.rulerData.push(
-            {
-                element: tab,
-                groupOffset: groupOffset,
-                logLevel: logLevel
-            }
-        );
     }
-
+    private getRulers() {
+        return Array.prototype.slice.call<HTMLCollectionOf<Element>, [], Element[]>(this.getElementsByClassName(groupTabClassName));
+    }
     private updateRulers(propagate: boolean) {
-        for (let i = 0; i < this.rulerData.length; i++) {
-            const current = this.rulerData[i];
-            const connectedTop = this.previous?.rulerData[i]?.groupOffset === current.groupOffset;
-            const connectedBot = this.next?.rulerData[i]?.groupOffset === current.groupOffset;
-            current.element.classList.remove("ruler-unconnected", "ruler-unconnected-top", "ruler-unconnected-bottom");
+        const rulers = this.getRulers();
+        const previousRulers = this.previous?.getRulers();
+        const nextRulers = this.next?.getRulers();
+        if(this.previous === undefined) {
+            debugger;
+        }
+        for (let i = 0; i < rulers.length; i++) {
+            const current = rulers[i];
+            const currentOffset = LogEntryElement.getOffsetFromRuler(current);
+            const connectedTop = previousRulers?.find(s => LogEntryElement.getOffsetFromRuler(s) === currentOffset);
+            const connectedBot = nextRulers?.find(s => LogEntryElement.getOffsetFromRuler(s) === currentOffset);
+            current.classList.remove("ruler-unconnected", "ruler-unconnected-top", "ruler-unconnected-bottom");
             if (!connectedBot && !connectedTop) {
-                current.element.classList.add("ruler-unconnected");
+                current.classList.add("ruler-unconnected");
             } else if (!connectedBot && connectedTop) {
-                current.element.classList.add("ruler-unconnected-bot");
+                current.classList.add("ruler-unconnected-bot");
             } else if (connectedBot && !connectedTop
-                && !(i === this.rulerData.length - 1 && this.logData.logType === LogType.OpenGroup) //not an open group log.
+                && !(i === rulers.length - 1 && this.logData.logType === LogType.OpenGroup) //not an open group log.
             ) {
-                current.element.classList.add("ruler-unconnected-top");
+                current.classList.add("ruler-unconnected-top");
             }
         }
         if (propagate) {

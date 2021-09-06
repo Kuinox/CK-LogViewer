@@ -1,15 +1,16 @@
 import { GroupStats } from "../../../backend/GroupStats";
+import { LogGroup } from "../../../backend/LogGroup";
 import { LogLevel } from "../../../backend/LogLevel";
 
 export class GroupSummary extends HTMLElement { //TODO: @Hugo I was lazy, I let you fix this tricky typing :D.
-    constructor(stats: GroupStats, onClick: () => void) {
+    constructor(group: LogGroup, onClick: () => void) {
         super();
         this.append(...
             Object.keys(LogLevel)
                 .filter(key => isNaN(Number(key))) //filter log level names only.
                 .reverse() // reverse, so it start with the highest log level.
-                .filter((key: any) => stats[key] !== undefined)
-                .map((s: string & any) => GroupSummary.createBadge(s, stats[s]!))
+                .filter((key: any) => group.stats[key] !== undefined)
+                .map((s: string & any) => GroupSummary.createBadge(s, group.stats[s]!))
         );
         this.addEventListener("click", onClick);
     }

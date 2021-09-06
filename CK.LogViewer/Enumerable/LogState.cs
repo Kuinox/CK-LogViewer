@@ -43,7 +43,7 @@ namespace CK.LogViewer
                 }
             }
             readonly IEnumerator<IMulticastLogEntryWithOffset> _enumerator;
-            readonly Stack<GroupData> _dataStack;
+            readonly Stack<GroupData> _dataStack;   
             readonly Dictionary<Guid, int> _monitors;
             public Enumerator( IEnumerator<IMulticastLogEntryWithOffset> enumerator )
             {

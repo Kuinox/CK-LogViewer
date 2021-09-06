@@ -1,10 +1,12 @@
 import { Api } from "../../backend/api";
 import { LogEntry } from "../../backend/LogEntry";
+import { LogGroup } from "../../backend/LogGroup";
 import { LogType } from "../../backend/LogType";
-import { toggleHidden } from "../../helpers/domHelpers";
+import { isHidden, setHidden, toggleHidden } from "../../helpers/domHelpers";
 import { LoadingIcon } from "../Common/LoadingIcon";
 import { CssClassManager } from "./CssClassManager";
 import { LogEntryElement } from "./LogEntryElement";
+import { GroupSummary } from "./LogGroup/GroupSummary";
 import { LogMetadata } from "./New/LogMetadataElement";
 import { LogZoneElement } from "./New/LogZoneElement";
 export class LogViewer extends HTMLElement { //TODO: hide this behind an object, so consumer dont see HTML methods.
@@ -56,11 +58,28 @@ export class LogViewer extends HTMLElement { //TODO: hide this behind an object,
     }
 
     private rulerClicked(entry: LogEntryElement, groupOffset: number) {
-        entry.runOnGroup(groupOffset, (curr) => {
-            if (curr.logData.offset !== groupOffset && !(curr.logData.logType === LogType.CloseGroup && curr.logData.groupOffset === groupOffset)) {
-                toggleHidden(curr);
+        let wasPreviouslyHidden = false;
+        let openGroup: LogEntryElement;
+        LogEntryElement.runOnGroup(groupOffset, (curr) => {
+            if (curr.logData.offset !== groupOffset
+                && curr.logData.groupOffset === groupOffset
+                && curr.logData.logType === LogType.OpenGroup
+                && isHidden(curr)) {
+                wasPreviouslyHidden = true;
+            }
+            if(curr.logData.offset === groupOffset) {
+                openGroup = curr;
             }
         });
+        LogEntryElement.runOnGroup(groupOffset, (curr) => {
+            if (curr.logData.offset !== groupOffset && !(curr.logData.logType === LogType.CloseGroup && curr.logData.groupOffset === groupOffset)) {
+                setHidden(curr, !wasPreviouslyHidden);
+            }
+        });
+        const group = openGroup!.logData as LogGroup;
+        entry.insertAdjacentElement("afterend",new GroupSummary(group, () => {
+            console.log("hello");
+        }));
     }
     /**
      *
@@ -84,3 +103,5 @@ export class LogViewer extends HTMLElement { //TODO: hide this behind an object,
 }
 
 customElements.define('log-viewer', LogViewer);
+
+
