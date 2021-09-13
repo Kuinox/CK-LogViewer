@@ -1,7 +1,7 @@
-import { CKExceptionData } from "../../backend/CKExceptionData";
+import { ICKExceptionData } from "../../backend/ICKExceptionData";
 
 export class LogExceptionElement extends HTMLElement {
-    constructor(log: CKExceptionData) {
+    constructor(log: ICKExceptionData) {
         super();
         const a = document.createElement("a");
         a.innerHTML = log.typeException;
@@ -15,7 +15,7 @@ export class LogExceptionElement extends HTMLElement {
         this.appendChild(br);
     }
 
-    private static createModal(log: CKExceptionData ): HTMLElement {
+    private static createModal(log: ICKExceptionData ): HTMLElement {
         const modal = document.createElement('div');
         modal.setAttribute("class", "modal");
         modal.addEventListener("click", (event) => {

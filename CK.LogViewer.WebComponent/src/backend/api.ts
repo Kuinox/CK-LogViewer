@@ -1,4 +1,4 @@
-import { LogEntry } from "./LogEntry";
+import { ILogEntry } from "./ILogEntry";
 
 export class Api {
     filename: string;
@@ -6,19 +6,19 @@ export class Api {
         this.filename = filename;
     }
 
-    async getLogs(abortSignal?: AbortSignal): Promise<LogEntry[]> {
-        const result = await fetch(`api/LogViewer/${this.filename}?depth=2`, { signal: abortSignal });
+    async getLogs(abortSignal?: AbortSignal): Promise<ILogEntry[]> {
+        const result = await fetch(`api/LogViewer/${this.filename}`, { signal: abortSignal });
         if (!result.ok) throw new Error("Request response is not OK.");
         const json = await result.json();
-        return json as LogEntry[];
+        return json as ILogEntry[];
     }
 
-    async getGroupLogs(groupOffset: number, abortSignal?: AbortSignal): Promise<LogEntry[]> {
+    async getGroupLogs(groupOffset: number, abortSignal?: AbortSignal): Promise<ILogEntry[]> {
         if(groupOffset === undefined ) throw Error("Invalid argument.");
         const result = await fetch(`api/LogViewer/${this.filename}?groupOffset=${groupOffset}`, { signal: abortSignal });
         if (!result.ok) throw new Error("Request response is not OK.");
         const json = await result.json();
-        return json as LogEntry[];
+        return json as ILogEntry[];
     }
 
 

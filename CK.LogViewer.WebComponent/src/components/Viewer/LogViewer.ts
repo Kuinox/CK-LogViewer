@@ -1,17 +1,16 @@
 import { Api } from "../../backend/api";
-import { LogEntry } from "../../backend/LogEntry";
-import { LogGroup } from "../../backend/LogGroup";
+import { ILogEntry } from "../../backend/ILogEntry";
+import { ILogGroup } from "../../backend/ILogGroup";
 import { LogType } from "../../backend/LogType";
-import { isHidden, setHidden, toggleHidden } from "../../helpers/domHelpers";
+import { isHidden, setHidden } from "../../helpers/domHelpers";
 import { LoadingIcon } from "../Common/LoadingIcon";
 import { CssClassManager } from "./CssClassManager";
 import { LogEntryElement } from "./LogEntryElement";
-import { GroupSummary } from "./LogGroup/GroupSummary";
-import { LogMetadata } from "./New/LogMetadataElement";
-import { LogZoneElement } from "./New/LogZoneElement";
+import { GroupSummary } from "./GroupSummary";
+import { LogLevel } from "../../backend/LogLevel";
 export class LogViewer extends HTMLElement { //TODO: hide this behind an object, so consumer dont see HTML methods.
     private loadIcon: LoadingIcon | undefined;
-    private logZone!: LogZoneElement;
+    private logZone!: HTMLDivElement;
     private cssClassManager = new CssClassManager();
     constructor(displayLoading: boolean) {
         super();
@@ -53,34 +52,70 @@ export class LogViewer extends HTMLElement { //TODO: hide this behind an object,
         this.removeLoadIcon();
     }
 
-    public appendEntry(entry: LogEntry, cssClassManager: CssClassManager): void {
-        this.logZone.appendLog(entry, cssClassManager, this.rulerClicked);
+    public appendEntry(entry: ILogEntry, cssClassManager: CssClassManager): void {
+        this.logZone.append(new LogEntryElement(entry, cssClassManager, this.rulerClicked));
     }
 
-    private rulerClicked(entry: LogEntryElement, groupOffset: number) {
-        let wasPreviouslyHidden = false;
-        let openGroup: LogEntryElement;
+    private rulerClicked = (groupOffset: number) => {
+        let hasOpenGroupHidden = false;
+        let hasOpenGroup = false;
+        let isSimpleLogHidden = false;
+        let openGroup: LogEntryElement | undefined;
         LogEntryElement.runOnGroup(groupOffset, (curr) => {
             if (curr.logData.offset !== groupOffset
                 && curr.logData.groupOffset === groupOffset
-                && curr.logData.logType === LogType.OpenGroup
-                && isHidden(curr)) {
-                wasPreviouslyHidden = true;
+            ) {
+                if (curr.logData.logType === LogType.OpenGroup) {
+
+                    if (isHidden(curr)) {
+                        hasOpenGroupHidden = true;
+                    }
+                    hasOpenGroup = true;
+                } else if (curr.logData.logType !== LogType.CloseGroup) {
+                    isSimpleLogHidden = isHidden(curr) || curr instanceof GroupSummary;
+                }
             }
-            if(curr.logData.offset === groupOffset) {
+            if (curr.logData.offset === groupOffset) {
                 openGroup = curr;
             }
         });
+        if (openGroup === undefined) {
+            throw new Error("Logic error.");
+        }
+        const shouldHide = hasOpenGroup ? !hasOpenGroupHidden : !isSimpleLogHidden;
         LogEntryElement.runOnGroup(groupOffset, (curr) => {
             if (curr.logData.offset !== groupOffset && !(curr.logData.logType === LogType.CloseGroup && curr.logData.groupOffset === groupOffset)) {
-                setHidden(curr, !wasPreviouslyHidden);
+                setHidden(curr, shouldHide);
             }
         });
-        const group = openGroup!.logData as LogGroup;
-        entry.insertAdjacentElement("afterend",new GroupSummary(group, () => {
-            console.log("hello");
-        }));
-    }
+        LogEntryElement.runOnGroup(groupOffset, (current) => {
+            if (current instanceof GroupSummary) {
+                current.remove();
+            }
+        });
+        const group = openGroup!.logData as ILogGroup;
+        if (shouldHide) {
+            openGroup.insertAdjacentElement("afterend", new GroupSummary({
+                groupOffset: groupOffset,
+                logType: LogType.Line,
+                parentsLogLevel: group.parentsLogLevel.concat([{
+                    groupOffset: groupOffset,
+                    logLevel: group.logLevel
+                }]),
+                stats: group.stats,
+                logLevel: LogLevel.None,
+                offset: -1,
+                logTime: "",
+                monitorId: group.monitorId,
+                tags: "",
+                text: undefined
+            }, this.cssClassManager, this.rulerClicked, (curr) => {
+                if (curr.isConnected) {
+                    this.rulerClicked(groupOffset);
+                }
+            }));
+        }
+    };
     /**
      *
      * @param displayLoading true => display a loading icon. false => display nothing.
@@ -88,7 +123,7 @@ export class LogViewer extends HTMLElement { //TODO: hide this behind an object,
     public reset(displayLoading: boolean): void {
         this.removeLoadIcon();
         this.logZone?.remove();
-        this.logZone = new LogZoneElement();
+        this.logZone = document.createElement("div");
         this.appendChild(this.logZone);
         if (displayLoading) {
             this.loadIcon?.remove();

@@ -1,10 +1,11 @@
-import { GroupStats } from "../../../backend/GroupStats";
-import { LogGroup } from "../../../backend/LogGroup";
-import { LogLevel } from "../../../backend/LogLevel";
+import { ILogGroup } from "../../backend/ILogGroup";
+import { LogLevel } from "../../backend/LogLevel";
+import { CssClassManager } from "./CssClassManager";
+import { LogLineBaseElement, OnClickRulerCallback } from "./LogLineBaseElement";
 
-export class GroupSummary extends HTMLElement { //TODO: @Hugo I was lazy, I let you fix this tricky typing :D.
-    constructor(group: LogGroup, onClick: () => void) {
-        super();
+export class GroupSummary extends LogLineBaseElement {
+    constructor(group: ILogGroup, cssClassManager: CssClassManager, onRulerClick: OnClickRulerCallback, onClick: (sender: GroupSummary) => void) {
+        super(group, cssClassManager, onRulerClick);
         this.append(...
             Object.keys(LogLevel)
                 .filter(key => isNaN(Number(key))) //filter log level names only.
@@ -12,7 +13,7 @@ export class GroupSummary extends HTMLElement { //TODO: @Hugo I was lazy, I let 
                 .filter((key: any) => group.stats[key] !== undefined)
                 .map((s: string & any) => GroupSummary.createBadge(s, group.stats[s]!))
         );
-        this.addEventListener("click", onClick);
+        this.addEventListener("click", () => onClick(this));
     }
 
     private static createBadge(level: string, qty: number): HTMLElement {
