@@ -95,6 +95,14 @@ group-summary {
   display: flex;
 }
 
+.slider {
+  padding-left: 10px;
+  cursor: col-resize;
+  border-left: solid;
+  border-width: 1px;
+  border-color: rgb(56,56,61);
+}
+
 .badge {
   border-style: solid;
   border-width: 1px;

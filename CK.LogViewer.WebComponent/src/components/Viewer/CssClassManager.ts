@@ -17,6 +17,8 @@ export class CssClassManager {
                 refCount: 1,
                 style: style
             });
+        } else {
+            this.updateClass(ruleName, rule);
         }
     }
 

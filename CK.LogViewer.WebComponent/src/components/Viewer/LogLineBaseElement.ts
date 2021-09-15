@@ -5,39 +5,75 @@ import { CssClassManager } from "./CssClassManager";
 
 const groupTabClassName = "group-tab";
 const rulerGroupClassNamePart = "ruler-group";
-const monitorClass = "monitor-";
+const monitorClass = "monitor";
 export type OnClickRulerCallback = (groupOffset: number) => void;
 
 export class LogLineBaseElement extends HTMLElement {
     public logData: ILogEntry;
-
+    private cssClassManager: CssClassManager;
     public constructor(
         log: ILogEntry,
         cssClassManager: CssClassManager,
         onRulerClick: OnClickRulerCallback
     ) {
         super();
-        this.classList.add(LogLineBaseElement.getMonitorClass(log.monitorId));
+        this.logData = log;
+        this.cssClassManager = cssClassManager;
+        this.classList.add(this.monitorClass);
         const metadataContainer = document.createElement("div");
         this.append(metadataContainer);
         const date = document.createElement("span");
         date.classList.add("metadata-date");
         date.innerHTML = log.logTime.padEnd(32, " ");
         metadataContainer.append(date);
-        this.logData = log;
+        const slider = document.createElement("div");
+        slider.classList.add("slider");
+        slider.addEventListener("mousedown", this.onSliderMouseDown);
+        this.setMargin(10);
+        this.append(slider);
         for (let i = 0; i < log.parentsLogLevel.length - 1; i++) {
-            this.appendRuler(log.parentsLogLevel[i].logLevel, log.parentsLogLevel[i].groupOffset, cssClassManager, onRulerClick, undefined);
+            this.appendRuler(log.parentsLogLevel[i].logLevel, log.parentsLogLevel[i].groupOffset, onRulerClick, undefined);
         }
         if (log.parentsLogLevel.length >= 1) {
             if (log.logType === LogType.CloseGroup) {
-                this.appendRuler(log.parentsLogLevel[log.parentsLogLevel.length - 1].logLevel, log.parentsLogLevel[log.parentsLogLevel.length - 1].groupOffset, cssClassManager, onRulerClick, "ruler-close");
+                this.appendRuler(log.parentsLogLevel[log.parentsLogLevel.length - 1].logLevel, log.parentsLogLevel[log.parentsLogLevel.length - 1].groupOffset, onRulerClick, "ruler-close");
             } else {
-                this.appendRuler(log.parentsLogLevel[log.parentsLogLevel.length - 1].logLevel, log.parentsLogLevel[log.parentsLogLevel.length - 1].groupOffset, cssClassManager, onRulerClick, undefined);
+                this.appendRuler(log.parentsLogLevel[log.parentsLogLevel.length - 1].logLevel, log.parentsLogLevel[log.parentsLogLevel.length - 1].groupOffset, onRulerClick, undefined);
             }
         }
         if (log.logType === LogType.OpenGroup) {
-            this.appendRuler(log.logLevel, log.offset, cssClassManager, onRulerClick, "ruler-open");
+            this.appendRuler(log.logLevel, log.offset, onRulerClick, "ruler-open");
         }
+    }
+
+    initialMouseX = 0;
+    initialMargin = 0;
+    onSliderMouseDown = (ev: MouseEvent): void => {
+        document.addEventListener("mousemove", this.onSliderMove);
+        document.addEventListener("mouseup", this.onMouseUp);
+        this.initialMouseX = ev.x;
+        this.initialMargin = this.currentMargin;
+    };
+
+    onMouseUp = (): void => {
+        document.removeEventListener("mouseup", this.onMouseUp);
+        document.removeEventListener("mousemove", this.onSliderMove);
+    };
+
+    onSliderMove = (ev: MouseEvent): void => {
+        const diff = ev.x - this.initialMouseX;
+        const newPos = this.initialMargin + diff;
+        this.setMargin(newPos);
+    };
+    private get sliderClassName(): string {
+        return  "slider" + this.monitorClass;
+    }
+    currentMargin = 0;
+    setMargin(margin: number): void {
+        this.currentMargin = margin;
+        this.cssClassManager.requireClass(this.sliderClassName, `.${this.monitorClass} .slider {
+            margin-left: ${margin}px;
+        }` );
     }
 
     public static runOnGroup(groupOffset: number, delegate: (entry: LogLineBaseElement) => void): void {
@@ -46,8 +82,8 @@ export class LogLineBaseElement extends HTMLElement {
         ).map<LogLineBaseElement>(s => s.parentElement as LogLineBaseElement).forEach(delegate);
     }
 
-    private static getMonitorClass(monitorId: string) {
-        return monitorClass + monitorId;
+    private get monitorClass() {
+        return monitorClass + this.logData.monitorId;
     }
 
     private static getRulerClassByOffset(groupOffset: number) {
@@ -74,7 +110,6 @@ export class LogLineBaseElement extends HTMLElement {
     private appendRuler(
         logLevel: LogLevel,
         groupOffset: number,
-        cssClassManager: CssClassManager,
         onRulerClick: OnClickRulerCallback,
         classToApply: string | undefined
     ) {
@@ -83,8 +118,8 @@ export class LogLineBaseElement extends HTMLElement {
         tabContainer.classList.add(groupTabClassName, ruleName);
         this.append(tabContainer);
         const rule = "." + ruleName + "{background-color: rgba(255, 255, 255, 0.1);}";
-        tabContainer.onmouseenter = () => cssClassManager.requireClass(ruleName, rule);
-        tabContainer.onmouseleave = () => cssClassManager.releaseClass(ruleName);
+        tabContainer.onmouseenter = () => this.cssClassManager.requireClass(ruleName, rule);
+        tabContainer.onmouseleave = () => this.cssClassManager.releaseClass(ruleName);
         tabContainer.onclick = () => onRulerClick(groupOffset);
         const tab = document.createElement("div");
         const logLevelStr = logLevelToString.get(logLevel & LogLevel.Mask);
