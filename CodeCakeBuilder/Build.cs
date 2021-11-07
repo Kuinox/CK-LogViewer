@@ -58,7 +58,7 @@ namespace CodeCake
                        Cake.GitReleaseManagerCreate( token, "Kuinox", "CK-LogViewer", new GitReleaseManagerCreateSettings
                        {
                            Assets = installer,
-                           Milestone = globalInfo.BuildInfo.Version.ToString()
+                           Name = globalInfo.BuildInfo.Version.ToString()
                        } );
 
                    }
