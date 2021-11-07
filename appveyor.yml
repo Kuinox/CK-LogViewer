@@ -14,7 +14,7 @@ deploy:
   provider: GitHub
   auth_token:
     secure: AuHvdKmnk4TyWUO7ZwroArshVYg0dinkux/Mg5cf6hq4ofXxYUbJGY/hBLjwXVee
-  artifact: .*/CodeCakeBuilder/Releases/.*\.exe
+  artifact: /.*\.exe/
   draft: false
   prerelease: false
   on:

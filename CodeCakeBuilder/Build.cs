@@ -42,8 +42,6 @@ namespace CodeCake
                    {
                        OutputDirectory = globalInfo.ReleasesFolder.ToString()
                    } );
-                   Cake.CleanDirectories( globalInfo.ReleasesFolder.AppendPart( "CK.LogViewer.WebApp" ) );
-                   Cake.CleanDirectories( globalInfo.ReleasesFolder.AppendPart( "CK.LogViewer.Desktop" ) );
                } );
         }
 
