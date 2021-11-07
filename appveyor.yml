@@ -12,7 +12,7 @@ test: off
 deploy:
   release: CK-LogViewer-Desktop-v$(APPVEYOR_BUILD_VERSION)
   provider: GitHub
-  token:
+  auth_token:
     secure: AuHvdKmnk4TyWUO7ZwroArshVYg0dinkux/Mg5cf6hq4ofXxYUbJGY/hBLjwXVee
   artifact: /.*/CodeCakeBuilder/Releases/*\.exe
   draft: false
