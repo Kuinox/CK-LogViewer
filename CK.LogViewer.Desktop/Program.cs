@@ -2,6 +2,7 @@ using CK.LogViewer.Desktop;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 public class Program
 {
