@@ -7,6 +7,10 @@
     <IsPackable>False</IsPackable>
   </PropertyGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="dotnet tool restore" />
+  </Target>
+
   <ItemGroup>
     <PackageReference Include="Cake.Npm" Version="0.17.0" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" Version="3.1.10" />

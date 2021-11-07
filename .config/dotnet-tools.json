@@ -1,0 +1,11 @@
+{
+  "isRoot": true,
+  "tools": {
+    "GitReleaseManager.Tool": {
+      "version": "0.12.1 ",
+      "commands": [
+        "dotnet-gitreleasemanager"
+      ]
+    }
+  }
+}
