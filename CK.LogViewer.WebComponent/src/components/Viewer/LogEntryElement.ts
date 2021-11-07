@@ -2,16 +2,19 @@ import { LogLevel, logLevelToString } from "../../backend/LogLevel";
 import { ILogEntry } from "../../backend/ILogEntry";
 import { LogExceptionElement } from "./LogExceptionElement";
 import { CssClassManager } from "./CssClassManager";
-import { LogLineBaseElement, OnClickRulerCallback } from "./LogLineBaseElement";
+import { LogLineBaseElement, LogViewerState, OnClickRulerCallback } from "./LogLineBaseElement";
+import { ColorGenerator } from "../../helpers/colorGenerator";
 
 
 export class LogEntryElement extends LogLineBaseElement {
     constructor(
         log: ILogEntry,
         cssClassManager: CssClassManager,
+        colorGenerator: ColorGenerator,
+        logviewerState: LogViewerState,
         onRulerClick: OnClickRulerCallback
     ) {
-        super(log, cssClassManager, onRulerClick);
+        super(log, cssClassManager, colorGenerator, logviewerState, onRulerClick);
         const logContent = document.createElement("div");
         logContent.classList.add("log-content");
         this.append(logContent);

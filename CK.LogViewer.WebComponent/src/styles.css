@@ -72,6 +72,11 @@ log-exception {
   margin-bottom: 5px;
 }
 
+.log-content {
+  min-width: 85%;
+  width: 85%;
+}
+
 .log-content:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
@@ -85,6 +90,7 @@ log-entry {
   line-height: 1em;
   display: flex;
   flex-direction: row;
+  width: 100%;
 }
 
 .metadata-date {
@@ -96,11 +102,16 @@ group-summary {
 }
 
 .slider {
-  padding-left: 10px;
+  padding-left: 5px;
+  padding-right: 5px;
   cursor: col-resize;
+}
+.slider div {
   border-left: solid;
   border-width: 1px;
   border-color: rgb(56,56,61);
+  width: 1px;
+  height: 100%;
 }
 
 .badge {

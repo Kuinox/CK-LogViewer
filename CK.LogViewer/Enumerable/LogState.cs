@@ -12,14 +12,18 @@ namespace CK.LogViewer
 {
     public static class EnumerableLogStatsExtensions
     {
-        public static IEnumerable<LogEntryWithState> AddState( this IEnumerable<IMulticastLogEntryWithOffset> @this ) => new Enumerable( @this );
+        public static IEnumerable<LogEntryWithState> AddState( this IEnumerable<IMulticastLogEntryWithOffset> @this )
+            => @this
+                .GroupBy( s => s.MonitorId )
+                .Select( s => new Enumerable( s ) ) //this is a single monitor method.
+                .SelectMany( s => s )
+                .OrderBy( s => s.LogTime );
+
         struct Enumerable : IEnumerable<LogEntryWithState>
         {
             readonly Enumerator _enumerator;
             public Enumerable( IEnumerable<IMulticastLogEntryWithOffset> enumerable ) => _enumerator = new Enumerator( enumerable.GetEnumerator() );
-
             public IEnumerator<LogEntryWithState> GetEnumerator() => _enumerator;
-
             IEnumerator IEnumerable.GetEnumerator() => _enumerator;
         }
 
@@ -43,13 +47,11 @@ namespace CK.LogViewer
                 }
             }
             readonly IEnumerator<IMulticastLogEntryWithOffset> _enumerator;
-            readonly Stack<GroupData> _dataStack;   
-            readonly Dictionary<Guid, int> _monitors;
+            readonly Stack<GroupData> _dataStack;
             public Enumerator( IEnumerator<IMulticastLogEntryWithOffset> enumerator )
             {
                 _enumerator = enumerator;
                 _dataStack = new Stack<GroupData>();
-                _monitors = new Dictionary<Guid, int>();
                 _dataStack.Push( new GroupData() );
                 _currentData = null!;
             }
@@ -57,7 +59,6 @@ namespace CK.LogViewer
             public LogEntryWithState Current => new(
                 _enumerator.Current,
                 _currentData.LogLevelSummary,
-                GetMonitorId( _enumerator.Current.MonitorId ),
                 _currentData.ParentsGroupLevels,
                 _currentData.GroupOffset
             );
@@ -66,22 +67,6 @@ namespace CK.LogViewer
 
             public void Dispose() => _enumerator.Dispose();
             public void Reset() => _enumerator.Reset();
-
-            int GetMonitorId( Guid monitorId )
-            {
-                if( monitorId == Guid.Empty ) return 0;
-                int value;
-                if( _monitors.TryGetValue( monitorId, out value ) )
-                {
-                    return value;
-                }
-                else
-                {
-                    var newId = _monitors.Count + 1;
-                    _monitors.Add( monitorId, newId );
-                    return newId;
-                }
-            }
 
             public bool MoveNext()
             {
@@ -131,8 +116,7 @@ namespace CK.LogViewer
 
             public LogEntryWithState(
                 IMulticastLogEntryWithOffset multicastLogEntryWithOffset,
-                Dictionary<LogLevel, int> stats,
-                int monitorSimpleId,
+                IReadOnlyDictionary<LogLevel, int> stats,
                 ImmutableArray<(LogLevel logLevel, long groupOffset)> parentsLogLevel,
                 long groupOffset
             )
@@ -140,13 +124,11 @@ namespace CK.LogViewer
                 Debug.Assert( stats != null );
                 _multicastLogEntryWithOffset = multicastLogEntryWithOffset;
                 Stats = stats;
-                MonitorSimpleId = monitorSimpleId;
                 ParentsLogLevel = parentsLogLevel;
                 GroupOffset = groupOffset;
             }
 
             public IReadOnlyDictionary<LogLevel, int> Stats { get; }
-            public int MonitorSimpleId { get; }
             public ImmutableArray<(LogLevel logLevel, long groupOffset)> ParentsLogLevel { get; }
             public long GroupOffset { get; }
 

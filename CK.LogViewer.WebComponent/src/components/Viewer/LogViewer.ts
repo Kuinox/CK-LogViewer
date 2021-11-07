@@ -8,10 +8,14 @@ import { CssClassManager } from "./CssClassManager";
 import { LogEntryElement } from "./LogEntryElement";
 import { GroupSummary } from "./GroupSummary";
 import { LogLevel } from "../../backend/LogLevel";
+import { ColorGenerator } from "../../helpers/colorGenerator";
+import { LogViewerState } from "./LogLineBaseElement";
 export class LogViewer extends HTMLElement { //TODO: hide this behind an object, so consumer dont see HTML methods.
     private loadIcon: LoadingIcon | undefined;
     private logZone!: HTMLDivElement;
     private cssClassManager = new CssClassManager();
+    private colorGenerator = new ColorGenerator();
+    private logviewerState = new LogViewerState();
     constructor(displayLoading: boolean) {
         super();
         this.reset(displayLoading);
@@ -41,7 +45,7 @@ export class LogViewer extends HTMLElement { //TODO: hide this behind an object,
         this.reset(true);
         for (let i = 0; i < logs.length; i++) {
             const curr = logs[i];
-            this.appendEntry(curr, this.cssClassManager);
+            this.appendEntry(curr);
             if (this.aborter.signal.aborted) {
                 return;
             }
@@ -52,8 +56,8 @@ export class LogViewer extends HTMLElement { //TODO: hide this behind an object,
         this.removeLoadIcon();
     }
 
-    public appendEntry(entry: ILogEntry, cssClassManager: CssClassManager): void {
-        this.logZone.append(new LogEntryElement(entry, cssClassManager, this.rulerClicked));
+    public appendEntry(entry: ILogEntry): void {
+        this.logZone.append(new LogEntryElement(entry, this.cssClassManager, this.colorGenerator, this.logviewerState, this.rulerClicked));
     }
 
     private rulerClicked = (groupOffset: number) => {
@@ -109,7 +113,11 @@ export class LogViewer extends HTMLElement { //TODO: hide this behind an object,
                 monitorId: group.monitorId,
                 tags: "",
                 text: undefined
-            }, this.cssClassManager, this.rulerClicked, (curr) => {
+            },
+            this.cssClassManager,
+            this.colorGenerator,
+            this.logviewerState,
+            this.rulerClicked, (curr) => {
                 if (curr.isConnected) {
                     this.rulerClicked(groupOffset);
                 }

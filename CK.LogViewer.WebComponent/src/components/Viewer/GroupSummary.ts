@@ -1,11 +1,18 @@
 import { ILogGroup } from "../../backend/ILogGroup";
 import { LogLevel } from "../../backend/LogLevel";
+import { ColorGenerator } from "../../helpers/colorGenerator";
 import { CssClassManager } from "./CssClassManager";
-import { LogLineBaseElement, OnClickRulerCallback } from "./LogLineBaseElement";
+import { LogLineBaseElement, LogViewerState, OnClickRulerCallback } from "./LogLineBaseElement";
 
 export class GroupSummary extends LogLineBaseElement {
-    constructor(group: ILogGroup, cssClassManager: CssClassManager, onRulerClick: OnClickRulerCallback, onClick: (sender: GroupSummary) => void) {
-        super(group, cssClassManager, onRulerClick);
+    constructor(
+        group: ILogGroup,
+        cssClassManager: CssClassManager,
+        colorGenerator: ColorGenerator,
+        logviewerState: LogViewerState,
+        onRulerClick: OnClickRulerCallback,
+        onClick: (sender: GroupSummary) => void) {
+        super(group, cssClassManager, colorGenerator, logviewerState, onRulerClick);
         this.append(...
             Object.keys(LogLevel)
                 .filter(key => isNaN(Number(key))) //filter log level names only.

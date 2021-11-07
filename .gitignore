@@ -260,3 +260,4 @@ Tests/**/TestResult*.xml
 /CK.LogViewer.WebComponent/public/
 /CK.LogViewer.WebApp/saveLog
 /CK.LogViewer.WebApp/wwwroot/
+**/Logs/

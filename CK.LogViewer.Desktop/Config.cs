@@ -4,13 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CK.LogViewer
+namespace CK.LogViewer.Desktop
 {
-    public class LogProcessor
+    class Config
     {
-        public void Process()
-        {
-
-        }
+        public string ServerAddress { get; set; }
     }
 }

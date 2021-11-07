@@ -1,35 +1,21 @@
-using CK.Core;
-using CK.Monitoring;
-using CK.Monitoring.Handlers;
-using System;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace LogSampleGenerator
+public class Program
 {
-    class Program
+    public static async Task Main( string[] args )
     {
-        static void Main( string[] args )
-        {
-            GrandOutputConfiguration cfg = new();
-            var binCfg = new BinaryFileConfiguration
-            {
-                Path = "LogOutput"
-            };
-            cfg.Handlers.Add( binCfg );
-            GrandOutput.EnsureActiveDefault( cfg );
-
-            ActivityMonitor m = new();
-            CKTraitContext ctx = ActivityMonitor.Tags.Context;
-            CKTrait tagA = ctx.FindOrCreate( "tagA" );
-            CKTrait tagB = ctx.FindOrCreate( "tagB" );
-            CKTrait tagC = ctx.FindOrCreate( "tagC" );
-
-            m.Info( "Log with no tag" );
-            m.Info( "Log with tag A", tagA );
-            m.Info( "Log with tag B", tagB );
-            m.Info( "Log with tag C", tagC );
-            m.Info( "Log with tag A & B", tagA.Union( tagB ) );
-            m.Info( "Log with no tag B & C", tagB.Union( tagC ) );
-            m.Info( "Log with no tag A & B & C", tagA.Union( tagB.Union( tagC ) ) );
-        }
+        CancellationTokenSource cts = new( 500 );
+        await CreateHostBuilder( args ).Build().RunAsync(cts.Token);
     }
+
+    public static IHostBuilder CreateHostBuilder( string[] args ) =>
+        Host.CreateDefaultBuilder( args )
+            .UseMonitoring()
+            .ConfigureServices( (hostContext, services) =>
+            {
+                services.AddHostedService<Worker>();
+            } );
 }

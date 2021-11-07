@@ -27,7 +27,7 @@ namespace CK.LogViewer
             writer.WriteNumber( "offset", entry.Offset ); ;
             writer.WriteNumber( "logLevel", (byte)entry.LogLevel );
             writer.WriteString( "logTime", entry.LogTime.ToString() );
-            writer.WriteString( "monitorId", entry.MonitorSimpleId.ToString() );
+            writer.WriteString( "monitorId", entry.MonitorId.ToString() );
             writer.WriteNumber( "logType", (int)entry.LogType );
             writer.WriteNumber( "groupOffset", entry.GroupOffset );
             WriteException( entry.Exception, writer );

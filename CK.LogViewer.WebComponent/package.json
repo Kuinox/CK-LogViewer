@@ -20,10 +20,10 @@
     "web-components-loader": "^0.1.2",
     "webpack": "^5.52.1",
     "webpack-cli": "^4.8.0",
-    "webpack-dev-server": "^4.2.0"
+    "webpack-dev-server": "^4.2.0",
+    "@webcomponents/custom-elements": "^1.5.0"
   },
   "dependencies": {
-    "@webcomponents/custom-elements": "^1.5.0",
     "ts-toolbelt": "^9.6.0"
   }
 }

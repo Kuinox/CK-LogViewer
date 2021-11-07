@@ -2,23 +2,43 @@ import { ILogEntry } from "../../backend/ILogEntry";
 import { LogLevel, logLevelToString } from "../../backend/LogLevel";
 import { LogType } from "../../backend/LogType";
 import { CssClassManager } from "./CssClassManager";
+import {ColorGenerator} from "../../helpers/colorGenerator";
 
 const groupTabClassName = "group-tab";
 const rulerGroupClassNamePart = "ruler-group";
 const monitorClass = "monitor";
 export type OnClickRulerCallback = (groupOffset: number) => void;
+const minMargin = 10;
+
+export class LogViewerState
+{
+    rulersOffset: {
+        [key: string]: number
+    } = {};
+
+    rulersColors: {
+        [key:string]: string
+    } = {};
+}
 
 export class LogLineBaseElement extends HTMLElement {
     public logData: ILogEntry;
+    private colorGenerator: ColorGenerator;
     private cssClassManager: CssClassManager;
+    private logviewerState: LogViewerState;
+
     public constructor(
         log: ILogEntry,
         cssClassManager: CssClassManager,
+        colorGenerator: ColorGenerator,
+        logviewerState: LogViewerState,
         onRulerClick: OnClickRulerCallback
     ) {
         super();
         this.logData = log;
+        this.colorGenerator = colorGenerator;
         this.cssClassManager = cssClassManager;
+        this.logviewerState = logviewerState;
         this.classList.add(this.monitorClass);
         const metadataContainer = document.createElement("div");
         this.append(metadataContainer);
@@ -29,7 +49,8 @@ export class LogLineBaseElement extends HTMLElement {
         const slider = document.createElement("div");
         slider.classList.add("slider");
         slider.addEventListener("mousedown", this.onSliderMouseDown);
-        this.setMargin(10);
+        slider.appendChild(document.createElement("div"));
+        this.setMargin(minMargin);
         this.append(slider);
         for (let i = 0; i < log.parentsLogLevel.length - 1; i++) {
             this.appendRuler(log.parentsLogLevel[i].logLevel, log.parentsLogLevel[i].groupOffset, onRulerClick, undefined);
@@ -48,33 +69,57 @@ export class LogLineBaseElement extends HTMLElement {
 
     initialMouseX = 0;
     initialMargin = 0;
+    previousCursor = "";
     onSliderMouseDown = (ev: MouseEvent): void => {
+        ev.preventDefault(); // avoid selecting text.
         document.addEventListener("mousemove", this.onSliderMove);
         document.addEventListener("mouseup", this.onMouseUp);
         this.initialMouseX = ev.x;
-        this.initialMargin = this.currentMargin;
+        const initialValue = this.logviewerState.rulersOffset[this.sliderClassName];
+        this.initialMargin = initialValue ?? minMargin;
+        this.previousCursor = document.body.style.cursor;
+        document.body.style.cursor = "col-resize";
+    };
+
+    currentMargin = 0;
+    setMargin = (margin: number): void => {
+        if (margin < minMargin) margin = minMargin;
+        this.logviewerState.rulersOffset[this.sliderClassName] = margin;
+        this.currentMargin = margin;
+        let rulerColor = this.logviewerState.rulersColors[this.sliderClassName];
+        if (rulerColor===undefined) {
+            rulerColor = this.colorGenerator.getUniqueColor();
+            this.logviewerState.rulersColors[this.sliderClassName] = rulerColor;
+        }
+
+        this.cssClassManager.requireClass(this.sliderClassName, `.${this.monitorClass} .slider {
+    margin-left: ${margin}px;
+
+}
+.${this.monitorClass} .slider div {
+    /*border-color: ${rulerColor};*/
+    box-shadow: -3px 0px 3px ${rulerColor};
+}
+
+        ` );
     };
 
     onMouseUp = (): void => {
         document.removeEventListener("mouseup", this.onMouseUp);
+        document.body.style.cursor = this.previousCursor;
         document.removeEventListener("mousemove", this.onSliderMove);
     };
 
     onSliderMove = (ev: MouseEvent): void => {
+        ev.preventDefault(); // avoid changing cursor.
         const diff = ev.x - this.initialMouseX;
         const newPos = this.initialMargin + diff;
         this.setMargin(newPos);
     };
     private get sliderClassName(): string {
-        return  "slider" + this.monitorClass;
+        return "slider" + this.monitorClass;
     }
-    currentMargin = 0;
-    setMargin(margin: number): void {
-        this.currentMargin = margin;
-        this.cssClassManager.requireClass(this.sliderClassName, `.${this.monitorClass} .slider {
-            margin-left: ${margin}px;
-        }` );
-    }
+
 
     public static runOnGroup(groupOffset: number, delegate: (entry: LogLineBaseElement) => void): void {
         Array.prototype.slice.call<HTMLCollectionOf<Element>, [], Element[]>(
@@ -106,7 +151,7 @@ export class LogLineBaseElement extends HTMLElement {
         });
         return this.getOffsetByRulerClass(className!);
     }
-
+    self = this;
     private appendRuler(
         logLevel: LogLevel,
         groupOffset: number,
