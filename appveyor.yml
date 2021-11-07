@@ -1,0 +1,33 @@
+install: []
+version: build{build}
+image: Visual Studio 2019
+clone_folder: C:\Kuinox\
+branches:
+  only:
+    - master
+    - develop
+build_script:
+  - dotnet run --project CodeCakeBuilder -nointeraction
+test: off
+deploy:
+  release: CK-LogViewer-Desktop-v$(APPVEYOR_BUILD_VERSION)
+  provider: GitHub
+  token:
+    secure: AuHvdKmnk4TyWUO7ZwroArshVYg0dinkux/Mg5cf6hq4ofXxYUbJGY/hBLjwXVee
+  artifact: /.*/CodeCakeBuilder/Releases/*\.exe
+  draft: false
+  prerelease: false
+  on:
+    branch: master                 # release from master branch only
+    APPVEYOR_REPO_TAG: true        # deploy on tag push only
+artifacts:
+  - path: '**\*.log'
+    name: Log file
+  - path: '**\*.ckmon'
+    name: Log file
+  - path: '**\*.trx'
+    name: Visual studio test results file
+  - path: '**\Tests\**\TestResult*.xml'
+    name: NUnit tests result files
+  - path: '**Tests\**\Logs\**\*'
+    name: Log files

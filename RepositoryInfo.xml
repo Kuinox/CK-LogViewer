@@ -1,0 +1,7 @@
+<RepositoryInfo>
+  <SimpleGitVersion>
+    <Branches>
+      <Branch Name="develop" VersionName="develop" CIVersionMode="LastReleaseBased" />
+    </Branches>
+  </SimpleGitVersion>
+</RepositoryInfo>
