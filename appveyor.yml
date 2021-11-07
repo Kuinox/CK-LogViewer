@@ -9,17 +9,6 @@ branches:
 build_script:
   - dotnet run --project CodeCakeBuilder -nointeraction
 test: off
-deploy:
-  release: CK-LogViewer-Desktop-v$(APPVEYOR_BUILD_VERSION)
-  provider: GitHub
-  auth_token:
-    secure: AuHvdKmnk4TyWUO7ZwroArshVYg0dinkux/Mg5cf6hq4ofXxYUbJGY/hBLjwXVee
-  artifact: /.*\.exe/
-  draft: false
-  prerelease: false
-  on:
-    branch: master                 # release from master branch only
-    APPVEYOR_REPO_TAG: true        # deploy on tag push only
 artifacts:
   - path: '**\*.log'
     name: Log file

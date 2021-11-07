@@ -5,6 +5,11 @@ using Cake.Common.Tools.DotNetCore.Publish;
 using Cake.Common.Tools.InnoSetup;
 using Cake.Core;
 using Cake.Core.Diagnostics;
+using Cake.Common.Tools.GitReleaseManager;
+using System;
+using Cake.Common.Tools.GitReleaseManager.Create;
+using System.IO;
+using System.Linq;
 
 namespace CodeCake
 {
@@ -42,6 +47,21 @@ namespace CodeCake
                    {
                        OutputDirectory = globalInfo.ReleasesFolder.ToString()
                    } );
+                   string installer = Directory.GetFiles( globalInfo.ReleasesFolder ).Single( s => s.EndsWith( ".exe" ) );
+                   string token = Environment.GetEnvironmentVariable( "GitHubPAT" );
+                   if( token == null )
+                   {
+                       Console.WriteLine( "Skipping release creation because token is missing." );
+                   }
+                   else
+                   {
+                       Cake.GitReleaseManagerCreate( token, "Kuinox", "CK-LogViewer", new GitReleaseManagerCreateSettings
+                       {
+                           Assets = installer,
+                           Milestone = globalInfo.BuildInfo.Version.ToString()
+                       } );
+
+                   }
                } );
         }
 
