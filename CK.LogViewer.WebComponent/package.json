@@ -1,11 +1,13 @@
 {
-  "name": "ck.logviewer.webcomponent2",
+  "name": "ck.logviewer.webcomponent",
+  "private": true,
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "build": "webpack --mode production",
-    "start": "webpack --watch --mode development"
+    "start": "webpack --watch --mode development",
+    "clean": "exit 0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.31.0",

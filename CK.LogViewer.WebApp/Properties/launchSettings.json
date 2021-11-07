@@ -3,6 +3,8 @@
   "profiles": {
     "CK.LogViewer.WebApp": {
       "commandName": "Project",
+      "launchBrowser": false,
+      "commandLineArgs": "--console",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
