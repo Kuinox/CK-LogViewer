@@ -62,8 +62,9 @@ namespace CodeCake
                             Name = globalInfo.BuildInfo.Version.ToString(),
                             TargetCommitish = globalInfo.BuildInfo.CommitSha,
                             InputFilePath = "CodeCakeBuilder/gitreleasemanager.yml",
+                            Prerelease = globalInfo.BuildInfo.Version.IsPrerelease
                         } );
-
+                       Cake.GitReleaseManagerPublish( token, "Kuinox", "CK-LogViewer", globalInfo.BuildInfo.Version.ToString() );
                    }
                } );
         }
