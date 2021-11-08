@@ -10,6 +10,7 @@ using System;
 using Cake.Common.Tools.GitReleaseManager.Create;
 using System.IO;
 using System.Linq;
+using System.IO.Compression;
 
 namespace CodeCake
 {
@@ -47,7 +48,7 @@ namespace CodeCake
                    {
                        OutputDirectory = globalInfo.ReleasesFolder.ToString()
                    } );
-                   string installer = Directory.GetFiles( globalInfo.ReleasesFolder ).Single( s => s.EndsWith( ".exe" ) );
+                   string installer = Path.GetFullPath( Directory.GetFiles( globalInfo.ReleasesFolder ).Single( s => s.EndsWith( ".exe" ) ) );
                    string token = Environment.GetEnvironmentVariable( "GitHubPAT" );
                    if( token == null )
                    {
@@ -55,11 +56,13 @@ namespace CodeCake
                    }
                    else
                    {
-                       Cake.GitReleaseManagerCreate( token, "Kuinox", "CK-LogViewer", new GitReleaseManagerCreateSettings
-                       {
-                           Assets = installer,
-                           Name = globalInfo.BuildInfo.Version.ToString()
-                       } );
+                        Cake.GitReleaseManagerCreate( token, "Kuinox", "CK-LogViewer", new GitReleaseManagerCreateSettings
+                        {
+                            Assets = installer,
+                            Name = globalInfo.BuildInfo.Version.ToString(),
+                            TargetCommitish = globalInfo.BuildInfo.CommitSha,
+                            InputFilePath = "CodeCakeBuilder/gitreleasemanager.yml",
+                        } );
 
                    }
                } );
