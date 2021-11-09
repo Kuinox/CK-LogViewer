@@ -11,6 +11,7 @@ using Cake.Common.Tools.GitReleaseManager.Create;
 using System.IO;
 using System.Linq;
 using System.IO.Compression;
+using SimpleGitVersion;
 
 namespace CodeCake
 {
@@ -25,48 +26,50 @@ namespace CodeCake
                                                 .AddNPM()
                                                 .SetCIBuildTag();
             Task( "Default" ).Does( () =>
-               {
-                   globalInfo.TerminateIfShouldStop();
+            {
+                globalInfo.TerminateIfShouldStop();
 
-                   globalInfo.GetDotnetSolution().Clean();
-                   globalInfo.GetNPMSolution().Clean();
-                   Cake.CleanDirectories( globalInfo.ReleasesFolder );
+                globalInfo.GetDotnetSolution().Clean();
+                globalInfo.GetNPMSolution().Clean();
+                Cake.CleanDirectories( globalInfo.ReleasesFolder );
 
-                   globalInfo.GetDotnetSolution().Build();
-                   globalInfo.GetNPMSolution().Build();
+                globalInfo.GetDotnetSolution().Build();
+                globalInfo.GetNPMSolution().Build();
 
-                   Cake.DotNetCorePublish( "CK.LogViewer.WebApp", new DotNetCorePublishSettings()
-                   {
-                       OutputDirectory = globalInfo.ReleasesFolder.AppendPart( "CK.LogViewer.WebApp" ).ToString()
-                   } );
-                   Cake.DotNetCorePublish( "CK.LogViewer.Desktop", new DotNetCorePublishSettings()
-                   {
-                       OutputDirectory = globalInfo.ReleasesFolder.AppendPart( "CK.LogViewer.Desktop" ).ToString()
-                   } );
+                Cake.DotNetCorePublish( "CK.LogViewer.WebApp", new DotNetCorePublishSettings()
+                .AddVersionArguments( globalInfo.BuildInfo, ( cfg ) =>
+                {
+                    cfg.OutputDirectory = globalInfo.ReleasesFolder.AppendPart( "CK.LogViewer.WebApp" ).ToString();
+                } ) );
+                Cake.DotNetCorePublish( "CK.LogViewer.Desktop", new DotNetCorePublishSettings()
+                 .AddVersionArguments( globalInfo.BuildInfo, ( cfg ) =>
+                {
+                    cfg.OutputDirectory = globalInfo.ReleasesFolder.AppendPart( "CK.LogViewer.Desktop" ).ToString();
+                } ) );
 
-                   Cake.InnoSetup( "CodeCakeBuilder/InnoSetup/innosetup.iss", new InnoSetupSettings()
-                   {
-                       OutputDirectory = globalInfo.ReleasesFolder.ToString()
-                   } );
-                   string installer = Path.GetFullPath( Directory.GetFiles( globalInfo.ReleasesFolder ).Single( s => s.EndsWith( ".exe" ) ) );
-                   string token = Environment.GetEnvironmentVariable( "GitHubPAT" );
-                   if( token == null )
-                   {
-                       Console.WriteLine( "Skipping release creation because token is missing." );
-                   }
-                   else
-                   {
-                        Cake.GitReleaseManagerCreate( token, "Kuinox", "CK-LogViewer", new GitReleaseManagerCreateSettings
-                        {
-                            Assets = installer,
-                            Name = globalInfo.BuildInfo.Version.ToString(),
-                            TargetCommitish = globalInfo.BuildInfo.CommitSha,
-                            InputFilePath = "CodeCakeBuilder/gitreleasemanager.yml",
-                            Prerelease = globalInfo.BuildInfo.Version.IsPrerelease
-                        } );
-                       Cake.GitReleaseManagerPublish( token, "Kuinox", "CK-LogViewer", globalInfo.BuildInfo.Version.ToString() );
-                   }
-               } );
+                Cake.InnoSetup( "CodeCakeBuilder/InnoSetup/innosetup.iss", new InnoSetupSettings()
+                {
+                    OutputDirectory = globalInfo.ReleasesFolder.ToString()
+                } );
+                string installer = Path.GetFullPath( Directory.GetFiles( globalInfo.ReleasesFolder ).Single( s => s.EndsWith( ".exe" ) ) );
+                string token = Environment.GetEnvironmentVariable( "GitHubPAT" );
+                if( token == null )
+                {
+                    Console.WriteLine( "Skipping release creation because token is missing." );
+                }
+                else
+                {
+                    Cake.GitReleaseManagerCreate( token, "Kuinox", "CK-LogViewer", new GitReleaseManagerCreateSettings
+                    {
+                        Assets = installer,
+                        Name = globalInfo.BuildInfo.Version.ToString(),
+                        TargetCommitish = globalInfo.BuildInfo.CommitSha,
+                        InputFilePath = "CodeCakeBuilder/gitreleasemanager.yml",
+                        Prerelease = globalInfo.BuildInfo.Version.IsPrerelease
+                    } );
+                    Cake.GitReleaseManagerPublish( token, "Kuinox", "CK-LogViewer", globalInfo.BuildInfo.Version.ToString() );
+                }
+            } );
         }
 
     }

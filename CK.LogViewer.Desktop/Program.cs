@@ -68,11 +68,12 @@ public class Program
 
     private static async Task CheckForUpdate()
     {
+        Debugger.Launch();
         Assembly assembly = Assembly.GetExecutingAssembly();
         FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo( assembly.Location );
         string? currentVersionStr = fileVersionInfo.ProductVersion;
         CSVersion? currentVersion = currentVersionStr == null ? null : CSVersion.Parse( currentVersionStr );
-        if( Debugger.IsAttached ) return;
+        //if( Debugger.IsAttached ) return;
         if( currentVersion == null )
         {
             Interaction.MsgBox( "Could not detect running version. Please update manually CK-LogViewer", "CK-LogViewer" );
@@ -82,8 +83,8 @@ public class Program
         GitHubClient client = new( new ProductHeaderValue( "CK-LogViewer-AutoUpdater" ) );
         IReadOnlyList<Release> repo = await client.Repository.Release.GetAll( "Kuinox", "CK-LogViewer" );
         (Release release, CSVersion version) = repo
-            .Select( s => (Release: s, Version: CSVersion.Parse( s.TagName )) )
-            .Where( s => s.Version.IsStable )
+            .Select( s => (Release: s, Version: CSVersion.TryParse( s.TagName )) )
+            .Where( s => s.Version?.IsStable ?? false )
             .OrderByDescending( s => s.Version )
             .FirstOrDefault();
 
