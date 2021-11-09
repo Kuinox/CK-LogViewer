@@ -38,6 +38,7 @@ PrivilegesRequiredOverridesAllowed=dialog
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
+DisableDirPage=auto
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl,CustomDefault.isl"
