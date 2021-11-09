@@ -86,6 +86,7 @@ public class Program
             .Where( s => s.Version.IsStable )
             .OrderByDescending( s => s.Version )
             .FirstOrDefault();
+
         if( release == null ) return; // No new version.
         if( currentVersion >= version ) return;
         MsgBoxResult result = Interaction.MsgBox( "A new version is available Do you want to install it ?", "CK-LogViewer", MsgBoxStyle.OkCancel );
