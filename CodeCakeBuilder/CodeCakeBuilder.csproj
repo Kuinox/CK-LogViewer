@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -6,13 +6,12 @@
     <LangVersion>7.3</LangVersion>
     <IsPackable>False</IsPackable>
   </PropertyGroup>
-
-
   <ItemGroup>
-    <Compile Include="GitReleaseManager.yml">
+    <Content Include="GitReleaseManager.yml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
+    </Content>
   </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Cake.Npm" Version="0.17.0" />
