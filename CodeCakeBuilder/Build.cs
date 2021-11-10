@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.IO.Compression;
 using SimpleGitVersion;
+using System.Collections.Generic;
 
 namespace CodeCake
 {
@@ -49,7 +50,11 @@ namespace CodeCake
 
                 Cake.InnoSetup( "CodeCakeBuilder/InnoSetup/innosetup.iss", new InnoSetupSettings()
                 {
-                    OutputDirectory = globalInfo.ReleasesFolder.ToString()
+                    OutputDirectory = globalInfo.ReleasesFolder.ToString(),
+                    Defines = new Dictionary<string, string>
+                    {
+                        { "MyAppVersion", globalInfo.BuildInfo.Version.ToString() }
+                    }
                 } );
                 string installer = Path.GetFullPath( Directory.GetFiles( globalInfo.ReleasesFolder ).Single( s => s.EndsWith( ".exe" ) ) );
                 string token = Environment.GetEnvironmentVariable( "GitHubPAT" );
@@ -64,7 +69,6 @@ namespace CodeCake
                         Assets = installer,
                         Name = globalInfo.BuildInfo.Version.ToString(),
                         TargetCommitish = globalInfo.BuildInfo.CommitSha,
-                        InputFilePath = "CodeCakeBuilder/gitreleasemanager.yml",
                         Prerelease = globalInfo.BuildInfo.Version.IsPrerelease
                     } );
                     Cake.GitReleaseManagerPublish( token, "Kuinox", "CK-LogViewer", globalInfo.BuildInfo.Version.ToString() );

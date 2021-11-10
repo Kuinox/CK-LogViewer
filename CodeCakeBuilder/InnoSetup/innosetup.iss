@@ -2,7 +2,6 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CK-LogViewer-Desktop"
-#define MyAppVersion "0.1.0"
 #define MyAppPublisher "Kuinox (logviewer@kuinox.io)"
 #define MyAppURL "https://github.com/Kuinox/CK-LogViewer/"
 #define MyAppExeName "CK.LogViewer.Desktop.exe"
