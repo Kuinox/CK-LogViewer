@@ -68,7 +68,6 @@ public class Program
 
     private static async Task CheckForUpdate()
     {
-        Debugger.Launch();
         Assembly assembly = Assembly.GetExecutingAssembly();
         FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo( assembly.Location );
         string? currentVersionStr = fileVersionInfo.ProductVersion?.Split("/")[0];
