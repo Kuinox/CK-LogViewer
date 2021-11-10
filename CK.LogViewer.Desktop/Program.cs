@@ -73,6 +73,7 @@ public class Program
         FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo( assembly.Location );
         string? currentVersionStr = fileVersionInfo.ProductVersion?.Split("/")[0];
         CSVersion? currentVersion = currentVersionStr == null ? null : CSVersion.Parse( currentVersionStr );
+
         //if( Debugger.IsAttached ) return;
         if( currentVersion == null )
         {
