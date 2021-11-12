@@ -53,7 +53,7 @@ namespace CodeCake
                     OutputDirectory = globalInfo.ReleasesFolder.ToString(),
                     Defines = new Dictionary<string, string>
                     {
-                        { "MyAppVersion", globalInfo.BuildInfo.Version.ToString() }
+                        { "MyAppVersion", "v"+ globalInfo.BuildInfo.Version.ToString() }
                     }
                 } );
                 string installer = Path.GetFullPath( Directory.GetFiles( globalInfo.ReleasesFolder ).Single( s => s.EndsWith( ".exe" ) ) );
@@ -67,7 +67,7 @@ namespace CodeCake
                     Cake.GitReleaseManagerCreate( token, "Kuinox", "CK-LogViewer", new GitReleaseManagerCreateSettings
                     {
                         Assets = installer,
-                        Name = globalInfo.BuildInfo.Version.ToString(),
+                        Name = "v" + globalInfo.BuildInfo.Version.ToString(),
                         TargetCommitish = globalInfo.BuildInfo.CommitSha,
                         Prerelease = globalInfo.BuildInfo.Version.IsPrerelease,
                         InputFilePath = "CodeCakeBuilder/gitreleasemanager.yml",

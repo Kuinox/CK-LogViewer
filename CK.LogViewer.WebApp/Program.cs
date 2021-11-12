@@ -21,13 +21,8 @@ namespace CK.LogViewer.WebApp
             bool isService = !(Debugger.IsAttached || args.Contains( "--console" ));
             if( isService )
             {
-                Console.WriteLine( "Is a service" );
                 string binDir = GetAppDir();
                 Environment.CurrentDirectory = binDir;
-            }
-            else
-            {
-                Console.WriteLine( "Is not a service" );
             }
             CreateHostBuilder( isService, args ).Build().Run();
         }

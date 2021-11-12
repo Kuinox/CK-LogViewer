@@ -3,49 +3,19 @@ import { ICKExceptionData } from "../../backend/ICKExceptionData";
 export class LogExceptionElement extends HTMLElement {
     constructor(log: ICKExceptionData) {
         super();
-        const a = document.createElement("a");
-        a.innerHTML = log.typeException;
-        a.href = "";
-        a.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.appendChild(LogExceptionElement.createModal(log));
-        });
-        const br = document.createElement("br");
-        this.appendChild(a);
-        this.appendChild(br);
+
+        const content = document.createElement("div");
+        const exceptionTitle = document.createElement("h1");
+        exceptionTitle.innerHTML = log.typeException;
+        content.appendChild(exceptionTitle);
+        const message = document.createElement("p");
+        message.innerHTML = log.message;
+        content.appendChild(message);
+        const stacktrace = document.createElement("p");
+        stacktrace.innerHTML = log.stackTrace;
+        content.appendChild(stacktrace);
+        this.appendChild(content);
     }
-
-    private static createModal(log: ICKExceptionData ): HTMLElement {
-        const modal = document.createElement('div');
-        modal.setAttribute("class", "modal");
-        modal.addEventListener("click", (event) => {
-            const target = event.target as any;
-            if (target.className === "modal") {
-                modal.remove();
-            }
-        });
-
-        const modalContent = document.createElement('div');
-        modalContent.setAttribute("class", "modal-content");
-
-        const closeTag = document.createElement("span");
-        closeTag.setAttribute("class", "close");
-        closeTag.innerHTML = "&times;";
-        closeTag.addEventListener("click", () => {
-            modal.remove();
-        });
-
-        const content = document.createElement("p");
-        content.innerHTML = log.stackTrace;
-
-        modalContent.appendChild(closeTag);
-        modalContent.appendChild(document.createElement("br"));
-        modalContent.appendChild(content);
-        modal.appendChild(modalContent);
-
-        return modal;
-    }
-
 }
 
 customElements.define('log-exception', LogExceptionElement);

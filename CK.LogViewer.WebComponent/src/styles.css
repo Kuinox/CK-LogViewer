@@ -75,10 +75,19 @@ log-exception {
 .log-content {
   min-width: 85%;
   width: 85%;
+  display: flex;
+  flex-direction: column;
 }
 
 .log-text {
-  white-space: pre;
+  white-space: pre-wrap;
+}
+
+log-exception {
+  white-space: pre-wrap;
+  border: solid;
+  border-width: 1px;
+  padding-left: 15px;
 }
 
 .log-content:hover {
