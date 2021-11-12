@@ -1,5 +1,5 @@
 export class CssClassManager {
-    private refCount: Map<string, { refCount: number, style: HTMLStyleElement }>;
+    private refCount: Map<string, { refCount: number, style: HTMLStyleElement, currentRule: string }>;
     /**
      * Assume you already have a class in your html doc.
      */
@@ -15,7 +15,8 @@ export class CssClassManager {
             document.body.appendChild(style);
             this.refCount.set(ruleName, {
                 refCount: 1,
-                style: style
+                style: style,
+                currentRule: rule
             });
         } else {
             this.updateClass(ruleName, rule);
@@ -25,6 +26,9 @@ export class CssClassManager {
     public updateClass(ruleName: string, newRule: string): void {
         const classInfo = this.refCount.get(ruleName);
         if (classInfo === undefined) throw new RangeError("This rule is not registered.");
+        if(newRule === classInfo.currentRule) {
+            return;
+        }
         classInfo.style.innerHTML = newRule;
     }
 
@@ -37,7 +41,8 @@ export class CssClassManager {
         } else {
             this.refCount.set(ruleName, {
                 refCount: classInfo.refCount - 1,
-                style: classInfo.style
+                style: classInfo.style,
+                currentRule: classInfo.currentRule
             });
         }
     }
