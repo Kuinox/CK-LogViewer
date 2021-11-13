@@ -43,6 +43,7 @@ export class LogViewer extends HTMLElement { //TODO: hide this behind an object,
             return;
         }
         this.reset(true);
+        const perf = performance.now();
         for (let i = 0; i < logs.length; i++) {
             const curr = logs[i];
             this.appendEntry(curr);
@@ -54,6 +55,7 @@ export class LogViewer extends HTMLElement { //TODO: hide this behind an object,
             }
         }
         this.removeLoadIcon();
+        console.log("renderTime: " + (performance.now() - perf) + "ms");
     }
 
     public appendEntry(entry: ILogEntry): void {

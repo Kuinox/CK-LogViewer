@@ -53,16 +53,17 @@ namespace CK.LogViewer
                 _enumerator = enumerator;
                 _dataStack = new Stack<GroupData>();
                 _dataStack.Push( new GroupData() );
-                _currentData = null!;
             }
 
             public LogEntryWithState Current => new(
                 _enumerator.Current,
-                _currentData.LogLevelSummary,
-                _currentData.ParentsGroupLevels,
-                _currentData.GroupOffset
+                CurrentData.LogLevelSummary,
+                _enumerator.Current.LogType != LogEntryType.OpenGroup ?
+                    CurrentData.ParentsGroupLevels
+                    : CurrentData.ParentsGroupLevels.RemoveRange( CurrentData.ParentsGroupLevels.Length - 1, 1 ),
+                CurrentData.GroupOffset
             );
-            GroupData _currentData;
+            GroupData CurrentData => _dataStack.Peek();
             object IEnumerator.Current => Current;
 
             public void Dispose() => _enumerator.Dispose();
@@ -70,9 +71,13 @@ namespace CK.LogViewer
 
             public bool MoveNext()
             {
+                if( _enumerator.Current?.LogType == LogEntryType.CloseGroup )
+                {
+                    _dataStack.Pop();
+                }
                 if( !_enumerator.MoveNext() ) return false;
-                _currentData = _dataStack.Peek();
-                switch( _enumerator.Current.LogType )
+
+                switch( _enumerator.Current!.LogType )
                 {
                     case LogEntryType.Line:
                         IncrementStat( _enumerator.Current.LogLevel );
@@ -80,11 +85,8 @@ namespace CK.LogViewer
                     case LogEntryType.OpenGroup:
                         IncrementStat( _enumerator.Current.LogLevel );
                         _dataStack.Push(
-                            new GroupData( _currentData, _enumerator.Current )
+                            new GroupData( CurrentData, _enumerator.Current )
                         );
-                        break;
-                    case LogEntryType.CloseGroup:
-                        _dataStack.Pop();
                         break;
                 }
                 return true;

@@ -52,15 +52,11 @@ export class LogLineBaseElement extends HTMLElement {
         slider.appendChild(document.createElement("div"));
         this.setMargin(minMargin);
         this.append(slider);
-        for (let i = 0; i < log.parentsLogLevel.length - 1; i++) {
+        for (let i = 0; i <  log.parentsLogLevel.length - (log.logType ==LogType.CloseGroup ? 1 : 0 ); i++) {
             this.appendRuler(log.parentsLogLevel[i].logLevel, log.parentsLogLevel[i].groupOffset, onRulerClick, undefined);
         }
-        if (log.parentsLogLevel.length >= 1) {
-            if (log.logType === LogType.CloseGroup) {
-                this.appendRuler(log.parentsLogLevel[log.parentsLogLevel.length - 1].logLevel, log.parentsLogLevel[log.parentsLogLevel.length - 1].groupOffset, onRulerClick, "ruler-close");
-            } else {
-                this.appendRuler(log.parentsLogLevel[log.parentsLogLevel.length - 1].logLevel, log.parentsLogLevel[log.parentsLogLevel.length - 1].groupOffset, onRulerClick, undefined);
-            }
+        if (log.logType === LogType.CloseGroup) {
+            this.appendRuler(log.logLevel, log.groupOffset, onRulerClick, "ruler-close");
         }
         if (log.logType === LogType.OpenGroup) {
             this.appendRuler(log.logLevel, log.offset, onRulerClick, "ruler-open");
