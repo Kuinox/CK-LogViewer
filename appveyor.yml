@@ -7,7 +7,6 @@ branches:
     - master
     - develop
 build_script:
-  - choco install gitreleasemanager.portable -y
   - dotnet run --project CodeCakeBuilder -nointeraction
 test: off
 artifacts:

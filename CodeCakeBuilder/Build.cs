@@ -14,6 +14,7 @@ using System.IO.Compression;
 using SimpleGitVersion;
 using System.Collections.Generic;
 using Cake.WebDeploy;
+using Octokit;
 
 namespace CodeCake
 {
@@ -65,15 +66,18 @@ namespace CodeCake
                 }
                 else
                 {
-                    Cake.GitReleaseManagerCreate( token, "Kuinox", "CK-LogViewer", new GitReleaseManagerCreateSettings
+                    GitHubClient client = new GitHubClient( new ProductHeaderValue( "CodeCakeBuilder" ) );
+                    var tokenAuth = new Credentials( token );
+                    client.Credentials = tokenAuth;
+                    string version = "v" + globalInfo.BuildInfo.Version.ToString();
+                    client.Repository.Release.Create( "Kuinox", "CK-LogViewer", new NewRelease(version)
                     {
-                        Assets = installer,
-                        Name = "v" + globalInfo.BuildInfo.Version.ToString(),
+                        Body = ":tada:",
+                        Name = version,
                         TargetCommitish = globalInfo.BuildInfo.CommitSha,
                         Prerelease = globalInfo.BuildInfo.Version.IsPrerelease,
-                        InputFilePath = "CodeCakeBuilder/gitreleasemanager.yml",
+                        Draft = false
                     } );
-                    Cake.GitReleaseManagerPublish( token, "Kuinox", "CK-LogViewer", globalInfo.BuildInfo.Version.ToString() );
                 }
                 string siteName = "cklogviewerwebapp";
                 string deployToken = Environment.GetEnvironmentVariable( "DEPLOY_PASSWORD" );
