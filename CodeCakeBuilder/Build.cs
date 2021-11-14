@@ -39,15 +39,21 @@ namespace CodeCake
                 globalInfo.GetNPMSolution().Build();
                 string webappServer = globalInfo.ReleasesFolder.AppendPart( "CK.LogViewer.WebApp.Server" ).ToString();
                 string webappDesktop = globalInfo.ReleasesFolder.AppendPart( "CK.LogViewer.WebApp.Desktop" ).ToString();
+                string desktopApp = globalInfo.ReleasesFolder.AppendPart( "CK.LogViewer.Desktop" ).ToString();
                 Cake.DotNetCorePublish( "CK.LogViewer.WebApp", new DotNetCorePublishSettings()
                 .AddVersionArguments( globalInfo.BuildInfo, ( cfg ) =>
                 {
                     cfg.OutputDirectory = webappServer;
                 } ) );
+                Cake.DotNetCorePublish( "CK.LogViewer.WebApp", new DotNetCorePublishSettings()
+                .AddVersionArguments( globalInfo.BuildInfo, ( cfg ) =>
+                {
+                    cfg.OutputDirectory = webappDesktop;
+                } ) );
                 Cake.DotNetCorePublish( "CK.LogViewer.Desktop", new DotNetCorePublishSettings()
                  .AddVersionArguments( globalInfo.BuildInfo, ( cfg ) =>
                 {
-                    cfg.OutputDirectory = webappDesktop;
+                    cfg.OutputDirectory = desktopApp;
                 } ) );
                 File.Delete( webappServer + "/appsettings.Desktop.json" );
                 File.Delete( webappDesktop + "/appsettings.Server.json" );
