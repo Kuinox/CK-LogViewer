@@ -76,7 +76,7 @@ namespace CodeCake
             var projects = sln
                 .Projects
                 .Where( p => !(p is SolutionFolder)
-                            && p.Name != "CodeCakeBuilder" )
+                            && !p.Name.StartsWith("CodeCakeBuilder") )
                 .ToList();
             var projectsToPublish = projects.Where(
                     p => ((bool?)XDocument.Load( p.Path.FullPath )

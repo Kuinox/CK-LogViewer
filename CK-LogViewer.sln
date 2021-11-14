@@ -18,6 +18,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CK.LogViewer.Desktop", "CK.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeCakeBuilder", "CodeCakeBuilder\CodeCakeBuilder.csproj", "{0C196C8F-BAA5-45E9-AA62-21AD3F1A2FAE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeCakeBuilder.NetFrameWorkRunner", "CodeCakeBuilder.NetFrameWorkRunner\CodeCakeBuilder.NetFrameWorkRunner.csproj", "{F3FC8FA3-388D-4C0E-AE39-9B9778DF676D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{0C196C8F-BAA5-45E9-AA62-21AD3F1A2FAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0C196C8F-BAA5-45E9-AA62-21AD3F1A2FAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0C196C8F-BAA5-45E9-AA62-21AD3F1A2FAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3FC8FA3-388D-4C0E-AE39-9B9778DF676D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3FC8FA3-388D-4C0E-AE39-9B9778DF676D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3FC8FA3-388D-4C0E-AE39-9B9778DF676D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3FC8FA3-388D-4C0E-AE39-9B9778DF676D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

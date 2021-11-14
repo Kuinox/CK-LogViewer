@@ -38,11 +38,12 @@ namespace CodeCake
 
                 globalInfo.GetDotnetSolution().Build();
                 globalInfo.GetNPMSolution().Build();
-                string webappFolder = globalInfo.ReleasesFolder.AppendPart( "CK.LogViewer.WebApp" ).ToString();
+                string webappServer = globalInfo.ReleasesFolder.AppendPart( "CK.LogViewer.WebApp.Server" ).ToString();
+                string webappDesktop = globalInfo.ReleasesFolder.AppendPart( "CK.LogViewer.WebApp.Desktop" ).ToString();
                 Cake.DotNetCorePublish( "CK.LogViewer.WebApp", new DotNetCorePublishSettings()
                 .AddVersionArguments( globalInfo.BuildInfo, ( cfg ) =>
                 {
-                    cfg.OutputDirectory = webappFolder;
+                    cfg.OutputDirectory = webappServer;
                 } ) );
                 Cake.DotNetCorePublish( "CK.LogViewer.Desktop", new DotNetCorePublishSettings()
                  .AddVersionArguments( globalInfo.BuildInfo, ( cfg ) =>
@@ -79,24 +80,8 @@ namespace CodeCake
                         Draft = false
                     } );
                 }
-                string siteName = "cklogviewerwebapp";
-                string deployToken = Environment.GetEnvironmentVariable( "DEPLOY_PASSWORD" );
 
-                if( deployToken == null )
-                {
-                    Console.WriteLine( $"Skipping website deploy because token 'DEPLOY_PASSWORD' is missing." );
-                }
-                else
-                {
-                    Cake.DeployWebsite( new DeploySettings()
-                    {
-                        SourcePath = webappFolder,
-                        SiteName = siteName,
-                        ComputerName = "https://" + siteName + ".scm.azurewebsites.net:443/msdeploy.axd?site=" + siteName,
-                        Username = "$" + siteName,
-                        Password = deployToken
-                    } );
-                }
+                Cake.DotNetCoreRun( "CodeCakeBuilder.NetFrameWork.Runner" );
             } );
         }
     }
