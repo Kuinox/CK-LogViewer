@@ -13,7 +13,6 @@ using System.Linq;
 using System.IO.Compression;
 using SimpleGitVersion;
 using System.Collections.Generic;
-using Cake.WebDeploy;
 using Octokit;
 
 namespace CodeCake
