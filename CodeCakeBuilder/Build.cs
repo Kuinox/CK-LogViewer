@@ -47,8 +47,10 @@ namespace CodeCake
                 Cake.DotNetCorePublish( "CK.LogViewer.Desktop", new DotNetCorePublishSettings()
                  .AddVersionArguments( globalInfo.BuildInfo, ( cfg ) =>
                 {
-                    cfg.OutputDirectory = globalInfo.ReleasesFolder.AppendPart( "CK.LogViewer.Desktop" ).ToString();
+                    cfg.OutputDirectory = webappDesktop;
                 } ) );
+                File.Delete( webappServer + "/appsettings.Desktop.json" );
+                File.Delete( webappDesktop + "/appsettings.Server.json" );
 
                 Cake.InnoSetup( "CodeCakeBuilder/InnoSetup/innosetup.iss", new InnoSetupSettings()
                 {
@@ -58,6 +60,8 @@ namespace CodeCake
                         { "MyAppVersion", "v"+ globalInfo.BuildInfo.Version.ToString() }
                     }
                 } );
+
+
                 string installer = Path.GetFullPath( Directory.GetFiles( globalInfo.ReleasesFolder ).Single( s => s.EndsWith( ".exe" ) ) );
                 string token = Environment.GetEnvironmentVariable( "GitHubPAT" );
                 if( token == null )

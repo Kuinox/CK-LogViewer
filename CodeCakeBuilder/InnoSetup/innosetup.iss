@@ -43,7 +43,7 @@ DisableDirPage=auto
 Name: "english"; MessagesFile: "compiler:Default.isl,CustomDefault.isl"
 
 [Files]
-Source: "..\Releases\CK.LogViewer.WebApp\*"; DestDir: "{app}\CK.LogViewer.WebApp"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\Releases\CK.LogViewer.WebApp.Desktop\*"; DestDir: "{app}\CK.LogViewer.WebApp"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\Releases\CK.LogViewer.Desktop\*"; DestDir: "{app}\CK.LogViewer.Desktop"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\..\LICENSE"; DestDir: "{app}";
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
