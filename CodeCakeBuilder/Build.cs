@@ -90,7 +90,7 @@ namespace CodeCake
                     } );
                 }
 
-                Cake.DotNetCoreRun( "CodeCakeBuilder.NetFrameWork.Runner" );
+                Cake.DotNetCoreRun( "CodeCakeBuilder.NetFrameWorkRunner" );
             } );
         }
     }
