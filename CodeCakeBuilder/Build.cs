@@ -13,6 +13,7 @@ using System.Linq;
 using System.IO.Compression;
 using SimpleGitVersion;
 using System.Collections.Generic;
+using Cake.WebDeploy;
 
 namespace CodeCake
 {
@@ -36,11 +37,11 @@ namespace CodeCake
 
                 globalInfo.GetDotnetSolution().Build();
                 globalInfo.GetNPMSolution().Build();
-
+                string webappFolder = globalInfo.ReleasesFolder.AppendPart( "CK.LogViewer.WebApp" ).ToString();
                 Cake.DotNetCorePublish( "CK.LogViewer.WebApp", new DotNetCorePublishSettings()
                 .AddVersionArguments( globalInfo.BuildInfo, ( cfg ) =>
                 {
-                    cfg.OutputDirectory = globalInfo.ReleasesFolder.AppendPart( "CK.LogViewer.WebApp" ).ToString();
+                    cfg.OutputDirectory = webappFolder;
                 } ) );
                 Cake.DotNetCorePublish( "CK.LogViewer.Desktop", new DotNetCorePublishSettings()
                  .AddVersionArguments( globalInfo.BuildInfo, ( cfg ) =>
@@ -60,7 +61,7 @@ namespace CodeCake
                 string token = Environment.GetEnvironmentVariable( "GitHubPAT" );
                 if( token == null )
                 {
-                    Console.WriteLine( "Skipping release creation because token is missing." );
+                    Console.WriteLine( $"Skipping release creation because token 'GitHubPAT' is missing." );
                 }
                 else
                 {
@@ -74,8 +75,25 @@ namespace CodeCake
                     } );
                     Cake.GitReleaseManagerPublish( token, "Kuinox", "CK-LogViewer", globalInfo.BuildInfo.Version.ToString() );
                 }
+                string siteName = "cklogviewerwebapp";
+                string deployToken = Environment.GetEnvironmentVariable( "DEPLOY_PASSWORD" );
+
+                if( deployToken == null )
+                {
+                    Console.WriteLine( $"Skipping website deploy because token 'DEPLOY_PASSWORD' is missing." );
+                }
+                else
+                {
+                    Cake.DeployWebsite( new DeploySettings()
+                    {
+                        SourcePath = webappFolder,
+                        SiteName = siteName,
+                        ComputerName = "https://" + siteName + ".scm.azurewebsites.net:443/msdeploy.axd?site=" + siteName,
+                        Username = "$" + siteName,
+                        Password = deployToken
+                    } );
+                }
             } );
         }
-
     }
 }
