@@ -1,6 +1,6 @@
-using Nuke.Common.Tooling;
-using Nuke.WebDeploy;
+using Microsoft.Web.Deployment;
 using System;
+using System.IO;
 
 namespace CodeCakeBuilder.NetFrameWorkRunner
 {
@@ -8,15 +8,27 @@ namespace CodeCakeBuilder.NetFrameWorkRunner
     {
         public static void Main()
         {
+            Console.WriteLine( );
             string deployToken = Environment.GetEnvironmentVariable( "DEPLOY_PASSWORD" );
             string siteName = "cklogviewerwebapp";
-            WebDeployTasks.WebDeploy( s =>
-                 s.SetSourcePath( "CodeCakeBuilder/Releases/CK.LogViewer.WebApp.Server" )
-                 .SetSiteName( siteName )
-                 .SetPublishUrl( "https://" + siteName + ".scm.azurewebsites.net:443/msdeploy.axd?site=" + siteName )
-                 .SetUsername( "$" + siteName )
-                 .SetPassword( deployToken )
-            );
+            string sourcepath = Path.GetFullPath( "../CodeCakeBuilder/Releases/CK.LogViewer.WebApp.Server" );
+            var sourceOptions = new DeploymentBaseOptions();
+            var destinationOptions = new DeploymentBaseOptions
+            {
+                AuthenticationType = "basic",
+                ComputerName = "https://" + siteName + ".scm.azurewebsites.net:443/msdeploy.axd?site=" + siteName,
+                UserName = "$" + siteName,
+                Password = deployToken
+            };
+            destinationOptions.Trace += ( _, trace ) => Console.WriteLine( trace.EventLevel + " " + trace.Message );
+
+            var syncOptions = new DeploymentSyncOptions();
+            var sourceProvider = DeploymentWellKnownProvider.IisApp;
+            var destinationProvider = DeploymentWellKnownProvider.IisApp;
+            using( var deploymentObject = DeploymentManager.CreateObject( sourceProvider, sourcepath, sourceOptions ) )
+            {
+                deploymentObject.SyncTo( destinationProvider, siteName, destinationOptions, syncOptions );
+            }
         }
     }
 }
