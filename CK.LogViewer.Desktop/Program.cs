@@ -56,22 +56,24 @@ public class Program
             hash = await resp.Content.ReadAsStringAsync();
         }
 
-        Process.Start( new ProcessStartInfo( serverAdress + "#" + hash )
+        Assembly assembly = Assembly.GetExecutingAssembly();
+        FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo( assembly.Location );
+        string? currentVersionStr = fileVersionInfo.ProductVersion?.Split( "/" )[0];
+        CSVersion? currentVersion = currentVersionStr == null ? null : CSVersion.Parse( currentVersionStr );
+
+        Process.Start( new ProcessStartInfo( serverAdress + $"?v={currentVersion}#" + hash )
         {
             UseShellExecute = true
         } );
 
 
-        await CheckForUpdate();
+        await CheckForUpdate( currentVersion );
         return 0;
     }
 
-    private static async Task CheckForUpdate()
+    private static async Task CheckForUpdate( CSVersion? currentVersion )
     {
-        Assembly assembly = Assembly.GetExecutingAssembly();
-        FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo( assembly.Location );
-        string? currentVersionStr = fileVersionInfo.ProductVersion?.Split( "/" )[0];
-        CSVersion? currentVersion = currentVersionStr == null ? null : CSVersion.Parse( currentVersionStr );
+       
 
         //if( Debugger.IsAttached ) return;
         if( currentVersion == null )
