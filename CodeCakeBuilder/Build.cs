@@ -104,7 +104,7 @@ namespace CodeCake
         static void DeleteFile( NetworkCredential creds, string filePath )
         {
             Console.WriteLine( $"Deleting {filePath}." );
-            FtpWebRequest request = (FtpWebRequest)WebRequest.Create( "ftp://waws-prod-par-013.ftp.azurewebsites.windows.net/site/wwwroot/" + filePath );
+            FtpWebRequest request = (FtpWebRequest)WebRequest.Create( "ftp://waws-prod-par-013.ftp.azurewebsites.windows.net/site/wwwroot/" + filePath.Replace( '\\', '/' ) );
             request.Credentials = creds;
             request.EnableSsl = true;
             request.Method = WebRequestMethods.Ftp.DeleteFile;
@@ -117,7 +117,7 @@ namespace CodeCake
         static void UploadFile( NetworkCredential creds, string filePath )
         {
             Console.WriteLine( $"Uploading {filePath}." );
-            FtpWebRequest request = (FtpWebRequest)WebRequest.Create( "ftp://waws-prod-par-013.ftp.azurewebsites.windows.net/site/wwwroot/" + filePath );
+            FtpWebRequest request = (FtpWebRequest)WebRequest.Create( "ftp://waws-prod-par-013.ftp.azurewebsites.windows.net/site/wwwroot/" + filePath.Replace( '\\', '/' ) );
             request.Credentials = creds;
             request.EnableSsl = true;
             request.Method = WebRequestMethods.Ftp.UploadFile;
