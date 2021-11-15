@@ -91,7 +91,6 @@ namespace CodeCake
                     } );
                 }
 
-                Cake.DotNetCoreRun( "CodeCakeBuilder.NetFrameWorkRunner" );
                 string deployToken = Environment.GetEnvironmentVariable( "DEPLOY_PASSWORD" );
                 NetworkCredential creds = new NetworkCredential( "CKLogViewerWebApp\\$CKLogViewerWebApp", deployToken );
                 foreach( string file in Directory.GetFiles( webappServer, "*", SearchOption.AllDirectories ) )
