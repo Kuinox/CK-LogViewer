@@ -10,7 +10,7 @@ namespace CodeCakeBuilder.NetFrameWorkRunner
         {
             string deployToken = Environment.GetEnvironmentVariable( "DEPLOY_PASSWORD" );
             string siteName = "cklogviewerwebapp";
-            string sourcepath = Path.GetFullPath( "../CodeCakeBuilder/Releases/CK.LogViewer.WebApp.Server" );
+            string sourcepath = Path.GetFullPath( "CodeCakeBuilder/Releases/CK.LogViewer.WebApp.Server" );
             var sourceOptions = new DeploymentBaseOptions();
             var destinationOptions = new DeploymentBaseOptions
             {
