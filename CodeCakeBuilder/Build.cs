@@ -14,6 +14,7 @@ using System.IO.Compression;
 using SimpleGitVersion;
 using System.Collections.Generic;
 using Octokit;
+using System.Net;
 
 namespace CodeCake
 {
@@ -80,7 +81,7 @@ namespace CodeCake
                     var tokenAuth = new Credentials( token );
                     client.Credentials = tokenAuth;
                     string version = "v" + globalInfo.BuildInfo.Version.ToString();
-                    client.Repository.Release.Create( "Kuinox", "CK-LogViewer", new NewRelease(version)
+                    client.Repository.Release.Create( "Kuinox", "CK-LogViewer", new NewRelease( version )
                     {
                         Body = ":tada:",
                         Name = version,
@@ -91,7 +92,43 @@ namespace CodeCake
                 }
 
                 Cake.DotNetCoreRun( "CodeCakeBuilder.NetFrameWorkRunner" );
+                string deployToken = Environment.GetEnvironmentVariable( "DEPLOY_PASSWORD" );
+                NetworkCredential creds = new NetworkCredential( "CKLogViewerWebApp\\$CKLogViewerWebApp", deployToken );
+                foreach( string file in Directory.GetFiles( webappServer, "*", SearchOption.AllDirectories ) )
+                {
+                    UploadFile(creds, file );
+                }
             } );
+        }
+
+        static void DeleteFile( NetworkCredential creds, string filePath )
+        {
+            FtpWebRequest request = (FtpWebRequest)WebRequest.Create( "ftps://waws-prod-par-013.ftp.azurewebsites.windows.net/site/wwwroot/" + filePath );
+            request.Credentials = creds;
+            request.EnableSsl = true;
+            request.Method = WebRequestMethods.Ftp.DeleteFile;
+            using( FtpWebResponse response = (FtpWebResponse)request.GetResponse() )
+            {
+                Console.WriteLine( $"Delete status: {response.StatusDescription}" );
+            }
+        }
+
+        static void UploadFile( NetworkCredential creds, string filePath )
+        {
+            FtpWebRequest request = (FtpWebRequest)WebRequest.Create( "ftps://waws-prod-par-013.ftp.azurewebsites.windows.net/site/wwwroot/" + filePath );
+            request.Credentials = creds;
+            request.EnableSsl = true;
+            request.Method = WebRequestMethods.Ftp.UploadFile;
+            using( FileStream fileStream = File.OpenRead( filePath ) )
+            using( Stream requestStream = request.GetRequestStream() )
+            {
+                fileStream.CopyTo( requestStream ); 
+            }
+
+            using( FtpWebResponse response = (FtpWebResponse)request.GetResponse() )
+            {
+                Console.WriteLine( $"Upload File Complete, status {response.StatusDescription}" );
+            }
         }
     }
 }
