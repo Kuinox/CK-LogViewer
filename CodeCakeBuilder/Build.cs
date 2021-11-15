@@ -81,14 +81,20 @@ namespace CodeCake
                     var tokenAuth = new Credentials( token );
                     client.Credentials = tokenAuth;
                     string version = "v" + globalInfo.BuildInfo.Version.ToString();
-                    client.Repository.Release.Create( "Kuinox", "CK-LogViewer", new NewRelease( version )
+                    Release release = client.Repository.Release.Create( "Kuinox", "CK-LogViewer", new NewRelease( version )
                     {
                         Body = ":tada:",
                         Name = version,
                         TargetCommitish = globalInfo.BuildInfo.CommitSha,
                         Prerelease = globalInfo.BuildInfo.Version.IsPrerelease,
                         Draft = false
-                    } );
+                    } ).GetAwaiter().GetResult();
+                    using( FileStream installerStream = File.OpenRead( installer ) )
+                    {
+                        client.Repository.Release.UploadAsset(
+                            release, new ReleaseAssetUpload( Path.GetFileName( installer ), "application/octet-stream", installerStream, default )
+                        ).GetAwaiter().GetResult();
+                    }
                 }
 
                 string deployToken = Environment.GetEnvironmentVariable( "DEPLOY_PASSWORD" );
