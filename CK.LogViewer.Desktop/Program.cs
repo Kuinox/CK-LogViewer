@@ -70,7 +70,7 @@ public class Program
     {
         Assembly assembly = Assembly.GetExecutingAssembly();
         FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo( assembly.Location );
-        string? currentVersionStr = fileVersionInfo.ProductVersion?.Split("/")[0];
+        string? currentVersionStr = fileVersionInfo.ProductVersion?.Split( "/" )[0];
         CSVersion? currentVersion = currentVersionStr == null ? null : CSVersion.Parse( currentVersionStr );
 
         //if( Debugger.IsAttached ) return;
@@ -85,6 +85,7 @@ public class Program
         (Release release, CSVersion version) = repo
             .Select( s => (Release: s, Version: CSVersion.TryParse( s.TagName )) )
             .Where( s => s.Version?.IsStable ?? false )
+            .Where( s => s.Release.Assets.Any( s => s.Name.EndsWith( ".exe" ) ) )
             .OrderByDescending( s => s.Version )
             .FirstOrDefault();
 

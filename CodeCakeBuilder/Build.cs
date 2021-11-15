@@ -31,7 +31,11 @@ namespace CodeCake
             Task( "Default" ).Does( () =>
             {
                 globalInfo.TerminateIfShouldStop();
-
+                if(!globalInfo.IsValid)
+                {
+                    Console.WriteLine("Invalid version. Exiting.");
+                    return;
+                }
                 globalInfo.GetDotnetSolution().Clean();
                 globalInfo.GetNPMSolution().Clean();
                 Cake.CleanDirectories( globalInfo.ReleasesFolder );
