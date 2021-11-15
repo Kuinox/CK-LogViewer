@@ -150,8 +150,8 @@ namespace CodeCake
             FtpWebRequest request = (FtpWebRequest)WebRequest.Create( uri );
             request.Credentials = creds;
             request.EnableSsl = true;
-            //request.ConnectionGroupName = "FTPCCB";
-            //request.KeepAlive = true;
+            request.ConnectionGroupName = "FTPCCB";
+            request.KeepAlive = true;
             return request;
         }
     }
