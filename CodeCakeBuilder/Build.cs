@@ -95,16 +95,17 @@ namespace CodeCake
                 NetworkCredential creds = new NetworkCredential( "CKLogViewerWebApp\\$CKLogViewerWebApp", deployToken );
                 foreach( string file in Directory.GetFiles( webappServer, "*", SearchOption.AllDirectories ) )
                 {
-                    DeleteFile( creds, file );
-                    UploadFile( creds, file );
+                    string uploadPath = Path.GetRelativePath( webappServer, file );
+                    DeleteFile( creds, uploadPath );
+                    UploadFile( creds, file, uploadPath );
                 }
             } );
         }
 
-        static void DeleteFile( NetworkCredential creds, string filePath )
+        static void DeleteFile( NetworkCredential creds, string uploadPath )
         {
-            Console.WriteLine( $"Deleting {filePath}." );
-            FtpWebRequest request = (FtpWebRequest)WebRequest.Create( "ftp://waws-prod-par-013.ftp.azurewebsites.windows.net/site/wwwroot/" + filePath.Replace( '\\', '/' ) );
+            Console.WriteLine( $"Deleting {uploadPath}." );
+            FtpWebRequest request = (FtpWebRequest)WebRequest.Create( "ftp://waws-prod-par-013.ftp.azurewebsites.windows.net/site/wwwroot/" + uploadPath.Replace( '\\', '/' ) );
             request.Credentials = creds;
             request.EnableSsl = true;
             request.Method = WebRequestMethods.Ftp.DeleteFile;
@@ -114,10 +115,10 @@ namespace CodeCake
             }
         }
 
-        static void UploadFile( NetworkCredential creds, string filePath )
+        static void UploadFile( NetworkCredential creds, string filePath, string uploadPath )
         {
-            Console.WriteLine( $"Uploading {filePath}." );
-            FtpWebRequest request = (FtpWebRequest)WebRequest.Create( "ftp://waws-prod-par-013.ftp.azurewebsites.windows.net/site/wwwroot/" + filePath.Replace( '\\', '/' ) );
+            Console.WriteLine( $"Uploading {filePath} to {uploadPath}." );
+            FtpWebRequest request = (FtpWebRequest)WebRequest.Create( "ftp://waws-prod-par-013.ftp.azurewebsites.windows.net/site/wwwroot/" + uploadPath.Replace( '\\', '/' ) );
             request.Credentials = creds;
             request.EnableSsl = true;
             request.Method = WebRequestMethods.Ftp.UploadFile;
