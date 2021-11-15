@@ -105,14 +105,23 @@ namespace CodeCake
         static void DeleteFile( NetworkCredential creds, string uploadPath )
         {
             Console.WriteLine( $"Deleting {uploadPath}." );
-            FtpWebRequest request = (FtpWebRequest)WebRequest.Create( "ftp://waws-prod-par-013.ftp.azurewebsites.windows.net/site/wwwroot/" + uploadPath.Replace( '\\', '/' ) );
-            request.Credentials = creds;
-            request.EnableSsl = true;
-            request.Method = WebRequestMethods.Ftp.DeleteFile;
-            using( FtpWebResponse response = (FtpWebResponse)request.GetResponse() )
+            try
             {
-                Console.WriteLine( $"Delete status: {response.StatusDescription}" );
+
+                FtpWebRequest request = (FtpWebRequest)WebRequest.Create( "ftp://waws-prod-par-013.ftp.azurewebsites.windows.net/site/wwwroot/" + uploadPath.Replace( '\\', '/' ) );
+                request.Credentials = creds;
+                request.EnableSsl = true;
+                request.Method = WebRequestMethods.Ftp.DeleteFile;
+                using( FtpWebResponse response = (FtpWebResponse)request.GetResponse() )
+                {
+                    Console.WriteLine( $"Delete status: {response.StatusDescription}" );
+                }
             }
+            catch( Exception ex )
+            {
+                Console.WriteLine( ex.Message );
+            }
+
         }
 
         static void UploadFile( NetworkCredential creds, string filePath, string uploadPath )
@@ -125,7 +134,7 @@ namespace CodeCake
             using( FileStream fileStream = File.OpenRead( filePath ) )
             using( Stream requestStream = request.GetRequestStream() )
             {
-                fileStream.CopyTo( requestStream ); 
+                fileStream.CopyTo( requestStream );
             }
 
             using( FtpWebResponse response = (FtpWebResponse)request.GetResponse() )
