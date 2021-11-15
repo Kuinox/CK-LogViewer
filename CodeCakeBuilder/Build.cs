@@ -127,9 +127,11 @@ namespace CodeCake
         static void UploadFile( NetworkCredential creds, string filePath, string uploadPath )
         {
             Console.WriteLine( $"Uploading {filePath} to {uploadPath}." );
-            FtpWebRequest request = (FtpWebRequest)WebRequest.Create( "ftp://waws-prod-par-013.ftp.azurewebsites.windows.net/site/wwwroot/" + uploadPath.Replace( '\\', '/' ) );
-            request.Credentials = creds;
-            request.EnableSsl = true;
+            FtpWebRequest request = CreateWebRequest(
+                "ftp://waws-prod-par-013.ftp.azurewebsites.windows.net/site/wwwroot/" + uploadPath.Replace( '\\', '/' ),
+                creds
+            );
+
             request.Method = WebRequestMethods.Ftp.UploadFile;
             using( FileStream fileStream = File.OpenRead( filePath ) )
             using( Stream requestStream = request.GetRequestStream() )
@@ -141,6 +143,16 @@ namespace CodeCake
             {
                 Console.WriteLine( $"Upload File Complete, status {response.StatusDescription}" );
             }
+        }
+
+        static FtpWebRequest CreateWebRequest( string uri, NetworkCredential creds )
+        {
+            FtpWebRequest request = (FtpWebRequest)WebRequest.Create( uri );
+            request.Credentials = creds;
+            request.EnableSsl = true;
+            request.ConnectionGroupName = "FTPCCB";
+            request.KeepAlive = true;
+            return request;
         }
     }
 }
