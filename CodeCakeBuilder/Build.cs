@@ -95,7 +95,8 @@ namespace CodeCake
                 NetworkCredential creds = new NetworkCredential( "CKLogViewerWebApp\\$CKLogViewerWebApp", deployToken );
                 foreach( string file in Directory.GetFiles( webappServer, "*", SearchOption.AllDirectories ) )
                 {
-                    UploadFile(creds, file );
+                    DeleteFile( creds, file );
+                    UploadFile( creds, file );
                 }
             } );
         }
