@@ -63,6 +63,7 @@ export class LogViewer extends HTMLElement { //TODO: hide this behind an object,
     }
 
     private rulerClicked = (groupOffset: number) => {
+        console.log(groupOffset);
         let hasOpenGroupHidden = false;
         let hasOpenGroup = false;
         let isSimpleLogHidden = false;
