@@ -33,7 +33,24 @@ namespace CK.LogViewer
             WriteException( entry.Exception, writer );
             WriteParentsLogLevel( entry, writer );
             WriteStats( entry, writer );
+            WriteConclusions( entry, writer );
             writer.WriteEndObject();
+        }
+
+        private static void WriteConclusions( LogEntryWithState entry, Utf8JsonWriter writer )
+        {
+            if( entry.Conclusions != null && entry.Conclusions.Count > 0 )
+            {
+                writer.WriteStartArray( "conclusions" );
+                foreach( ActivityLogGroupConclusion conclusion in entry.Conclusions )
+                {
+                    writer.WriteStartObject();
+                    writer.WriteString( "text", conclusion.Text );
+                    writer.WriteString( "tag", conclusion.Tag );
+                    writer.WriteEndObject();
+                }
+                writer.WriteEndArray();
+            }
         }
 
         static void WriteStats( LogEntryWithState entry, Utf8JsonWriter writer )

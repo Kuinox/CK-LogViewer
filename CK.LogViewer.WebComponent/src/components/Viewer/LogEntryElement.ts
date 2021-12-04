@@ -4,6 +4,8 @@ import { LogExceptionElement } from "./LogExceptionElement";
 import { CssClassManager } from "./CssClassManager";
 import { LogLineBaseElement, LogViewerState, OnClickRulerCallback } from "./LogLineBaseElement";
 import { ColorGenerator } from "../../helpers/colorGenerator";
+import { LogType } from "../../backend/LogType";
+import { ICloseGroup } from "../../backend/ICloseGroup";
 
 
 export class LogEntryElement extends LogLineBaseElement {
@@ -25,6 +27,9 @@ export class LogEntryElement extends LogLineBaseElement {
         const span = document.createElement("span");
         span.className = "log-text";
         span.innerHTML = log.text ?? "";
+        if(log.logType == LogType.CloseGroup) {
+            span.innerHTML = (log as ICloseGroup).conclusions?.map(s=>s.text)?.join("\n") ?? "";
+        }
         logContent.append(span);
 
         const logLevel = logLevelToString.get(log.logLevel & LogLevel.Mask);
