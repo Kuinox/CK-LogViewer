@@ -53,7 +53,7 @@ export class LogLineBaseElement extends HTMLElement {
         this.classList.add(this.monitorClass);
         const date = document.createElement("span");
         date.classList.add("metadata-date");
-        date.innerHTML = log.logTime.padEnd(32, " ");
+        date.innerText = log.logTime.padEnd(32, " ");
         this.append(date);
         const slider = document.createElement("div");
         slider.classList.add("slider");

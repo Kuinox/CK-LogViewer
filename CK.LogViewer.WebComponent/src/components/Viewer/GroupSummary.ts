@@ -39,7 +39,7 @@ export class GroupSummary extends LogLineBaseElement {
         const span = document.createElement("span");
         span.classList.add("badge");
         span.classList.add(level.toLowerCase());
-        span.innerHTML = qty + " " + level;
+        span.innerText = qty + " " + level;
         return span;
     }
 }

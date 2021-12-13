@@ -5,7 +5,7 @@ export class LoadingIcon extends HTMLElement {
 
     }
     connectedCallback(): void {
-        this.innerHTML = "/";
+        this.innerText = "/";
         this.interval = setInterval(this.spin, 100);
     }
 
@@ -17,17 +17,17 @@ export class LoadingIcon extends HTMLElement {
     spin = (): void => {
         switch (this.step) {
             case 0:
-                this.innerHTML = "/";
+                this.innerText = "/";
                 break;
             case 1:
-                this.innerHTML = "-";
+                this.innerText = "-";
                 break;
             case 3:
-                this.innerHTML = "|";
+                this.innerText = "|";
                 this.step = 0;
                 return;
             case 2:
-                this.innerHTML = "\\";
+                this.innerText = "\\";
                 break;
         }
         this.step++;

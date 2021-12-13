@@ -6,13 +6,13 @@ export class LogExceptionElement extends HTMLElement {
 
         const content = document.createElement("div");
         const exceptionTitle = document.createElement("h1");
-        exceptionTitle.innerHTML = log.typeException;
+        exceptionTitle.innerText = log.typeException;
         content.appendChild(exceptionTitle);
         const message = document.createElement("p");
-        message.innerHTML = log.message;
+        message.innerText = log.message;
         content.appendChild(message);
         const stacktrace = document.createElement("p");
-        stacktrace.innerHTML = log.stackTrace;
+        stacktrace.innerText = log.stackTrace;
         content.appendChild(stacktrace);
         this.appendChild(content);
     }

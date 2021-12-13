@@ -26,9 +26,9 @@ export class LogEntryElement extends LogLineBaseElement {
         }
         const span = document.createElement("span");
         span.className = "log-text";
-        span.innerHTML = log.text ?? "";
+        span.innerText = log.text ?? "";
         if(log.logType == LogType.CloseGroup) {
-            span.innerHTML = (log as ICloseGroup).conclusions?.map(s=>s.text)?.join("\n") ?? "";
+            span.innerText = (log as ICloseGroup).conclusions?.map(s=>s.text)?.join("\n") ?? "";
         }
         logContent.append(span);
 
