@@ -23,7 +23,7 @@ namespace CK.LogViewer
 
         public LogLevel LogLevel => _multicastLogEntry.LogLevel;
 
-        public string Text => _multicastLogEntry.Text;
+        public string? Text => _multicastLogEntry.Text;
 
         public CKTrait Tags => _multicastLogEntry.Tags;
 
@@ -37,7 +37,7 @@ namespace CK.LogViewer
 
         public IReadOnlyList<ActivityLogGroupConclusion>? Conclusions => _multicastLogEntry.Conclusions;
 
-        public Guid MonitorId => _multicastLogEntry.MonitorId;
+        public string MonitorId => _multicastLogEntry.MonitorId;
 
         public LogEntryType PreviousEntryType => _multicastLogEntry.PreviousEntryType;
 

@@ -1,3 +1,4 @@
+using CK.LogViewer.WebApp.Configuration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -26,6 +27,7 @@ namespace CK.LogViewer.WebApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices( IServiceCollection services )
         {
+            services.AddHttpClient();
             services.AddControllers();
             services
                .AddMvcCore( o =>
@@ -33,6 +35,7 @@ namespace CK.LogViewer.WebApp
                    o.EnableEndpointRouting = false;
                } );
             services.AddResponseCompression();
+            services.Configure<LogViewerConfig>( Configuration.GetSection( "LogViewerConfig" ) );
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

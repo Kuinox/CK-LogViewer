@@ -6,9 +6,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
-using CK.Text;
 using CK.LogViewer.Enumerable;
 using System;
+using System.Net.Http;
+using Microsoft.Extensions.Options;
+using CK.LogViewer.WebApp.Configuration;
+using System.Security.Cryptography;
 
 namespace CK.LogViewer.WebApp.Controllers
 {
@@ -17,14 +20,21 @@ namespace CK.LogViewer.WebApp.Controllers
     public class LogViewerController : ControllerBase
     {
         readonly IActivityMonitor _m;
+        readonly IOptions<LogViewerConfig> _config;
+        readonly HttpClient _httpClient;
 
-        public LogViewerController( IActivityMonitor m ) => _m = m;
+        public LogViewerController( IActivityMonitor m, IHttpClientFactory httpClientFactory, IOptions<LogViewerConfig> config )
+        {
+            _m = m;
+            _config = config;
+            _httpClient = httpClientFactory.CreateClient();
+        }
 
         [HttpGet( "{logName}" )]
         public async Task GetLogJson( string logName, [FromQuery] int depth = -1, int groupOffset = -1 )
         {
             await using( Utf8JsonWriter writer = new( HttpContext.Response.Body ) )
-            using( LogReader logReader = LogReader.Open( "saveLog/" + logName + "/log.ckmon", groupOffset < 0 ? 0 : groupOffset ) )
+            using( LogReader logReader = LogReader.Open( _storagePath.AppendPart( logName ).AppendPart( "log.ckmon" ), groupOffset < 0 ? 0 : groupOffset ) )
             {
                 HttpContext.Response.ContentType = "application/json";
                 var logsToWrite = logReader
@@ -44,30 +54,47 @@ namespace CK.LogViewer.WebApp.Controllers
             }
         }
 
+        [HttpPost( "{logname}/upload" )]
+        public async Task<IActionResult> UploadToPublicInstance( string logName )
+        {
+            if( logName.IndexOfAny( Path.GetInvalidFileNameChars() ) >= 0 ) return new BadRequestResult();
+            string logPath = _storagePath.AppendPart( logName ).AppendPart( "log.ckmon" );
+            if( !System.IO.File.Exists( logPath ) ) return NotFound();
+            using( FileStream fs = System.IO.File.OpenRead( logPath ) )
+            {
+                HttpResponseMessage resp = await _httpClient.PostAsync( new Uri( _config.Value.PublicInstanceUri, "/api/LogViewer" ), new StreamContent( fs ) );
+                return Ok( resp.Content.ReadAsStringAsync() );
+            }
+        }
+
+        readonly NormalizedPath _storagePath = "saveLog";
+
         [HttpPost]
         public async Task<string> UploadLog( IList<IFormFile> files )
         {
-            SHA1Value finalResult;
+            byte[] finalResult;
+            string shaString;
             using( TemporaryFile temporaryFile = new() )
             {
                 using( var stream = files[0].OpenReadStream() )
                 {
+                    HashAlgorithm hashAlg = HashAlgorithm.Create( "SHA256" )!;
                     using( var tempStream = System.IO.File.OpenWrite( temporaryFile.Path ) )
-                    using( SHA1Stream sHA512Stream = new( stream, true, true ) )
+                    using( CryptoStream sHA512Stream = new( stream, hashAlg, CryptoStreamMode.Write ) )
                     {
                         await sHA512Stream.CopyToAsync( tempStream );
-                        finalResult = sHA512Stream.GetFinalResult();
+                        sHA512Stream.FlushFinalBlock();
+                        finalResult = hashAlg.Hash!;
                     }
                 }
-                NormalizedPath storagePath = "saveLog";
-                string shaString = finalResult.ToString();
-                NormalizedPath logFolder = storagePath.AppendPart( shaString );
+                shaString = Convert.ToHexString( finalResult );
+                NormalizedPath logFolder = _storagePath.AppendPart( shaString );
                 NormalizedPath logPath = logFolder.AppendPart( "log.ckmon" );
                 Directory.CreateDirectory( logFolder );
                 System.IO.File.Move( temporaryFile.Path, logPath, true );
                 temporaryFile.Detach();
             }
-            return finalResult.ToString();
+            return shaString;
         }
     }
 }

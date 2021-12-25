@@ -146,7 +146,7 @@ namespace CK.LogViewer
             public string? FileName => _multicastLogEntryWithOffset.FileName;
             public int LineNumber => _multicastLogEntryWithOffset.LineNumber;
             public IReadOnlyList<ActivityLogGroupConclusion>? Conclusions => _multicastLogEntryWithOffset.Conclusions;
-            public Guid MonitorId => _multicastLogEntryWithOffset.MonitorId;
+            public string MonitorId => _multicastLogEntryWithOffset.MonitorId;
             public LogEntryType PreviousEntryType => _multicastLogEntryWithOffset.PreviousEntryType;
             public DateTimeStamp PreviousLogTime => _multicastLogEntryWithOffset.PreviousLogTime;
             public ILogEntry CreateUnicastLogEntry() => _multicastLogEntryWithOffset.CreateUnicastLogEntry();

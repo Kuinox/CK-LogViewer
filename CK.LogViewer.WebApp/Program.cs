@@ -34,13 +34,16 @@ namespace CK.LogViewer.WebApp
             {
                 host = host.UseWindowsService();
             }
-            return host.UseMonitoring()
+            return host.UseCKMonitoring()
                 .ConfigureAppConfiguration( ( context, config ) =>
                 {
                     config
                        .AddJsonFile( "appsettings.json", optional: false, reloadOnChange: true )
-                       .AddJsonFile( $"appsettings.{context.HostingEnvironment.EnvironmentName}.json", optional: true )
-                       .AddJsonFile( $"appsettings.Desktop.json", optional: true );
+                       .AddJsonFile( $"appsettings.{context.HostingEnvironment.EnvironmentName}.json", optional: true );
+                    if( !Debugger.IsAttached )
+                    {
+                        config.AddJsonFile( $"appsettings.Desktop.json", optional: true );
+                    }
                 } )
                 .ConfigureWebHostDefaults( webBuilder =>
                  {

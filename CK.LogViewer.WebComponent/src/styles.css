@@ -252,3 +252,19 @@ group-summary {
   position: absolute;
   left: 270px;
 }
+
+
+.upload-button {
+  height: 35px;
+  width: 35px;
+  cursor: pointer;
+}
+
+.upload-button svg {
+  position: relative;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  color: white;
+}

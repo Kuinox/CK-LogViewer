@@ -11,6 +11,7 @@ export class UploadFile extends HTMLElement {
         inputFileUpload.setAttribute("name", "files");
         inputFileUpload.setAttribute("type", "file");
         inputFileUpload.setAttribute("size", "1");
+        inputFileUpload.setAttribute("accept", ".ckmon");
         fileUploadForm.appendChild(inputFileUpload);
         inputFileUpload.addEventListener("change", this.uploadFiles);
         this.appendChild(fileUploadForm);

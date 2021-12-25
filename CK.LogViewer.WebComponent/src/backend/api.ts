@@ -1,4 +1,5 @@
 import { ILogEntry } from "./ILogEntry";
+import { UploadResult } from "./UploadResult";
 
 export class Api {
     filename: string;
@@ -14,17 +15,19 @@ export class Api {
     }
 
     async getGroupLogs(groupOffset: number, abortSignal?: AbortSignal): Promise<ILogEntry[]> {
-        if(groupOffset === undefined ) throw Error("Invalid argument.");
+        if (groupOffset === undefined) throw Error("Invalid argument.");
         const result = await fetch(`api/LogViewer/${this.filename}?groupOffset=${groupOffset}`, { signal: abortSignal });
         if (!result.ok) throw new Error("Request response is not OK.");
         const json = await result.json();
         return json as ILogEntry[];
     }
 
-
+    async uploadLogToPublicInstance(): Promise<string> {
+        const result = await fetch(`api/LogViewer/${this.filename}/upload`, { method: "POST" });
+        if (!result.ok) throw new Error("Request response is not OK.");
+        return await result.text();
+    }
 }
-
-
 
 export async function uploadLog(formData: FormData): Promise<string> {
     const result = await fetch(`api/LogViewer/`, {

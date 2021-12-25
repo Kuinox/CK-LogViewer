@@ -13,7 +13,7 @@ public class Program
 
     public static IHostBuilder CreateHostBuilder( string[] args ) =>
         Host.CreateDefaultBuilder( args )
-            .UseMonitoring()
+            .UseCKMonitoring()
             .ConfigureServices( (hostContext, services) =>
             {
                 services.AddHostedService<Worker>();
