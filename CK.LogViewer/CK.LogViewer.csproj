@@ -9,6 +9,4 @@
   <ItemGroup>
     <PackageReference Include="CK.Monitoring" Version="15.0.0-r01" />
   </ItemGroup>
-
-
 </Project>
