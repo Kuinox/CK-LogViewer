@@ -10,7 +10,7 @@ import { GroupSummary } from "./GroupSummary";
 import { LogLevel } from "../../backend/LogLevel";
 import { ColorGenerator } from "../../helpers/colorGenerator";
 import { LogViewerState } from "./LogLineBaseElement";
-import { openOnPublicInstance } from "../../services/mainServerService";
+import { isPublicInstance, openOnPublicInstance } from "../../services/mainServerService";
 export class LogViewer extends HTMLElement { //TODO: hide this behind an object, so consumer dont see HTML methods.
     private loadIcon: LoadingIcon | undefined;
     private logZone!: HTMLDivElement;
@@ -45,11 +45,13 @@ export class LogViewer extends HTMLElement { //TODO: hide this behind an object,
     api: Api | undefined;
     async render(filename: string): Promise<void> { //TODO: move this out of the LogViewer component.
         if (!this.isSetup) {
-            const div = document.createElement("div");
-            div.classList.add("upload-button");
-            div.innerHTML = `<svg viewBox="0 0 122.88 88.98"><style type="text/css">.st0{fill:#fff;fill-rule:evenodd;clip-rule:evenodd;}</style><g><path class="st0" d="M85.33,16.83c12.99-9.83,31.92,1.63,31.92,13.63c0,7.75-2.97,10.79-7.57,14.03 c23.2,12.41,12.7,39.86-7.54,44.49l-70.69,0c-33.2,0-45.48-44.99-10.13-55.89C14.69,6.66,66.5-17.2,85.33,16.83L85.33,16.83z M53.37,69.54V53.66H39.16l22.29-26.82l22.29,26.82H69.53v15.88H53.37L53.37,69.54z"/></g></svg>`;
-            div.onclick = this.uploadLogToPublicInstance;
-            this.appendChild(div);
+            if (!isPublicInstance()) {
+                const div = document.createElement("div");
+                div.classList.add("upload-button");
+                div.innerHTML = `<svg viewBox="0 0 122.88 88.98"><style type="text/css">.st0{fill:#fff;fill-rule:evenodd;clip-rule:evenodd;}</style><g><path class="st0" d="M85.33,16.83c12.99-9.83,31.92,1.63,31.92,13.63c0,7.75-2.97,10.79-7.57,14.03 c23.2,12.41,12.7,39.86-7.54,44.49l-70.69,0c-33.2,0-45.48-44.99-10.13-55.89C14.69,6.66,66.5-17.2,85.33,16.83L85.33,16.83z M53.37,69.54V53.66H39.16l22.29-26.82l22.29,26.82H69.53v15.88H53.37L53.37,69.54z"/></g></svg>`;
+                div.onclick = this.uploadLogToPublicInstance;
+                this.appendChild(div);
+            }
             this.isSetup = true;
         }
         this.api = new Api(filename);

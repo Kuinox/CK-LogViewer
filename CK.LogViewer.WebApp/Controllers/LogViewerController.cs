@@ -62,16 +62,26 @@ namespace CK.LogViewer.WebApp.Controllers
             if( !System.IO.File.Exists( logPath ) ) return NotFound();
             using( FileStream fs = System.IO.File.OpenRead( logPath ) )
             {
-                HttpResponseMessage resp = await _httpClient.PostAsync( new Uri( _config.Value.PublicInstanceUri, "/api/LogViewer" ), new StreamContent( fs ) );
-                return Ok( resp.Content.ReadAsStringAsync() );
+                HttpResponseMessage resp = await _httpClient.PostAsync( new Uri( _config.Value.PublicInstanceUri, "/api/LogViewer" ), new MultipartFormDataContent()
+                {
+                    { new StreamContent( fs ), "files", "log.ckmon"}
+                } );
+                if( !resp.IsSuccessStatusCode )
+                {
+                    throw new InvalidOperationException( resp.ReasonPhrase );
+                }
+                string response = await resp.Content.ReadAsStringAsync();
+                string newUri = new Uri( _config.Value.PublicInstanceUri, "#" + response ).ToString();
+                return Ok( newUri );
             }
         }
 
         readonly NormalizedPath _storagePath = "saveLog";
 
         [HttpPost]
-        public async Task<string> UploadLog( IList<IFormFile> files )
+        public async Task<IActionResult> UploadLog( IList<IFormFile> files )
         {
+            if( files.Count == 0 ) return new BadRequestResult();
             byte[] finalResult;
             string shaString;
             using( TemporaryFile temporaryFile = new() )
@@ -93,7 +103,7 @@ namespace CK.LogViewer.WebApp.Controllers
                 System.IO.File.Move( temporaryFile.Path, logPath, true );
                 temporaryFile.Detach();
             }
-            return shaString;
+            return Ok( shaString );
         }
     }
 }
