@@ -80,14 +80,13 @@ namespace CK.LogViewer.WebApp.Controllers
                 {
                     HashAlgorithm hashAlg = HashAlgorithm.Create( "SHA256" )!;
                     using( var tempStream = System.IO.File.OpenWrite( temporaryFile.Path ) )
-                    using( CryptoStream sHA512Stream = new( stream, hashAlg, CryptoStreamMode.Write ) )
+                    using( CryptoStream sHA512Stream = new( stream, hashAlg, CryptoStreamMode.Read ) )
                     {
                         await sHA512Stream.CopyToAsync( tempStream );
-                        sHA512Stream.FlushFinalBlock();
                         finalResult = hashAlg.Hash!;
                     }
                 }
-                shaString = Convert.ToHexString( finalResult );
+                shaString = Convert.ToHexString( finalResult ).ToLower();
                 NormalizedPath logFolder = _storagePath.AppendPart( shaString );
                 NormalizedPath logPath = logFolder.AppendPart( "log.ckmon" );
                 Directory.CreateDirectory( logFolder );
