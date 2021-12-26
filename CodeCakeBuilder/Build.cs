@@ -15,6 +15,7 @@ using SimpleGitVersion;
 using System.Collections.Generic;
 using Octokit;
 using System.Net;
+using System.Net.Http;
 
 namespace CodeCake
 {
@@ -117,7 +118,6 @@ namespace CodeCake
             Console.WriteLine( $"Deleting {uploadPath}." );
             try
             {
-
                 FtpWebRequest request = (FtpWebRequest)WebRequest.Create( "ftp://waws-prod-par-013.ftp.azurewebsites.windows.net/site/wwwroot/" + uploadPath.Replace( '\\', '/' ) );
                 request.Credentials = creds;
                 request.EnableSsl = true;

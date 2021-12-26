@@ -8,6 +8,6 @@ namespace CK.LogViewer.Desktop
 {
     class Config
     {
-        public string ServerAddress { get; set; }
+        public string ServerAddress { get; set; } = null!;
     }
 }

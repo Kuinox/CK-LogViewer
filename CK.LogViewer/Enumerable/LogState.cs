@@ -139,7 +139,7 @@ namespace CK.LogViewer
             public int GroupDepth => _multicastLogEntryWithOffset.GroupDepth;
             public LogEntryType LogType => _multicastLogEntryWithOffset.LogType;
             public LogLevel LogLevel => _multicastLogEntryWithOffset.LogLevel;
-            public string Text => _multicastLogEntryWithOffset.Text;
+            public string? Text => _multicastLogEntryWithOffset.Text;
             public CKTrait Tags => _multicastLogEntryWithOffset.Tags;
             public DateTimeStamp LogTime => _multicastLogEntryWithOffset.LogTime;
             public CKExceptionData? Exception => _multicastLogEntryWithOffset.Exception;

@@ -7,7 +7,7 @@ namespace CK.LogViewer.WebApp.Configuration
 {
     public class LogViewerConfig
     {
-        public Uri PublicInstanceUri { get; set; }
+        public Uri PublicInstanceUri { get; set; } = null!;
 
     }
 }

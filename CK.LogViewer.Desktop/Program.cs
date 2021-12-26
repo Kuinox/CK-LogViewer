@@ -222,7 +222,7 @@ public class Program
 
         public static MsgBoxResult MsgBox( string text, string? caption )
         {
-            return MsgBox( text, caption, MsgBoxStyle.OkOnly );
+            return MsgBox( text, caption ?? "", MsgBoxStyle.OkOnly );
         }
 
 
