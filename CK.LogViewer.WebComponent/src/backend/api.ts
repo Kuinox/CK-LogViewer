@@ -1,5 +1,4 @@
 import { ILogEntry } from "./ILogEntry";
-import { UploadResult } from "./UploadResult";
 
 export class Api {
     filename: string;

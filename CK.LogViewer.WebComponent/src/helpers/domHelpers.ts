@@ -1,5 +1,3 @@
-import { XOR } from "./types";
-
 export function setHidden(element: HTMLElement, doHide: boolean): void {
     const hidden = isHidden(element);
     if (hidden == doHide) return;
