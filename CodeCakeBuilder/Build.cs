@@ -45,7 +45,7 @@ namespace CodeCake
                 globalInfo.GetNPMSolution().Build();
                 string toPublish = "CK.Monitoring.MQTT";
                 globalInfo.GetDotnetSolution().Pack();
-                var artifacts = globalInfo.GetArtifactPushList();
+                globalInfo.PushArtifacts();
 
                 string webappServer = globalInfo.ReleasesFolder.AppendPart( "CK.LogViewer.WebApp.Server" ).ToString();
                 string webappDesktop = globalInfo.ReleasesFolder.AppendPart( "CK.LogViewer.WebApp.Desktop" ).ToString();

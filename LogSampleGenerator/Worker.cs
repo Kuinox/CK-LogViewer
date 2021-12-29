@@ -3,24 +3,18 @@ using Microsoft.Extensions.Hosting;
 using System.Threading;
 using System.Threading.Tasks;
 
-public class Worker : IHostedService
+public class Worker : BackgroundService
 {
-    public Task StartAsync( CancellationToken cancellationToken )
+    protected override async Task ExecuteAsync( CancellationToken stoppingToken )
     {
         ActivityMonitor m1 = new();
         using( m1.OpenInfo( "Test" ) )
         {
-            for( int i = 0; i < 100; i++ )
+            while( !stoppingToken.IsCancellationRequested )
             {
-                ActivityMonitor m2 = new();
-                m2.Info( "Hello" );
+                m1.Info( "Hello" );
+                await Task.Delay( 1000, stoppingToken );
             }
         }
-        return Task.CompletedTask;
-    }
-
-    public Task StopAsync( CancellationToken cancellationToken )
-    {
-        return Task.CompletedTask;
     }
 }

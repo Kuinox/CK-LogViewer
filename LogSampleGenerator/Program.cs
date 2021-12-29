@@ -1,3 +1,4 @@
+using CK.Monitoring.MQTT;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Threading;
@@ -7,8 +8,8 @@ public class Program
 {
     public static async Task Main( string[] args )
     {
-        CancellationTokenSource cts = new( 500 );
-        await CreateHostBuilder( args ).Build().RunAsync(cts.Token);
+        MQTT? mqtt = null;
+        await CreateHostBuilder( args ).Build().RunAsync();
     }
 
     public static IHostBuilder CreateHostBuilder( string[] args ) =>
