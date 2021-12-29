@@ -1,6 +1,7 @@
 using CK.Core;
 using CK.MQTT;
 using CK.MQTT.Client;
+using System.Diagnostics;
 using System.Threading.Channels;
 
 namespace CK.Monitoring.MQTT
@@ -23,6 +24,7 @@ namespace CK.Monitoring.MQTT
             using( CKBinaryWriter bw = new( mem ) )
             {
                 entry.WriteLogEntry( bw );
+                Debugger.Break();
                 await _client.PublishAsync( m, $"ck-log/{_instanceGuid}", QualityOfService.ExactlyOnce, false, mem.GetBuffer() );
             }
         }
