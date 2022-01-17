@@ -1,25 +1,29 @@
 using CK.Core;
 using CK.Monitoring;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 using static CK.LogViewer.EnumerableLogStatsExtensions;
 
 namespace CK.LogViewer
 {
-    public static class EnumerableLogToJsonExtensions
+    public static class LogToJson
     {
-        public static void WriteTo( this IEnumerable<LogEntryWithState> @this, Utf8JsonWriter writer )
+      
+        public static async Task WriteToAsync( this IObservable<LogEntryWithState> @this, Utf8JsonWriter writer )
         {
             writer.WriteStartArray();
-            foreach( LogEntryWithState entry in @this )
+            
+            await foreach( LogEntryWithState entry in @this.ToAsyncEnumerable() )
             {
                 WriteLog( entry, writer );
             }
             writer.WriteEndArray();
         }
 
-
-        static void WriteLog( LogEntryWithState entry, Utf8JsonWriter writer )
+        public static void WriteLog( LogEntryWithState entry, Utf8JsonWriter writer )
         {
             writer.WriteStartObject();
             writer.WriteBoolean( "isGroup", false );

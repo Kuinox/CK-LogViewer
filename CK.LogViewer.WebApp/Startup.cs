@@ -1,4 +1,9 @@
+using CK.Core;
 using CK.LogViewer.WebApp.Configuration;
+using CK.LogViewer.WebApp.Handlers;
+using CK.LogViewer.WebApp.Services;
+using CK.MQTT;
+using CK.MQTT.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CK.LogViewer.WebApp
@@ -27,6 +33,15 @@ namespace CK.LogViewer.WebApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices( IServiceCollection services )
         {
+            MQTTConfiguration mqttConfig = Configuration.GetSection( "MQTT" ).Get<MQTTConfiguration>();
+            services.Configure<MQTTConfiguration>( Configuration.GetSection( "MQTT" ) );
+            IMqtt3Client client = MqttClient.Factory.CreateMQTT3Client( new( mqttConfig.ConnectionString ), 
+                ( IActivityMonitor? m, DisposableApplicationMessage msg, CancellationToken token ) =>
+            {
+                // Will be replaced.
+                return new ValueTask();
+            } );
+            services.AddSingleton( client );
             services.AddHttpClient();
             services.AddControllers();
             services
@@ -35,7 +50,11 @@ namespace CK.LogViewer.WebApp
                    o.EnableEndpointRouting = false;
                } );
             services.AddResponseCompression();
+            services.AddSingleton<AppendToFileHandler>();
+            services.AddSingleton<MQTTEmitterHandler>();
+            services.AddHostedService<MqttService>();
             services.Configure<LogViewerConfig>( Configuration.GetSection( "LogViewerConfig" ) );
+            services.Configure<LogPersistanceConfig>( Configuration.GetSection( "LogPersistanceConfig" ) );
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

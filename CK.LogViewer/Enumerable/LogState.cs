@@ -7,27 +7,34 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace CK.LogViewer
 {
     public static class EnumerableLogStatsExtensions
     {
-        public static IEnumerable<LogEntryWithState> AddState( this IEnumerable<IMulticastLogEntryWithOffset> @this )
+        public static IObservable<LogEntryWithState> AddState( this IObservable<IMulticastLogEntryWithOffset> @this )
             => @this
                 .GroupBy( s => s.MonitorId )
-                .Select( s => new Enumerable( s ) ) //this is a single monitor method.
-                .SelectMany( s => s )
-                .OrderBy( s => s.LogTime );
+                .Select( s => new Observable( s.AsObservable() ) )
+                .SelectMany( s => s );
 
-        struct Enumerable : IEnumerable<LogEntryWithState>
+        class Observable : IObservable<LogEntryWithState>
         {
-            readonly Enumerator _enumerator;
-            public Enumerable( IEnumerable<IMulticastLogEntryWithOffset> enumerable ) => _enumerator = new Enumerator( enumerable.GetEnumerator() );
-            public IEnumerator<LogEntryWithState> GetEnumerator() => _enumerator;
-            IEnumerator IEnumerable.GetEnumerator() => _enumerator;
+            readonly IObservable<IMulticastLogEntryWithOffset> _observable;
+
+            public Observable( IObservable<IMulticastLogEntryWithOffset> observable )
+                => _observable = observable;
+
+            public IDisposable Subscribe( IObserver<LogEntryWithState> observer )
+                => _observable.Subscribe( new Observer( observer ) );
+
         }
 
-        class Enumerator : IEnumerator<LogEntryWithState>
+        class Observer : IObserver<IMulticastLogEntryWithOffset>
         {
             class GroupData
             {
@@ -46,51 +53,50 @@ namespace CK.LogViewer
                     GroupOffset = entry.Offset;
                 }
             }
-            readonly IEnumerator<IMulticastLogEntryWithOffset> _enumerator;
             readonly Stack<GroupData> _dataStack;
-            public Enumerator( IEnumerator<IMulticastLogEntryWithOffset> enumerator )
+            readonly IObserver<LogEntryWithState> _observer;
+
+            public Observer( IObserver<LogEntryWithState> observer )
             {
-                _enumerator = enumerator;
                 _dataStack = new Stack<GroupData>();
                 _dataStack.Push( new GroupData() );
+                _observer = observer;
             }
 
-            public LogEntryWithState Current => new(
-                _enumerator.Current,
-                CurrentData.LogLevelSummary,
-                _enumerator.Current.LogType != LogEntryType.OpenGroup ?
-                    CurrentData.ParentsGroupLevels
-                    : CurrentData.ParentsGroupLevels.RemoveRange( CurrentData.ParentsGroupLevels.Length - 1, 1 ),
-                CurrentData.GroupOffset
-            );
-            GroupData CurrentData => _dataStack.Peek();
-            object IEnumerator.Current => Current;
+            public void OnCompleted() => _observer.OnCompleted();
 
-            public void Dispose() => _enumerator.Dispose();
-            public void Reset() => _enumerator.Reset();
+            public void OnError( Exception error ) => _observer.OnError( error );
 
-            public bool MoveNext()
+            public void OnNext( IMulticastLogEntryWithOffset value )
             {
-                if( _enumerator.Current?.LogType == LogEntryType.CloseGroup )
+                if( value.LogType == LogEntryType.CloseGroup )
                 {
                     _dataStack.Pop();
                 }
-                if( !_enumerator.MoveNext() ) return false;
-
-                switch( _enumerator.Current!.LogType )
+                _observer.OnNext( new LogEntryWithState(
+                    value,
+                    CurrentData.LogLevelSummary,
+                    value.LogType != LogEntryType.OpenGroup ?
+                    CurrentData.ParentsGroupLevels
+                    : CurrentData.ParentsGroupLevels.RemoveRange( CurrentData.ParentsGroupLevels.Length - 1, 1 ),
+                    CurrentData.GroupOffset
+                    ) );
+                switch( value.LogType )
                 {
                     case LogEntryType.Line:
-                        IncrementStat( _enumerator.Current.LogLevel );
+                        IncrementStat( value.LogLevel );
                         break;
                     case LogEntryType.OpenGroup:
-                        IncrementStat( _enumerator.Current.LogLevel );
+                        IncrementStat( value.LogLevel );
                         _dataStack.Push(
-                            new GroupData( CurrentData, _enumerator.Current )
+                            new GroupData( CurrentData, value )
                         );
                         break;
                 }
-                return true;
             }
+
+            GroupData CurrentData => _dataStack.Peek();
+
 
             void IncrementStat( LogLevel logLevel )
             {
@@ -109,9 +115,6 @@ namespace CK.LogViewer
             }
         }
 
-        public static IEnumerable<LogEntryWithState> ComputeState( this IEnumerable<IMulticastLogEntryWithOffset> @this ) => new Enumerable( @this );
-
-        // OK this class is for all entries but it's state is for all entries.
         public class LogEntryWithState : IMulticastLogEntryWithOffset
         {
             readonly IMulticastLogEntryWithOffset _multicastLogEntryWithOffset;

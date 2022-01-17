@@ -261,3 +261,5 @@ Tests/**/TestResult*.xml
 /CK.LogViewer.WebApp/saveLog
 /CK.LogViewer.WebApp/wwwroot/
 **/Logs/
+/CK.LogViewer.WebApp/streamLogFiles/
+/CK.LogViewer.WebApp/logFiles/

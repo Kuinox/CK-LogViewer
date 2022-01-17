@@ -12,6 +12,7 @@ using System.Net.Http;
 using Microsoft.Extensions.Options;
 using CK.LogViewer.WebApp.Configuration;
 using System.Security.Cryptography;
+using System.Reactive.Linq;
 
 namespace CK.LogViewer.WebApp.Controllers
 {
@@ -21,24 +22,47 @@ namespace CK.LogViewer.WebApp.Controllers
     {
         readonly IActivityMonitor _m;
         readonly IOptions<LogViewerConfig> _config;
+        readonly IOptions<LogPersistanceConfig> _logPersistanceConfig;
         readonly HttpClient _httpClient;
 
-        public LogViewerController( IActivityMonitor m, IHttpClientFactory httpClientFactory, IOptions<LogViewerConfig> config )
+        public LogViewerController( IActivityMonitor m,
+                                   IHttpClientFactory httpClientFactory,
+                                   IOptions<LogViewerConfig> config,
+                                   IOptions<LogPersistanceConfig> logPersistanceConfig )
         {
             _m = m;
             _config = config;
+            _logPersistanceConfig = logPersistanceConfig;
             _httpClient = httpClientFactory.CreateClient();
         }
+
+        NormalizedPath LogFileFolder => _logPersistanceConfig.Value.LogFileFolder;
+        NormalizedPath StreamFolder => _logPersistanceConfig.Value.StreamLogFolder;
 
         [HttpGet( "{logName}" )]
         public async Task GetLogJson( string logName, [FromQuery] int depth = -1, int groupOffset = -1 )
         {
+            bool isLive = logName.Length != 64;
+            NormalizedPath path = (isLive ? StreamFolder : LogFileFolder).AppendPart( logName ).AppendPart( "log.ckmon" );
+            if( !System.IO.File.Exists( path ) && isLive )
+            {
+                await using( Utf8JsonWriter writer = new( HttpContext.Response.Body ) )
+                {
+                    writer.WriteStartArray();
+                    writer.WriteEndArray();
+                    await writer.FlushAsync();
+                }
+                return;
+            }
             await using( Utf8JsonWriter writer = new( HttpContext.Response.Body ) )
-            using( LogReader logReader = LogReader.Open( _storagePath.AppendPart( logName ).AppendPart( "log.ckmon" ), groupOffset < 0 ? 0 : groupOffset ) )
+            using( LogReader logReader = LogReader.Open( path,
+                groupOffset < 0 ? 0 : groupOffset )
+            )
             {
                 HttpContext.Response.ContentType = "application/json";
                 var logsToWrite = logReader
                     .ToEnumerable()
+                    .ToObservable()
                     .AddState();
                 if( depth >= 0 )
                 {
@@ -49,7 +73,7 @@ namespace CK.LogViewer.WebApp.Controllers
                 {
                     logsToWrite = logsToWrite.TakeOnlyCurrentGroupContent();
                 }
-                logsToWrite.WriteTo( writer );
+                await logsToWrite.WriteToAsync( writer );
                 await writer.FlushAsync();
             }
         }
@@ -58,7 +82,7 @@ namespace CK.LogViewer.WebApp.Controllers
         public async Task<IActionResult> UploadToPublicInstance( string logName )
         {
             if( logName.IndexOfAny( Path.GetInvalidFileNameChars() ) >= 0 ) return new BadRequestResult();
-            string logPath = _storagePath.AppendPart( logName ).AppendPart( "log.ckmon" );
+            string logPath = LogFileFolder.AppendPart( logName ).AppendPart( "log.ckmon" );
             if( !System.IO.File.Exists( logPath ) ) return NotFound();
             using( FileStream fs = System.IO.File.OpenRead( logPath ) )
             {
@@ -75,8 +99,6 @@ namespace CK.LogViewer.WebApp.Controllers
                 return Ok( newUri );
             }
         }
-
-        readonly NormalizedPath _storagePath = "saveLog";
 
         [HttpPost]
         public async Task<IActionResult> UploadLog( IList<IFormFile> files )
@@ -97,7 +119,7 @@ namespace CK.LogViewer.WebApp.Controllers
                     }
                 }
                 shaString = Convert.ToHexString( finalResult ).ToLower();
-                NormalizedPath logFolder = _storagePath.AppendPart( shaString );
+                NormalizedPath logFolder = LogFileFolder.AppendPart( shaString );
                 NormalizedPath logPath = logFolder.AppendPart( "log.ckmon" );
                 Directory.CreateDirectory( logFolder );
                 System.IO.File.Move( temporaryFile.Path, logPath, true );

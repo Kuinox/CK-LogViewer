@@ -11,13 +11,18 @@ import { LogLevel } from "../../backend/LogLevel";
 import { ColorGenerator } from "../../helpers/colorGenerator";
 import { LogViewerState } from "./LogLineBaseElement";
 import { isPublicInstance, openOnPublicInstance } from "../../services/mainServerService";
+import { MQTTService } from "../../backend/MQTTHelpers";
+import { IPublishPacket } from "mqtt";
+
 export class LogViewer extends HTMLElement { //TODO: hide this behind an object, so consumer dont see HTML methods.
     private loadIcon: LoadingIcon | undefined;
     private logZone!: HTMLDivElement;
     private cssClassManager = new CssClassManager();
     private colorGenerator = new ColorGenerator();
     private logviewerState = new LogViewerState();
+    private mqttService = new MQTTService("localhost:1884");
     private isSetup = false;
+    private previousSubscribe: undefined | (() => void);
     constructor(displayLoading: boolean) {
         super();
         this.reset(displayLoading);
@@ -43,7 +48,13 @@ export class LogViewer extends HTMLElement { //TODO: hide this behind an object,
         return new Promise(resolve => setTimeout(resolve, ms));
     }
     api: Api | undefined;
+
+
     async render(filename: string): Promise<void> { //TODO: move this out of the LogViewer component.
+        if (this.previousSubscribe !== undefined) {
+            this.previousSubscribe();
+        }
+        this.previousSubscribe = await this.mqttService.listenTo(filename, this.processLogStream);
         if (!this.isSetup) {
             if (!isPublicInstance()) {
                 const div = document.createElement("div");
@@ -59,31 +70,62 @@ export class LogViewer extends HTMLElement { //TODO: hide this behind an object,
         const aborter = new AbortController();
         this.aborter = aborter;
         const logs = await this.api.getLogs(aborter.signal);
+        console.log(`Received ${logs.length} logs.`);
         if (this.aborter.signal.aborted) {
             return;
         }
         this.reset(true);
+        this.renderPromise = this.doRender(logs);
+        await this.renderPromise;
+        this.removeLoadIcon();
+    }
+    private lastLog: ILogEntry | undefined;
+    private renderingDone = true;
+    private async doRender(logs: ILogEntry[]) {
+        console.log(`Rendering ${logs.length} logs.`);
+        this.renderingDone = false;
+        this.lastLog = logs[logs.length - 1];
         const perf = performance.now();
         for (let i = 0; i < logs.length; i++) {
             const curr = logs[i];
             this.appendEntry(curr);
-            if (this.aborter.signal.aborted) {
+            if (this.aborter!.signal.aborted) {
                 return;
             }
             if (i % 100 === 99) {
                 await this.sleep(0);
             }
         }
-        this.removeLoadIcon();
         console.log("renderTime: " + (performance.now() - perf) + "ms");
+        this.renderingDone = true;
     }
+    renderPromise: Promise<void> | undefined;
+    subscribed = false;
+    waitingMessages : ILogEntry[] = [];
+    private processLogStream = (message: IPublishPacket) => {
+        const logEntry = JSON.parse(message.payload.toString()) as ILogEntry;
+        if (this.lastLog?.logTime !== undefined && this.lastLog.logTime > logEntry.logTime) return;
+        if (!this.renderingDone) {
+            if (!this.subscribed) {
+                if (this.renderPromise === undefined) throw new Error("renderPromise is undefined");
+                this.renderPromise.then(() => {
+                    this.waitingMessages.forEach(entry => {
+                        this.appendEntry(entry);
+                    });
+                });
+            } else {
+                this.waitingMessages.push(logEntry);
+            }
+        } else {
+            this.appendEntry(logEntry);
+        }
+    };
 
     public appendEntry(entry: ILogEntry): void {
         this.logZone.append(new LogEntryElement(entry, this.cssClassManager, this.colorGenerator, this.logviewerState, this.rulerClicked));
     }
 
     private rulerClicked = (groupOffset: number) => {
-        console.log(groupOffset);
         let hasOpenGroupHidden = false;
         let hasOpenGroup = false;
         let isSimpleLogHidden = false;
@@ -165,6 +207,7 @@ export class LogViewer extends HTMLElement { //TODO: hide this behind an object,
 
     public removeLoadIcon(): void {
         this.loadIcon?.remove();
+        this.loadIcon = undefined;
     }
 }
 

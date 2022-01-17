@@ -24,14 +24,13 @@ namespace CK.Monitoring.MQTT
             using( CKBinaryWriter bw = new( mem ) )
             {
                 entry.WriteLogEntry( bw );
-                Debugger.Break();
-                await _client.PublishAsync( m, $"ck-log/{_instanceGuid}", QualityOfService.ExactlyOnce, false, mem.GetBuffer() );
+                await _client.PublishAsync( m, $"ck-log/{_instanceGuid}", QualityOfService.ExactlyOnce, false, mem.ToArray() );
             }
         }
 
         protected override bool DoActivate( IActivityMonitor m )
         {
-            _client = MqttClient.Factory.CreateMQTT3Client( new( _config.ConnectionString ), (IActivityMonitor? m, DisposableApplicationMessage msg, CancellationToken token) =>
+            _client = MqttClient.Factory.CreateMQTT3Client( new( _config.ConnectionString ), ( IActivityMonitor? m, DisposableApplicationMessage msg, CancellationToken token ) =>
             {
                 m?.Info( $"Receveid message on topic '{msg.Topic}', length {msg.Payload}." );
                 msg.Dispose();
