@@ -78,6 +78,31 @@ namespace CK.LogViewer.WebApp.Controllers
             }
         }
 
+        [HttpGet( "{logName}/text" )]
+        public async Task GetLogText( string logName, [FromQuery] int depth = -1, int groupOffset = -1 )
+        {
+            bool isLive = logName.Length != 64;
+            NormalizedPath path = (isLive ? StreamFolder : LogFileFolder).AppendPart( logName ).AppendPart( "log.ckmon" );
+            if( !System.IO.File.Exists( path ) && isLive )
+            {
+                return;
+            }
+            using( LogReader logReader = LogReader.Open( path,
+                groupOffset < 0 ? 0 : groupOffset )
+            )
+            {
+                HttpContext.Response.ContentType = "text/plain";
+                MulticastLogEntryTextBuilder builder = new( false, false );
+                await using( StreamWriter writer = new( HttpContext.Response.Body ) )
+                {
+                    foreach( var item in logReader.ToEnumerable() )
+                    {
+                        await writer.WriteLineAsync( builder.FormatEntryString( item ) );
+                    }
+                }
+            }
+        }
+
         [HttpPost( "{logname}/upload" )]
         public async Task<IActionResult> UploadToPublicInstance( string logName )
         {

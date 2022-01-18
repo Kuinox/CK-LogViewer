@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CK.ActivityMonitor.SimpleSender" Version="15.0.0-r02" />
-    <PackageReference Include="CK.Monitoring.Hosting" Version="15.0.0-r02" />
+    <PackageReference Include="CK.ActivityMonitor.SimpleSender" Version="15.0.0-r05" />
+    <PackageReference Include="CK.Monitoring.Hosting" Version="15.0.0-r05" />
   </ItemGroup>
 
   <ItemGroup>

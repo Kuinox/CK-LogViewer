@@ -13,6 +13,12 @@ export class Api {
         return json as ILogEntry[];
     }
 
+    async getLogsText(abortSignal?: AbortSignal): Promise<string> {
+        const result = await fetch(`api/LogViewer/${this.filename}/text`, { signal: abortSignal });
+        if (!result.ok) throw new Error("Request response is not OK.");
+        return await result.text();
+    }
+
     async getGroupLogs(groupOffset: number, abortSignal?: AbortSignal): Promise<ILogEntry[]> {
         if (groupOffset === undefined) throw Error("Invalid argument.");
         const result = await fetch(`api/LogViewer/${this.filename}?groupOffset=${groupOffset}`, { signal: abortSignal });

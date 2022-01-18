@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CK.Monitoring" Version="15.0.0-r01" />
-    <PackageReference Include="CK.MQTT.Client" Version="0.10.0" />
+    <PackageReference Include="CK.Monitoring" Version="15.0.0-r05" />
+    <PackageReference Include="CK.MQTT.Client" Version="0.10.2" />
   </ItemGroup>
 
 </Project>

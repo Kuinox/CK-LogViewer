@@ -80,7 +80,7 @@ namespace CK.LogViewer.WebApp.Handlers
                     using( Utf8JsonWriter writer = new( ms ) )
                     {
                         LogToJson.WriteLog( entry, writer );
-                        await writer.FlushAsync();
+                        await writer.FlushAsync( stoppingToken );
                         await await _mqttClient.PublishAsync( null, "logLive/" + _guid.ToString(), QualityOfService.ExactlyOnce, false, ms.ToArray() );
                     }
                 }

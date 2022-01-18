@@ -69,18 +69,16 @@ namespace CK.LogViewer
 
             public void OnNext( IMulticastLogEntryWithOffset value )
             {
+                _observer.OnNext( new LogEntryWithState(
+                    value,
+                    CurrentData.LogLevelSummary,
+                    CurrentData.ParentsGroupLevels,
+                    CurrentData.GroupOffset
+                ) );
                 if( value.LogType == LogEntryType.CloseGroup )
                 {
                     _dataStack.Pop();
                 }
-                _observer.OnNext( new LogEntryWithState(
-                    value,
-                    CurrentData.LogLevelSummary,
-                    value.LogType != LogEntryType.OpenGroup ?
-                    CurrentData.ParentsGroupLevels
-                    : CurrentData.ParentsGroupLevels.RemoveRange( CurrentData.ParentsGroupLevels.Length - 1, 1 ),
-                    CurrentData.GroupOffset
-                    ) );
                 switch( value.LogType )
                 {
                     case LogEntryType.Line:

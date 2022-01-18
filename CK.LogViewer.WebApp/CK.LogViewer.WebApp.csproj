@@ -8,13 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CK.ActivityMonitor.SimpleSender" Version="15.0.0-r02" />
-    <PackageReference Include="CK.Monitoring.Hosting" Version="15.0.0-r01" />
+    <PackageReference Include="CK.ActivityMonitor.SimpleSender" Version="15.0.0-r05" />
+    <PackageReference Include="CK.Monitoring.Hosting" Version="15.0.0-r05" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="6.0.0" />
+    <PackageReference Include="CK.MQTT.Client" Version="0.10.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\CK-MQTT\CK.MQTT.Client\CK.MQTT.Client.csproj" />
     <ProjectReference Include="..\CK.LogViewer\CK.LogViewer.csproj" />
   </ItemGroup>
   <ItemGroup>
