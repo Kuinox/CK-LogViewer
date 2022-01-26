@@ -73,7 +73,7 @@ public class Program
 
     private static async Task CheckForUpdate( CSVersion? currentVersion )
     {
-       
+
 
         //if( Debugger.IsAttached ) return;
         if( currentVersion == null )
@@ -99,7 +99,9 @@ public class Program
         ReleaseAsset installer = release.Assets.Single( s => s.Name.EndsWith( ".exe" ) );
         HttpClient httpClient = new();
         HttpResponseMessage response = await httpClient.GetAsync( installer.BrowserDownloadUrl );
-        string installerPath = "installer.exe";
+
+        string installerPath = Path.GetTempFileName();
+
         using( FileStream saveInstaller = File.OpenWrite( installerPath ) )
         using( Stream downloadStream = await response.Content.ReadAsStreamAsync() )
         {
@@ -110,7 +112,8 @@ public class Program
         {
             FileName = installerPath,
             Arguments = "/VERYSILENT",
-            CreateNoWindow = true
+            CreateNoWindow = true,
+            UseShellExecute = false
         } );
     }
 
