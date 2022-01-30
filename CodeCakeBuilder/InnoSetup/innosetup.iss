@@ -13,7 +13,7 @@
 #define DotnetPath "C:\Program Files\dotnet\dotnet.exe"
 #define ServiceDllPath "CK.LogViewer.WebApp\CK.LogViewer.WebApp.dll"
 #define Appname "CK Desktop LogViewer"
-
+#define MyAppVersion "0.0.0-0"
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
@@ -53,13 +53,6 @@ Root: HKA; Subkey: "Software\Classes\{#MyAppAssocKey}\DefaultIcon"; ValueType: s
 Root: HKA; Subkey: "Software\Classes\{#MyAppAssocKey}\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""
 Root: HKA; Subkey: "Software\Classes\Applications\{#MyAppExeName}\SupportedTypes"; ValueType: string; ValueName: ".ckmon"; ValueData: ""
 
-; Add Right click menu
-Root: "HKCR"; Subkey: "SystemFileAssociation\.ckmon\CK-LogViewer\Convert To .log File"; ValueType: none; ValueName: ""; ValueData: ""; Flags: uninsdeletekey
-; Add separator before and after the menu item:
-Root: "HKCR"; Subkey: "SystemFileAssociations\.ckmon\CK-LogViewer\Convert To .log File"; ValueType: string; ValueName: "SeparatorBefore"; ValueData: ""; Flags: uninsdeletekey
-Root: "HKCR"; Subkey: "SystemFileAssociations\.ckmon\CK-LogViewer\Convert To .log File"; ValueType: string; ValueName: "SeparatorAfter"; ValueData: ""; Flags: uninsdeletekey
-; Define command for the menu item:
-Root: "HKCR"; Subkey: "SystemFileAssociations\.ckmon\CK-LogViewer\Convert To .log File\command"; ValueType: string; ValueName: ""; ValueData: """{app}\CK.LogViewer.Desktop\CK.LogViewer.Desktop.exe"" --toText ""%1"""; Flags: uninsdeletekey
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
