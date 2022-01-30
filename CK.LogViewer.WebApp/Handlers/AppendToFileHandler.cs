@@ -33,7 +33,7 @@ namespace CK.LogViewer.WebApp.Handlers
             tmp.AddRange( BitConverter.GetBytes( LogReader.CurrentStreamVersion ) );
             _fileHeader = tmp.ToArray();
         }
-        public async Task Handle( IncomingLog notification, CancellationToken cancellationToken )
+        public async Task Handle( IActivityMonitor m, IncomingLog notification, CancellationToken cancellationToken )
         {
             string dir = Path.Combine( _logPersistanceConfig.Value.StreamLogFolder, notification.InstanceGuid.ToString() );
             string appFolder = Environment.GetFolderPath( Environment.SpecialFolder.CommonApplicationData, Environment.SpecialFolderOption.Create );
@@ -58,7 +58,7 @@ namespace CK.LogViewer.WebApp.Handlers
                     LogEntry = new MulticastLogEntryWithOffsetImpl( new MulticastLogEntryWithOffset( notification.LogEntry, position ) ),
                     Topic = notification.Topic
                 };
-                await _mqttEmitterHandler.Handle( log, cancellationToken );
+                await _mqttEmitterHandler.Handle( m, log, cancellationToken );
             }
         }
     }

@@ -77,7 +77,7 @@ namespace CK.LogViewer.WebApp.Services
                         m.Error( "Only multicast log entry are accepted." );
                         continue;
                     }
-                    await _appendToFileHandler.Handle( new()
+                    await _appendToFileHandler.Handle( m, new()
                     {
                         Topic = item.Topic,
                         InstanceGuid = Guid.Parse( item.Topic.Split( '/' )[1] ),

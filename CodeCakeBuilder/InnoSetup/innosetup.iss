@@ -13,7 +13,6 @@
 #define DotnetPath "C:\Program Files\dotnet\dotnet.exe"
 #define ServiceDllPath "CK.LogViewer.WebApp\CK.LogViewer.WebApp.dll"
 #define Appname "CK Desktop LogViewer"
-#define MyAppVersion "0.0.0-0"
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
