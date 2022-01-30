@@ -1,3 +1,4 @@
+using CK.Core;
 using CK.LogViewer.Enumerable;
 using CK.LogViewer.WebApp.Configuration;
 using CK.LogViewer.WebApp.Model;
@@ -9,8 +10,10 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -32,16 +35,55 @@ namespace CK.LogViewer.WebApp.Handlers
             _mqttConfig = mqttConfig;
         }
 
-        public async Task Handle( IncomingLogWithPosition notification, CancellationToken cancellationToken )
+        public async Task Handle(IActivityMonitor m, IncomingLogWithPosition notification, CancellationToken cancellationToken )
         {
             Handler? handler;
-            lock(_handlers)
+            bool createdNewHandler = false;
+            lock( _handlers )
             {
-                if(!_handlers.TryGetValue( notification.InstanceGuid, out handler ) )
+                if( !_handlers.TryGetValue( notification.InstanceGuid, out handler ) )
                 {
+                    createdNewHandler = true;
                     handler = new Handler( notification.InstanceGuid, _mqttConfig.Value.LogBufferSize, _mqttClient );
                     _handlers[notification.InstanceGuid] = handler;
                 }
+            }
+            if( createdNewHandler )
+            {
+                const string embeddedDir = "CK.LogViewer.Embedded";
+                var assembly = Assembly.GetExecutingAssembly();
+                var curr = assembly.Location;
+                var versionInfo =FileVersionInfo.GetVersionInfo( assembly.Location );
+                var climbing = new Stack<string>();
+                while( true )
+                {
+                    curr = Path.GetDirectoryName( curr );
+                    if( curr == null )
+                    {
+                        m.Error( "Could not find the CK.LogViewer.Embedded folder. Is your installation fine ?" );
+                    }
+                    if( Directory.GetDirectories( curr! ).Any( s => Path.GetFileName( s ) == embeddedDir ) )
+                    {
+                        break;
+                    }
+                    climbing.Push( Path.GetFileName( curr ) );
+                }
+
+                curr = Path.Combine( curr, embeddedDir );
+                if( climbing.Count > 0 )
+                {
+                    climbing.Pop();
+                    curr = Path.Combine( curr, Path.Combine( climbing.ToArray() ) );
+                }
+                curr = Path.Combine( curr, embeddedDir + ".dll" );
+                curr = Path.GetFullPath( curr );
+                Process.Start( new ProcessStartInfo()
+                {
+                    FileName = "dotnet",
+                    ArgumentList = { curr, $"http://localhost:8748/?v={versionInfo.ProductVersion}#{notification.InstanceGuid}" },
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                } );
             }
             await handler.HandleAsync( notification, cancellationToken );
         }
