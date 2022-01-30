@@ -4,7 +4,6 @@ using CK.Monitoring;
 using CKLogViewer;
 using CSemVer;
 using Octokit;
-using PhotinoNET;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
