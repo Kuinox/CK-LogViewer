@@ -36,6 +36,8 @@ namespace CK.LogViewer.WebApp.Handlers
         public async Task Handle( IncomingLog notification, CancellationToken cancellationToken )
         {
             string dir = Path.Combine( _logPersistanceConfig.Value.StreamLogFolder, notification.InstanceGuid.ToString() );
+            string appFolder = Environment.GetFolderPath( Environment.SpecialFolder.CommonApplicationData, Environment.SpecialFolderOption.Create );
+            dir = Path.Combine( appFolder, dir );
             Directory.CreateDirectory( dir );
             string logFile = Path.Combine( dir, "log.ckmon" );
             using( FileStream fs = File.Open( logFile, FileMode.Append ) )

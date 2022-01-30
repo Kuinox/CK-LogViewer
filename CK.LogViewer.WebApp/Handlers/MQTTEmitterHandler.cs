@@ -1,3 +1,4 @@
+using CK.LogViewer.Enumerable;
 using CK.LogViewer.WebApp.Configuration;
 using CK.LogViewer.WebApp.Model;
 using CK.LogViewer.WebApp.Services;
@@ -33,7 +34,7 @@ namespace CK.LogViewer.WebApp.Handlers
 
         public async Task Handle( IncomingLogWithPosition notification, CancellationToken cancellationToken )
         {
-            Handler handler;
+            Handler? handler;
             lock(_handlers)
             {
                 if(!_handlers.TryGetValue( notification.InstanceGuid, out handler ) )

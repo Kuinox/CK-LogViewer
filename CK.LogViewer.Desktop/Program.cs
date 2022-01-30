@@ -1,18 +1,25 @@
 using CK.LogViewer.Desktop;
+using CK.LogViewer.Enumerable;
+using CK.Monitoring;
+using CKLogViewer;
 using CSemVer;
 using Octokit;
+using PhotinoNET;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading.Tasks;
 
 public class Program
 {
+    [STAThread]
     public static async Task<int> Main( string[] args )
     {
         if( args.Length == 0 )
@@ -25,12 +32,41 @@ public class Program
             Console.Error.WriteLine( "Only one arg is accepted: the path of the .ckmon file." );
             return 2;
         }
-        string path = args.Single();
+        var toText = false;
+        var argsSet = new HashSet<string>( args );
+        var withFlag = argsSet.Where( s => s.StartsWith( "--" ) );
+        if( withFlag.Any() )
+        {
+            if( argsSet.Contains( "--toText" ) )
+            {
+                toText = true;
+                argsSet.Remove( "--toText" );
+            }
+        }
+
+        string path = argsSet.Single();
         if( !File.Exists( path ) )
         {
             Console.Error.WriteLine( "No file exist at the given path." );
             return 3;
         }
+
+        path = Path.GetFullPath( path );
+
+        if( toText )
+        {
+            MulticastLogEntryTextBuilder builder = new( false, false );
+            using( var reader = LogReader.Open( path ) )
+            using( var writer = new StreamWriter( path + ".ckmon" ) )
+            {
+                foreach( var item in reader.ToEnumerable() )
+                {
+                    await writer.WriteLineAsync( builder.FormatEntryString( item ) );
+                }
+            }
+            return 0;
+        }
+
         string assemblyPath = Path.GetDirectoryName( Assembly.GetExecutingAssembly().Location )!;
         string configPath = Path.Combine( assemblyPath, "appsettings.json" );
         string configTxt = await File.ReadAllTextAsync( configPath );
@@ -56,26 +92,52 @@ public class Program
             hash = await resp.Content.ReadAsStringAsync();
         }
 
-        Assembly assembly = Assembly.GetExecutingAssembly();
-        FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo( assembly.Location );
-        string? currentVersionStr = fileVersionInfo.ProductVersion?.Split( "/" )[0];
-        CSVersion? currentVersion = currentVersionStr == null ? null : CSVersion.Parse( currentVersionStr );
-
-        Process.Start( new ProcessStartInfo( serverAdress + $"?v={currentVersion}#" + hash )
+        var assembly = Assembly.GetExecutingAssembly();
+        var fileVersionInfo = FileVersionInfo.GetVersionInfo( assembly.Location );
+        var currentVersionStr = fileVersionInfo.ProductVersion?.Split( "/" )[0];
+        var currentVersion = currentVersionStr == null ? null : CSVersion.Parse( currentVersionStr );
+        var uri = $"{serverAdress}?v={currentVersion}#{hash}";
+        string? curr = assembly.Location;
+        const string embeddedDir = "CK.LogViewer.Embedded";
+        var climbing = new Stack<string>();
+        while( true )
         {
-            UseShellExecute = true
+            curr = Path.GetDirectoryName( curr );
+            if( curr == null )
+            {
+                Console.WriteLine( "Could not find the CK.LogViewer.Embedded folder. Is your installation fine ?" );
+                return 1;
+            }
+            if( Directory.GetDirectories( curr! ).Any( s => Path.GetFileName( s ) == embeddedDir ) )
+            {
+                break;
+            }
+            climbing.Push( Path.GetFileName( curr ) );
+        }
+
+        curr = Path.Combine( curr, embeddedDir );
+        if( climbing.Count > 0 )
+        {
+            climbing.Pop();
+            curr = Path.Combine( curr, Path.Combine( climbing.ToArray() ) );
+        }
+        curr = Path.Combine( curr, embeddedDir + ".dll" );
+        curr = Path.GetFullPath( curr );
+        Process.Start( new ProcessStartInfo()
+        {
+            FileName = "dotnet",
+            ArgumentList = { curr, uri },
+            UseShellExecute = false,
+            CreateNoWindow = true
         } );
-
-
         await CheckForUpdate( currentVersion );
         return 0;
     }
 
+
+
     private static async Task CheckForUpdate( CSVersion? currentVersion )
     {
-       
-
-        //if( Debugger.IsAttached ) return;
         if( currentVersion == null )
         {
             Interaction.MsgBox( "Could not detect running version. Please update manually CK-LogViewer", "CK-LogViewer" );
@@ -112,6 +174,7 @@ public class Program
             Arguments = "/VERYSILENT",
             CreateNoWindow = true
         } );
+        Environment.Exit( 0 );
     }
 
 

@@ -50,21 +50,28 @@ namespace CodeCake
                 string webappServer = globalInfo.ReleasesFolder.AppendPart( "CK.LogViewer.WebApp.Server" ).ToString();
                 string webappDesktop = globalInfo.ReleasesFolder.AppendPart( "CK.LogViewer.WebApp.Desktop" ).ToString();
                 string desktopApp = globalInfo.ReleasesFolder.AppendPart( "CK.LogViewer.Desktop" ).ToString();
+                string webshell = globalInfo.ReleasesFolder.AppendPart( "CK.LogViewer.Embedded" ).ToString();
+
                 Cake.DotNetCorePublish( "CK.LogViewer.WebApp", new DotNetCorePublishSettings()
-                .AddVersionArguments( globalInfo.BuildInfo, ( cfg ) =>
-                {
-                    cfg.OutputDirectory = webappServer;
-                } ) );
+                    .AddVersionArguments( globalInfo.BuildInfo, ( cfg ) =>
+                    {
+                        cfg.OutputDirectory = webappServer;
+                    } ) );
                 Cake.DotNetCorePublish( "CK.LogViewer.WebApp", new DotNetCorePublishSettings()
-                .AddVersionArguments( globalInfo.BuildInfo, ( cfg ) =>
-                {
-                    cfg.OutputDirectory = webappDesktop;
-                } ) );
+                    .AddVersionArguments( globalInfo.BuildInfo, ( cfg ) =>
+                    {
+                        cfg.OutputDirectory = webappDesktop;
+                    } ) );
+                Cake.DotNetCorePublish( "CK.LogViewer.Embedded", new DotNetCorePublishSettings()
+                    .AddVersionArguments( globalInfo.BuildInfo, ( cfg ) =>
+                    {
+                        cfg.OutputDirectory = webshell;
+                    } ) );
                 Cake.DotNetCorePublish( "CK.LogViewer.Desktop", new DotNetCorePublishSettings()
-                 .AddVersionArguments( globalInfo.BuildInfo, ( cfg ) =>
-                {
-                    cfg.OutputDirectory = desktopApp;
-                } ) );
+                    .AddVersionArguments( globalInfo.BuildInfo, ( cfg ) =>
+                    {
+                        cfg.OutputDirectory = desktopApp;
+                    } ) );
                 File.Delete( webappServer + "/appsettings.Desktop.json" );
                 File.Delete( webappDesktop + "/appsettings.Server.json" );
 

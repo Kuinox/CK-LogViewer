@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 
-namespace CK.LogViewer
+namespace CK.LogViewer.Enumerable
 {
     public static class GroupByLazyExtension
     {

@@ -13,6 +13,7 @@
 #define DotnetPath "C:\Program Files\dotnet\dotnet.exe"
 #define ServiceDllPath "CK.LogViewer.WebApp\CK.LogViewer.WebApp.dll"
 #define Appname "CK Desktop LogViewer"
+#define MyAppVersion "v0.5.0"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -29,11 +30,7 @@ DefaultDirName={autopf64}\{#MyAppName}
 ChangesAssociations=yes
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
-LicenseFile=..\..\LICENSE
 OutputBaseFilename={#MyAppName}-{#MyAppVersion}
-; Uncomment the following line to run in non administrative install mode (install for current user only.)
-;PrivilegesRequired=lowest
-PrivilegesRequiredOverridesAllowed=dialog
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -45,16 +42,25 @@ Name: "english"; MessagesFile: "compiler:Default.isl,CustomDefault.isl"
 [Files]
 Source: "..\Releases\CK.LogViewer.WebApp.Desktop\*"; DestDir: "{app}\CK.LogViewer.WebApp"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\Releases\CK.LogViewer.Desktop\*"; DestDir: "{app}\CK.LogViewer.Desktop"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\..\LICENSE"; DestDir: "{app}";
+Source: "..\Releases\CK.LogViewer.Embedded\*"; DestDir: "{app}\CK.LogViewer.Embedded"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Registry]
+Root: HKCR; Subkey: "{#MyAppAssocExt}"; ValueType: string; ValueName: ""; ValueData: "{#MyAppAssocName}"; Flags: uninsdeletevalue
+
 Root: HKA; Subkey: "Software\Classes\{#MyAppAssocExt}\OpenWithProgids"; ValueType: string; ValueName: "{#MyAppAssocKey}"; ValueData: ""; Flags: uninsdeletevalue
 Root: HKA; Subkey: "Software\Classes\{#MyAppAssocKey}"; ValueType: string; ValueName: ""; ValueData: "{#MyAppAssocName}"; Flags: uninsdeletekey
 Root: HKA; Subkey: "Software\Classes\{#MyAppAssocKey}\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\{#MyAppExeName},0"
 Root: HKA; Subkey: "Software\Classes\{#MyAppAssocKey}\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""
 Root: HKA; Subkey: "Software\Classes\Applications\{#MyAppExeName}\SupportedTypes"; ValueType: string; ValueName: ".ckmon"; ValueData: ""
 
+; Add Right click menu
+Root: "HKCR"; Subkey: "SystemFileAssociation\.ckmon\CK-LogViewer\Convert To .log File"; ValueType: none; ValueName: ""; ValueData: ""; Flags: uninsdeletekey
+; Add separator before and after the menu item:
+Root: "HKCR"; Subkey: "SystemFileAssociations\.ckmon\CK-LogViewer\Convert To .log File"; ValueType: string; ValueName: "SeparatorBefore"; ValueData: ""; Flags: uninsdeletekey
+Root: "HKCR"; Subkey: "SystemFileAssociations\.ckmon\CK-LogViewer\Convert To .log File"; ValueType: string; ValueName: "SeparatorAfter"; ValueData: ""; Flags: uninsdeletekey
+; Define command for the menu item:
+Root: "HKCR"; Subkey: "SystemFileAssociations\.ckmon\CK-LogViewer\Convert To .log File\command"; ValueType: string; ValueName: ""; ValueData: """{app}\CK.LogViewer.Desktop\CK.LogViewer.Desktop.exe"" --toText ""%1"""; Flags: uninsdeletekey
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"

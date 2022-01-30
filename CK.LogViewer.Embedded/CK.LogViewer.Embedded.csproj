@@ -1,14 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="CK.Monitoring" Version="15.0.0-r05" />
-    <PackageReference Include="CK.MQTT.Client" Version="0.10.3" />
+    <PackageReference Include="Photino.NET" Version="2.1.11" />
   </ItemGroup>
-
 </Project>

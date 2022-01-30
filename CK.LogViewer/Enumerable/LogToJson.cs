@@ -5,17 +5,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using static CK.LogViewer.EnumerableLogStatsExtensions;
+using static CK.LogViewer.Enumerable.EnumerableLogStatsExtensions;
 
-namespace CK.LogViewer
+namespace CK.LogViewer.Enumerable
 {
     public static class LogToJson
     {
-      
+
         public static async Task WriteToAsync( this IObservable<LogEntryWithState> @this, Utf8JsonWriter writer )
         {
             writer.WriteStartArray();
-            
+
             await foreach( LogEntryWithState entry in @this.ToAsyncEnumerable() )
             {
                 WriteLog( entry, writer );

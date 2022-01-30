@@ -1,5 +1,4 @@
 using CK.Core;
-using CK.LogViewer;
 using CK.Monitoring;
 using System;
 using System.Collections;
@@ -12,7 +11,7 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CK.LogViewer
+namespace CK.LogViewer.Enumerable
 {
     public static class EnumerableLogStatsExtensions
     {

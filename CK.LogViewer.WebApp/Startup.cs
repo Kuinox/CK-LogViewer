@@ -35,7 +35,7 @@ namespace CK.LogViewer.WebApp
         {
             MQTTConfiguration mqttConfig = Configuration.GetSection( "MQTT" ).Get<MQTTConfiguration>();
             services.Configure<MQTTConfiguration>( Configuration.GetSection( "MQTT" ) );
-            IMqtt3Client client = MqttClient.Factory.CreateMQTT3Client( new( mqttConfig.ConnectionString ), 
+            IMqtt3Client client = MqttClient.Factory.CreateMQTT3Client( new( mqttConfig.ConnectionString ),
                 ( IActivityMonitor? m, DisposableApplicationMessage msg, CancellationToken token ) =>
             {
                 // Will be replaced.
@@ -55,6 +55,7 @@ namespace CK.LogViewer.WebApp
             services.AddHostedService<MqttService>();
             services.Configure<LogViewerConfig>( Configuration.GetSection( "LogViewerConfig" ) );
             services.Configure<LogPersistanceConfig>( Configuration.GetSection( "LogPersistanceConfig" ) );
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

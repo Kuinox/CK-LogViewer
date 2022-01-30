@@ -7,7 +7,7 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CK.LogViewer
+namespace CK.LogViewer.Enumerable
 {
     public static class LogDepthFilterExtension
     {

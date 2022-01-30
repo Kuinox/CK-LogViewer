@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using CK.LogViewer.WebApp.Configuration;
 using System.Security.Cryptography;
 using System.Reactive.Linq;
+using CKLogViewer;
 
 namespace CK.LogViewer.WebApp.Controllers
 {
@@ -20,7 +21,6 @@ namespace CK.LogViewer.WebApp.Controllers
     [Route( "/api/[controller]" )]
     public class LogViewerController : ControllerBase
     {
-        readonly IActivityMonitor _m;
         readonly IOptions<LogViewerConfig> _config;
         readonly IOptions<LogPersistanceConfig> _logPersistanceConfig;
         readonly HttpClient _httpClient;
@@ -30,14 +30,15 @@ namespace CK.LogViewer.WebApp.Controllers
                                    IOptions<LogViewerConfig> config,
                                    IOptions<LogPersistanceConfig> logPersistanceConfig )
         {
-            _m = m;
             _config = config;
             _logPersistanceConfig = logPersistanceConfig;
             _httpClient = httpClientFactory.CreateClient();
         }
 
-        NormalizedPath LogFileFolder => _logPersistanceConfig.Value.LogFileFolder;
-        NormalizedPath StreamFolder => _logPersistanceConfig.Value.StreamLogFolder;
+        string AppFolder = Environment.GetFolderPath( Environment.SpecialFolder.CommonApplicationData, Environment.SpecialFolderOption.Create );
+
+        NormalizedPath LogFileFolder => new NormalizedPath( AppFolder ).Combine( _logPersistanceConfig.Value.LogFileFolder );
+        NormalizedPath StreamFolder => new NormalizedPath( AppFolder ).Combine( _logPersistanceConfig.Value.StreamLogFolder );
 
         [HttpGet( "{logName}" )]
         public async Task GetLogJson( string logName, [FromQuery] int depth = -1, int groupOffset = -1 )
@@ -130,7 +131,6 @@ namespace CK.LogViewer.WebApp.Controllers
         {
             if( files.Count == 0 ) return new BadRequestResult();
             byte[] finalResult;
-            string shaString;
             using( TemporaryFile temporaryFile = new() )
             {
                 using( var stream = files[0].OpenReadStream() )
@@ -143,14 +143,39 @@ namespace CK.LogViewer.WebApp.Controllers
                         finalResult = hashAlg.Hash!;
                     }
                 }
-                shaString = Convert.ToHexString( finalResult ).ToLower();
+                string shaString = Convert.ToHexString( finalResult ).ToLower();
                 NormalizedPath logFolder = LogFileFolder.AppendPart( shaString );
                 NormalizedPath logPath = logFolder.AppendPart( "log.ckmon" );
                 Directory.CreateDirectory( logFolder );
                 System.IO.File.Move( temporaryFile.Path, logPath, true );
                 temporaryFile.Detach();
+                return Ok( shaString );
             }
-            return Ok( shaString );
+        }
+
+        [HttpPost( "text" )]
+        public async Task<IActionResult> UploadTextLog( IList<IFormFile> files )
+        {
+            if( files.Count == 0 ) return new BadRequestResult();
+            byte[] finalResult;
+            using( TemporaryFile temporaryFile = new() )
+            {
+                await Text2CKMon.Run( files[0].OpenReadStream(), temporaryFile.Path );
+                HashAlgorithm hashAlg = HashAlgorithm.Create( "SHA256" )!;
+                using( var readStream = System.IO.File.OpenRead( temporaryFile.Path ) )
+                {
+                    hashAlg.ComputeHash( readStream );
+                    finalResult = hashAlg.Hash!;
+                }
+                string shaString = Convert.ToHexString( finalResult ).ToLower();
+
+                NormalizedPath logFolder = LogFileFolder.AppendPart( shaString );
+                NormalizedPath logPath = logFolder.AppendPart( "log.ckmon" );
+                Directory.CreateDirectory( logFolder );
+                System.IO.File.Move( temporaryFile.Path, logPath, true );
+                temporaryFile.Detach();
+                return Ok( shaString );
+            }
         }
     }
 }

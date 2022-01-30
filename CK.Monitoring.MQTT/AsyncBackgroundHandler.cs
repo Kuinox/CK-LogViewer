@@ -15,6 +15,7 @@ namespace CK.Monitoring.MQTT
         async Task BackgroundLoop( Channel<IMulticastLogEntry> channel )
         {
             ActivityMonitor m = new();
+            m.AutoTags += ActivityMonitor.Tags.StackTrace;
             await foreach( IMulticastLogEntry entry in channel.Reader.ReadAllAsync() )
             {
                 await DoHandleAsync( m, entry );

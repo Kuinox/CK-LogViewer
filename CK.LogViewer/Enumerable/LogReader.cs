@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace CK.LogViewer
+namespace CK.LogViewer.Enumerable
 {
     public static class EnumerableLogReaderExtensions
     {
@@ -33,7 +33,7 @@ namespace CK.LogViewer
         readonly Enumerator _logReader;
         public LogReader( Monitoring.LogReader logReader ) => _logReader = new Enumerator( logReader );
 
-        public IEnumerator<IMulticastLogEntryWithOffset > GetEnumerator() => _logReader;
+        public IEnumerator<IMulticastLogEntryWithOffset> GetEnumerator() => _logReader;
 
         IEnumerator IEnumerable.GetEnumerator() => _logReader;
     }
