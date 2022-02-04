@@ -3,6 +3,7 @@ using CK.Monitoring;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using static CK.LogViewer.Enumerable.EnumerableLogStatsExtensions;
@@ -15,11 +16,7 @@ namespace CK.LogViewer.Enumerable
         public static async Task WriteToAsync( this IObservable<LogEntryWithState> @this, Utf8JsonWriter writer )
         {
             writer.WriteStartArray();
-
-            await foreach( LogEntryWithState entry in @this.ToAsyncEnumerable() )
-            {
-                WriteLog( entry, writer );
-            }
+            await @this.ForEachAsync( ( entry ) => WriteLog( entry, writer ) );
             writer.WriteEndArray();
         }
 
