@@ -173,7 +173,6 @@ public class Program
         {
             FileName = installerPath,
             Arguments = "/VERYSILENT",
-            CreateNoWindow = true,
             UseShellExecute = false
         } );
         Environment.Exit( 0 );
