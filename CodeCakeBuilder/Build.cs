@@ -32,11 +32,7 @@ namespace CodeCake
             Task( "Default" ).Does( () =>
             {
                 globalInfo.TerminateIfShouldStop();
-                if(!globalInfo.IsValid)
-                {
-                    Console.WriteLine("Invalid version. Exiting.");
-                    return;
-                }
+               
                 globalInfo.GetDotnetSolution().Clean();
                 globalInfo.GetNPMSolution().Clean();
                 Cake.CleanDirectories( globalInfo.ReleasesFolder );
@@ -84,6 +80,11 @@ namespace CodeCake
                     }
                 } );
 
+                if( !globalInfo.IsValid )
+                {
+                    Console.WriteLine( "Invalid version. Exiting." );
+                    return;
+                }
 
                 string installer = Path.GetFullPath( Directory.GetFiles( globalInfo.ReleasesFolder ).Single( s => s.EndsWith( ".exe" ) ) );
                 string token = Environment.GetEnvironmentVariable( "GitHubPAT" );

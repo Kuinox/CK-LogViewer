@@ -8,6 +8,7 @@ using CK.MQTT.Client;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Channels;
@@ -35,7 +36,7 @@ namespace CK.LogViewer.WebApp.Services
             );
             _mqtt3Client.DisconnectedHandler = ( DisconnectedReason reason ) =>
             {
-
+                Debugger.Launch();
             };
             await _mqtt3Client.ConnectAsync( null, cancellationToken: cancellationToken );
             await _mqtt3Client.SubscribeAsync( null, new Subscription[]

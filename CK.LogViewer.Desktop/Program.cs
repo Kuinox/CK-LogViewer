@@ -126,8 +126,7 @@ public class Program
         {
             FileName = "dotnet",
             ArgumentList = { curr, uri },
-            UseShellExecute = false,
-            CreateNoWindow = true
+            UseShellExecute = false
         } );
         await CheckForUpdate( currentVersion );
         return 0;
