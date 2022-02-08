@@ -130,7 +130,7 @@ namespace CK.LogViewer.WebApp.Controllers
         public async Task<IActionResult> UploadLog( IList<IFormFile> files )
         {
             if( files.Count == 0 ) return new BadRequestResult();
-            byte[] finalResult;
+            byte[] hashFinalResult;
             using( TemporaryFile temporaryFile = new() )
             {
                 using( var stream = files[0].OpenReadStream() )
@@ -140,10 +140,10 @@ namespace CK.LogViewer.WebApp.Controllers
                     using( CryptoStream sHA512Stream = new( stream, hashAlg, CryptoStreamMode.Read ) )
                     {
                         await sHA512Stream.CopyToAsync( tempStream );
-                        finalResult = hashAlg.Hash!;
+                        hashFinalResult = hashAlg.Hash!;
                     }
                 }
-                string shaString = Convert.ToHexString( finalResult ).ToLower();
+                string shaString = Convert.ToHexString( hashFinalResult ).ToLower();
                 NormalizedPath logFolder = LogFileFolder.AppendPart( shaString );
                 NormalizedPath logPath = logFolder.AppendPart( "log.ckmon" );
                 Directory.CreateDirectory( logFolder );

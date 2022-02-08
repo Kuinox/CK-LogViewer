@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -11,7 +11,7 @@
     <PackageReference Include="CK.ActivityMonitor.SimpleSender" Version="15.0.0-r06" />
     <PackageReference Include="CK.Monitoring.Hosting" Version="15.0.0-r06" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="6.0.0" />
-    <PackageReference Include="CK.MQTT.Client" Version="0.10.4" />
+    <PackageReference Include="CK.MQTT.Client" Version="0.10.5" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
   </ItemGroup>
 
