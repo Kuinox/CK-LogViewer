@@ -48,7 +48,12 @@ module.exports = {
                 {
                     from: "src/styles.css",
                     to: "styles.css"
-                }]
+                },
+                {
+                    from: "src/Inconsolata.woff2",
+                    to: "Inconsolata.woff2"
+                }
+            ]
         }),
         new ReplaceInFileWebpackPlugin([{
             files: [`${outputPath}/index.html`],

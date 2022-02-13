@@ -37,8 +37,12 @@ namespace CK.LogViewer.WebApp.Controllers
 
         string AppFolder = Environment.GetFolderPath( Environment.SpecialFolder.CommonApplicationData, Environment.SpecialFolderOption.Create );
 
-        NormalizedPath LogFileFolder => new NormalizedPath( AppFolder ).Combine( _logPersistanceConfig.Value.LogFileFolder );
-        NormalizedPath StreamFolder => new NormalizedPath( AppFolder ).Combine( _logPersistanceConfig.Value.StreamLogFolder );
+        NormalizedPath LogFileFolder => new NormalizedPath( AppFolder )
+            .AppendPart( "CK.LogViewer" )
+            .Combine( _logPersistanceConfig.Value.LogFileFolder );
+        NormalizedPath StreamFolder => new NormalizedPath( AppFolder )
+            .AppendPart( "CK.LogViewer" )
+            .Combine( _logPersistanceConfig.Value.StreamLogFolder );
 
         [HttpGet( "{logName}" )]
         public async Task GetLogJson( string logName, [FromQuery] int depth = -1, int groupOffset = -1 )

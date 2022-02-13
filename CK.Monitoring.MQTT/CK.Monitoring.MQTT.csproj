@@ -11,4 +11,8 @@
     <PackageReference Include="CK.MQTT.Client" Version="0.10.5" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\CK.LogViewer.Embedded\CK.LogViewer.Embedded.csproj" />
+  </ItemGroup>
+
 </Project>
