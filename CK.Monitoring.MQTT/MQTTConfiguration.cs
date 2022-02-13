@@ -9,11 +9,13 @@ namespace CK.Monitoring.MQTT
     public class MQTTConfiguration : IHandlerConfiguration
     {
         public string ConnectionString { get; set; } = null!;
+        public bool LaunchLogViewer { get; set; } = false;
         public IHandlerConfiguration Clone()
         {
             return new MQTTConfiguration()
             {
-                ConnectionString = ConnectionString
+                ConnectionString = ConnectionString,
+                LaunchLogViewer = LaunchLogViewer
             };
         }
     }

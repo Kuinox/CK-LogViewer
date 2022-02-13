@@ -9,7 +9,7 @@ public class Program
     [STAThread]
     static void Main( string[] args )
     {
-        string path = args.Length > 0 ? args[0] : @"C:\Users\Kuinox\Desktop\log.ckmon";
+        string path = args[0];
         // Creating a new PhotinoWindow instance with the fluent API
         var window = new PhotinoWindow()
             .SetTitle( "CK-LogViewer" )
