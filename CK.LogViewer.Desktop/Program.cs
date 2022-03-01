@@ -18,7 +18,6 @@ using System.Threading.Tasks;
 
 public class Program
 {
-    [STAThread]
     public static async Task<int> Main( string[] args )
     {
         if( args.Length == 0 )
@@ -160,8 +159,8 @@ public class Program
         HttpClient httpClient = new();
         HttpResponseMessage response = await httpClient.GetAsync( installer.BrowserDownloadUrl );
 
-        string installerPath = Path.GetTempFileName();
-
+        string installerPath = Path.Combine( Path.GetTempPath(), "CK-LogViewer-Installer.exe" );
+        File.Delete( installerPath );
         using( FileStream saveInstaller = File.OpenWrite( installerPath ) )
         using( Stream downloadStream = await response.Content.ReadAsStreamAsync() )
         {
