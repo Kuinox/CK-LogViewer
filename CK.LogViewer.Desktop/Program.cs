@@ -25,11 +25,6 @@ public class Program
             Console.Error.WriteLine( "The path of the .ckmon file must be supplied." );
             return 1;
         }
-        if( args.Length > 1 )
-        {
-            Console.Error.WriteLine( "Only one arg is accepted: the path of the .ckmon file." );
-            return 2;
-        }
         var toText = false;
         var argsSet = new HashSet<string>( args );
         var withFlag = argsSet.Where( s => s.StartsWith( "--" ) );
@@ -103,7 +98,7 @@ public class Program
             curr = Path.GetDirectoryName( curr );
             if( curr == null )
             {
-                Console.WriteLine( "Could not find the CK.LogViewer.Embedded folder. Is your installation fine ?" );
+                Console.WriteLine( "Could not find the CK.LogViewer.Embedded folder. Is your installation OK ?" );
                 return 1;
             }
             if( Directory.GetDirectories( curr! ).Any( s => Path.GetFileName( s ) == embeddedDir ) )
