@@ -55,7 +55,7 @@ public class Program
         {
             MulticastLogEntryTextBuilder builder = new( false, false );
             using( var reader = LogReader.Open( path ) )
-            using( var writer = new StreamWriter( path + ".ckmon" ) )
+            using( var writer = new StreamWriter( path + ".ckmon", false ) )
             {
                 foreach( var item in reader.ToEnumerable() )
                 {
@@ -93,7 +93,7 @@ public class Program
         var assembly = Assembly.GetExecutingAssembly();
         var fileVersionInfo = FileVersionInfo.GetVersionInfo( assembly.Location );
         var currentVersionStr = fileVersionInfo.ProductVersion?.Split( "/" )[0];
-        var currentVersion = currentVersionStr == null ? null : CSVersion.Parse( currentVersionStr );
+        var currentVersion = currentVersionStr == null ? null : SVersion.Parse( currentVersionStr );
         var uri = $"{serverAdress}?v={currentVersion}#{hash}";
         string? curr = assembly.Location;
         const string embeddedDir = "CK.LogViewer.Embedded";
@@ -133,7 +133,7 @@ public class Program
 
 
 
-    private static async Task CheckForUpdate( CSVersion? currentVersion )
+    private static async Task CheckForUpdate( SVersion? currentVersion )
     {
         if( currentVersion == null )
         {
@@ -143,8 +143,8 @@ public class Program
 
         GitHubClient client = new( new ProductHeaderValue( "CK-LogViewer-AutoUpdater" ) );
         IReadOnlyList<Release> repo = await client.Repository.Release.GetAll( "Kuinox", "CK-LogViewer" );
-        (Release release, CSVersion version) = repo
-            .Select( s => (Release: s, Version: CSVersion.TryParse( s.TagName )) )
+        (Release release, SVersion version) = repo
+            .Select( s => (Release: s, Version: SVersion.TryParse( s.TagName )) )
             .Where( s => s.Version?.IsStable ?? false )
             .Where( s => s.Release.Assets.Any( s => s.Name.EndsWith( ".exe" ) ) )
             .OrderByDescending( s => s.Version )

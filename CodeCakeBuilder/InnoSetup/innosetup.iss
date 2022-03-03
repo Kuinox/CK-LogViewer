@@ -5,7 +5,7 @@
 #define MyAppPublisher "Kuinox (logviewer@kuinox.io)"
 #define MyAppURL "https://github.com/Kuinox/CK-LogViewer/"
 #define MyAppExeName "CK.LogViewer.Desktop.exe"
-#define MyAppAssocName "Binary CK-Monitoring LogFile"
+#define MyAppAssocName "CK-Monitoring Binary LogFile"
 #define MyAppAssocExt ".ckmon"
 #define MyAppAssocKey StringChange(MyAppAssocName, " ", "") + MyAppAssocExt
 #define AppServiceName "CK.LogViewer.WebApp"
@@ -13,6 +13,7 @@
 #define DotnetPath "C:\Program Files\dotnet\dotnet.exe"
 #define ServiceDllPath "CK.LogViewer.WebApp\CK.LogViewer.WebApp.dll"
 #define Appname "CK Desktop LogViewer"
+#define MyAppVersion "v0.1.0"
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
@@ -44,16 +45,20 @@ Source: "..\Releases\CK.LogViewer.Embedded\*"; DestDir: "{app}\CK.LogViewer.Embe
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Registry]
-Root: HKCR; Subkey: "{#MyAppAssocExt}"; ValueType: string; ValueName: ""; ValueData: "{#MyAppAssocName}"; Flags: uninsdeletevalue
+Root: HKCR; Subkey: "{#MyAppAssocExt}"; ValueType: string; ValueName: ""; ValueData: "{#MyAppAssocKey}"; Flags: uninsdeletevalue
+Root: HKCR; Subkey: "{#MyAppAssocExt}\shell"; ValueType: string; ValueName: ""; ValueData: "Export as '.log'"; Flags: uninsdeletevalue
+Root: HKCR; Subkey: "{#MyAppAssocExt}\shell\command"; ValueType: string; ValueName: ""; ValueData: """{app}\CK.LogViewer.Desktop\CK.LogViewer.Desktop.exe"" ""%1"""; Flags: uninsdeletevalue
+
 
 Root: HKA; Subkey: "Software\Classes\{#MyAppAssocExt}\OpenWithProgids"; ValueType: string; ValueName: "{#MyAppAssocKey}"; ValueData: ""; Flags: uninsdeletevalue
 Root: HKA; Subkey: "Software\Classes\{#MyAppAssocKey}"; ValueType: string; ValueName: ""; ValueData: "{#MyAppAssocName}"; Flags: uninsdeletekey
-Root: HKA; Subkey: "Software\Classes\{#MyAppAssocKey}\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\{#MyAppExeName},0"
-Root: HKA; Subkey: "Software\Classes\{#MyAppAssocKey}\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""
+Root: HKA; Subkey: "Software\Classes\{#MyAppAssocKey}\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\CK.LogViewer.Desktop\{#MyAppExeName}"" ""%1"""
+Root: HKA; Subkey: "Software\Classes\{#MyAppAssocKey}\shell\ExportText\"; ValueType: string; ValueName: ""; ValueData: "Export as '.log'"
+Root: HKA; Subkey: "Software\Classes\{#MyAppAssocKey}\shell\ExportText\command"; ValueType: string; ValueName: ""; ValueData: """{app}\CK.LogViewer.Desktop\{#MyAppExeName}"" ""%1"" --toText"
 Root: HKA; Subkey: "Software\Classes\Applications\{#MyAppExeName}\SupportedTypes"; ValueType: string; ValueName: ".ckmon"; ValueData: ""
 
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
+Name: "{group}\{#MyAppName}"; Filename: "{app}\CK.LogViewer.Desktop\{#MyAppExeName}"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
 
 [_ISTool]
