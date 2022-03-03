@@ -50,7 +50,7 @@ public class Program
         {
             MulticastLogEntryTextBuilder builder = new( false, false );
             using( var reader = LogReader.Open( path ) )
-            using( var writer = new StreamWriter( path + ".ckmon", false ) )
+            using( var writer = new StreamWriter( path + ".log", false ) )
             {
                 foreach( var item in reader.ToEnumerable() )
                 {
