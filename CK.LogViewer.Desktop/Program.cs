@@ -155,7 +155,7 @@ public class Program
 
         string installerPath = Path.Combine( Path.GetTempPath(), "CK-LogViewer-Installer.exe" );
         File.Delete( installerPath );
-        using( HttpResponseMessage response = await httpClient.GetAsync( installer.BrowserDownloadUrl ) );
+        using( HttpResponseMessage response = await httpClient.GetAsync( installer.BrowserDownloadUrl ) )
         using( FileStream saveInstaller = File.OpenWrite( installerPath ) )
         using( Stream downloadStream = await response.Content.ReadAsStreamAsync() )
         {
