@@ -152,10 +152,10 @@ public class Program
 
         ReleaseAsset installer = release.Assets.Single( s => s.Name.EndsWith( ".exe" ) );
         HttpClient httpClient = new();
-        HttpResponseMessage response = await httpClient.GetAsync( installer.BrowserDownloadUrl );
 
         string installerPath = Path.Combine( Path.GetTempPath(), "CK-LogViewer-Installer.exe" );
         File.Delete( installerPath );
+        using( HttpResponseMessage response = await httpClient.GetAsync( installer.BrowserDownloadUrl ) );
         using( FileStream saveInstaller = File.OpenWrite( installerPath ) )
         using( Stream downloadStream = await response.Content.ReadAsStreamAsync() )
         {

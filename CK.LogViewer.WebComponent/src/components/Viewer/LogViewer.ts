@@ -76,7 +76,12 @@ export class LogViewer extends HTMLElement { //TODO: hide this behind an object,
         if (this.previousSubscribe !== undefined) {
             this.previousSubscribe();
         }
-        this.previousSubscribe = await this.mqttService.listenTo(filename, this.processLogStream);
+        try {
+            this.previousSubscribe = await this.mqttService.listenTo(filename, this.processLogStream);
+        } catch (exception) {
+            console.error("Could not subscribe: " + exception);
+        }
+
         if (!this.isSetup) {
             if (!isPublicInstance()) {
                 const buttonsDiv = document.createElement("div");

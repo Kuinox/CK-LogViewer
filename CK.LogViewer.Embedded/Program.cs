@@ -2,24 +2,25 @@ using PhotinoNET;
 using System;
 using System.Drawing;
 
-namespace CK.LogViewer.Embedded;
-
-public class Program
+namespace CK.LogViewer.Embedded
 {
-    [STAThread]
-    static void Main( string[] args )
+    public class Program
     {
-        string path = args[0];
-        // Creating a new PhotinoWindow instance with the fluent API
-        var window = new PhotinoWindow()
-            .SetTitle( "CK-LogViewer" )
-            // Resize to a percentage of the main monitor work area
-            .SetUseOsDefaultSize( false )
-            .SetSize( new Size( 900, 800 ) )
-            .Center()
-            .SetResizable( true )
-            .Load( new Uri( path ) ); // Can be used with relative path strings or "new URI()" instance to load a website.
+        [STAThread]
+        static void Main( string[] args )
+        {
+            string path = args[0];
+            // Creating a new PhotinoWindow instance with the fluent API
+            var window = new PhotinoWindow()
+                .SetTitle( "CK-LogViewer" )
+                // Resize to a percentage of the main monitor work area
+                .SetUseOsDefaultSize( false )
+                .SetSize( new Size( 900, 800 ) )
+                .Center()
+                .SetResizable( true )
+                .Load( new Uri( path ) ); // Can be used with relative path strings or "new URI()" instance to load a website.
 
-        window.WaitForClose(); // Starts the application event loop
+            window.WaitForClose(); // Starts the application event loop
+        }
     }
 }
