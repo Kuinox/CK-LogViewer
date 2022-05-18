@@ -43,6 +43,7 @@ namespace CK.LogViewer
 
         public DateTimeStamp PreviousLogTime => _multicastLogEntry.PreviousLogTime;
 
+        public string GrandOutputId => _multicastLogEntry.GrandOutputId;
 
         public ILogEntry CreateUnicastLogEntry() => _multicastLogEntry.CreateUnicastLogEntry();
 

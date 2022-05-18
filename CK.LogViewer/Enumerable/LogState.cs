@@ -149,6 +149,9 @@ namespace CK.LogViewer.Enumerable
             public string MonitorId => _multicastLogEntryWithOffset.MonitorId;
             public LogEntryType PreviousEntryType => _multicastLogEntryWithOffset.PreviousEntryType;
             public DateTimeStamp PreviousLogTime => _multicastLogEntryWithOffset.PreviousLogTime;
+
+            public string GrandOutputId => _multicastLogEntryWithOffset.GrandOutputId;
+
             public ILogEntry CreateUnicastLogEntry() => _multicastLogEntryWithOffset.CreateUnicastLogEntry();
             public void WriteLogEntry( CKBinaryWriter w ) => _multicastLogEntryWithOffset.WriteLogEntry( w );
             #endregion

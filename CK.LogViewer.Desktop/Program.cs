@@ -26,6 +26,7 @@ public class Program
             return 1;
         }
         var toText = false;
+        var toCkmon = false;
         var argsSet = new HashSet<string>( args );
         var withFlag = argsSet.Where( s => s.StartsWith( "--" ) );
         if( withFlag.Any() )
@@ -34,6 +35,15 @@ public class Program
             {
                 toText = true;
                 argsSet.Remove( "--toText" );
+            }
+        }
+
+        if( withFlag.Any() )
+        {
+            if( argsSet.Contains( "--toCKMon" ) )
+            {
+                toCkmon = true;
+                argsSet.Remove( "--toCKMon" );
             }
         }
 
@@ -57,6 +67,14 @@ public class Program
                     await writer.WriteLineAsync( builder.FormatEntryString( item ) );
                 }
             }
+            return 0;
+        }
+
+        if( toCkmon )
+        {
+            Console.WriteLine( $"Converting {path} to ckmon." );
+            string text = await File.ReadAllTextAsync( path );
+            await Text2CKMon.Run( File.OpenRead( path ), path + ".ckmon" );
             return 0;
         }
 
