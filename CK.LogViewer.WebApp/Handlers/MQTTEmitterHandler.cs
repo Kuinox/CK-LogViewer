@@ -2,19 +2,14 @@ using CK.Core;
 using CK.LogViewer.Enumerable;
 using CK.LogViewer.WebApp.Configuration;
 using CK.LogViewer.WebApp.Model;
-using CK.LogViewer.WebApp.Services;
-using CK.Monitoring;
 using CK.MQTT;
-using Microsoft.Extensions.Hosting;
+using CK.MQTT.Client;
+using CK.MQTT.Packets;
 using Microsoft.Extensions.Options;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Channels;
@@ -24,18 +19,18 @@ namespace CK.LogViewer.WebApp.Handlers
 {
     public class MQTTEmitterHandler
     {
-        readonly IMqtt3Client _mqttClient;
+        readonly MqttClientAgent _mqttClient;
         readonly IOptions<MQTTConfiguration> _mqttConfig;
         readonly Dictionary<Guid, Handler> _handlers = new();
         //TODO: autocleanup, this is a slow memory leak.
         //We need to get rid of the handlers if they are not active anymore.
-        public MQTTEmitterHandler( IMqtt3Client mqttClient, IOptions<MQTTConfiguration> mqttConfig )
+        public MQTTEmitterHandler( MqttClientAgent mqttClient, IOptions<MQTTConfiguration> mqttConfig )
         {
             _mqttClient = mqttClient;
             _mqttConfig = mqttConfig;
         }
 
-        public async Task Handle(IActivityMonitor m, IncomingLogWithPosition notification, CancellationToken cancellationToken )
+        public async Task Handle( IActivityMonitor m, IncomingLogWithPosition notification, CancellationToken cancellationToken )
         {
             Handler? handler;
             lock( _handlers )
@@ -46,7 +41,7 @@ namespace CK.LogViewer.WebApp.Handlers
                     _handlers[notification.InstanceGuid] = handler;
                 }
             }
-            
+
             await handler.HandleAsync( notification, cancellationToken );
         }
 
@@ -86,7 +81,7 @@ namespace CK.LogViewer.WebApp.Handlers
                     {
                         LogToJson.WriteLog( entry, writer );
                         await writer.FlushAsync( stoppingToken );
-                        await await _mqttClient.PublishAsync( null, "logLive/" + _guid.ToString(), QualityOfService.ExactlyOnce, false, ms.ToArray() );
+                        await await _mqttClient.PublishAsync( new SmallOutgoingApplicationMessage( "logLive/" + _guid.ToString(), QualityOfService.ExactlyOnce, false, ms.ToArray() ) );
                     }
                 }
             }

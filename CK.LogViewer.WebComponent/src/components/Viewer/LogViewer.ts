@@ -127,7 +127,7 @@ export class LogViewer extends HTMLElement { //TODO: hide this behind an object,
             if (this.aborter!.signal.aborted) {
                 return;
             }
-            if (i % 100 === 99) {
+            if (i % 1000 === 99) {
                 await this.sleep(0);
             }
         }

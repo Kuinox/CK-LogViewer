@@ -25,17 +25,19 @@ namespace CK.LogViewer.WebApp.Controllers
         readonly IOptions<LogPersistanceConfig> _logPersistanceConfig;
         readonly HttpClient _httpClient;
 
-        public LogViewerController( IActivityMonitor m,
-                                   IHttpClientFactory httpClientFactory,
-                                   IOptions<LogViewerConfig> config,
-                                   IOptions<LogPersistanceConfig> logPersistanceConfig )
+        public LogViewerController( IHttpClientFactory httpClientFactory,
+                                    IOptions<LogViewerConfig> config,
+                                    IOptions<LogPersistanceConfig> logPersistanceConfig )
         {
             _config = config;
             _logPersistanceConfig = logPersistanceConfig;
             _httpClient = httpClientFactory.CreateClient();
         }
 
-        string AppFolder = Environment.GetFolderPath( Environment.SpecialFolder.CommonApplicationData, Environment.SpecialFolderOption.Create );
+        readonly string AppFolder =
+            Environment.UserInteractive ?
+                Path.GetFullPath("AppFolder")
+                : Environment.GetFolderPath( Environment.SpecialFolder.CommonApplicationData, Environment.SpecialFolderOption.Create );
 
         NormalizedPath LogFileFolder => new NormalizedPath( AppFolder )
             .AppendPart( "CK.LogViewer" )

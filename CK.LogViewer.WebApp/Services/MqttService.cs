@@ -18,45 +18,34 @@ namespace CK.LogViewer.WebApp.Services
 {
     public class MqttService : BackgroundService
     {
-        readonly IOptions<MQTTConfiguration> _config;
-        readonly IMqtt3Client _mqtt3Client;
+        readonly MqttClientAgent _mqtt3Client;
         readonly AppendToFileHandler _appendToFileHandler;
-        readonly Channel<DisposableApplicationMessage> _messageChannel;
-        public MqttService( IOptions<MQTTConfiguration> config, IMqtt3Client mqtt3Client, AppendToFileHandler appendToFileHandler )
+        readonly Channel<ApplicationMessage> _messageChannel;
+        public MqttService( IOptions<MQTTConfiguration> config, MqttClientAgent mqtt3Client, AppendToFileHandler appendToFileHandler )
         {
             _mqtt3Client = mqtt3Client;
             _appendToFileHandler = appendToFileHandler;
-            _messageChannel = Channel.CreateBounded<DisposableApplicationMessage>( config.Value.LogBufferSize );
+            _messageChannel = Channel.CreateBounded<ApplicationMessage>( config.Value.LogBufferSize );
         }
 
         public override async Task StartAsync( CancellationToken cancellationToken )
         {
-            _mqtt3Client.SetMessageHandler( ( IActivityMonitor? m, DisposableApplicationMessage msg, CancellationToken token ) =>
-                 _messageChannel.Writer.WriteAsync( msg, cancellationToken )
-            );
-            _mqtt3Client.DisconnectedHandler = ( DisconnectedReason reason ) =>
-            {
-                Debugger.Launch();
-            };
+            _mqtt3Client.OnMessage.Async += async (m, msg) => await _messageChannel.Writer.WriteAsync( msg );
             await _mqtt3Client.ConnectAsync( null, cancellationToken: cancellationToken );
-            await _mqtt3Client.SubscribeAsync( null, new Subscription[]
-            {
-                new Subscription("ck-log/#", QualityOfService.ExactlyOnce) //TODO: why no cancel token here ?
-            } );
+            await _mqtt3Client.SubscribeAsync( new Subscription( "ck-log/#", QualityOfService.ExactlyOnce ) );
             await base.StartAsync( cancellationToken );
         }
 
         protected override async Task ExecuteAsync( CancellationToken stoppingToken )
         {
             ActivityMonitor m = new();
-            await foreach( DisposableApplicationMessage item in _messageChannel.Reader.ReadAllAsync( stoppingToken ) )
+            await foreach( ApplicationMessage item in _messageChannel.Reader.ReadAllAsync( stoppingToken ) )
             {
                 try
                 {
                     m.Trace( "Processing message..." );
                     ILogEntry? entry;
                     bool badEndOfFile;
-                    using( item )
                     using( MemoryStream ms = new( item.Payload.ToArray() ) )
                     using( CKBinaryReader reader = new( ms ) )
                     {

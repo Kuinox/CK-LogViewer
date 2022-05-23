@@ -97,16 +97,8 @@ export class LogLineBaseElement extends HTMLElement {
             this.logviewerState.rulersColors[this.sliderClassName] = rulerColor;
         }
 
-        this.cssClassManager.requireClass(this.sliderClassName, `.${this.monitorClass} .slider {
-    margin-left: ${margin}px;
-
-}
-.${this.monitorClass} .slider div {
-    /*border-color: ${rulerColor};*/
-    box-shadow: -3px 0px 3px ${rulerColor};
-}
-
-        ` );
+        this.cssClassManager.requireClass(this.sliderClassName, `.${this.monitorClass} .slider {left: ${margin}px ;}
+.${this.monitorClass} .slider div {box-shadow: -3px 0px 3px ${rulerColor};}` );
     };
 
     onMouseUp = (): void => {
@@ -133,7 +125,7 @@ export class LogLineBaseElement extends HTMLElement {
     }
 
     private get monitorClass() {
-        return monitorClass + this.logData.monitorId;
+        return monitorClass + this.logData.monitorId.replace("{", "").replace("}", "");
     }
 
     private static getRulerClassByOffset(groupOffset: number) {

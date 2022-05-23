@@ -1,4 +1,3 @@
-using CK.Core;
 using CK.LogViewer.WebApp.Configuration;
 using CK.LogViewer.WebApp.Handlers;
 using CK.LogViewer.WebApp.Services;
@@ -6,18 +5,8 @@ using CK.MQTT;
 using CK.MQTT.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace CK.LogViewer.WebApp
 {
@@ -35,12 +24,15 @@ namespace CK.LogViewer.WebApp
         {
             MQTTConfiguration mqttConfig = Configuration.GetSection( "MQTT" ).Get<MQTTConfiguration>();
             services.Configure<MQTTConfiguration>( Configuration.GetSection( "MQTT" ) );
-            IMqtt3Client client = MqttClient.Factory.CreateMQTT3Client( new( mqttConfig.ConnectionString ),
-                ( IActivityMonitor? m, DisposableApplicationMessage msg, CancellationToken token ) =>
+            var splitted = mqttConfig.ConnectionString.Split( ':' );
+            var channel = new TcpChannel( splitted[0], int.Parse( splitted[1] ) );
+            var config = new Mqtt3ClientConfiguration()
             {
-                // Will be replaced.
-                return new ValueTask();
-            } );
+                KeepAliveSeconds = 0,
+                DisconnectBehavior = DisconnectBehavior.AutoReconnect,
+                Credentials = new MqttClientCredentials()
+            };
+            var client = new MqttClientAgent( ( s ) => new LowLevelMqttClient( ProtocolConfiguration.Mqtt3, config, s, channel ) );
             services.AddSingleton( client );
             services.AddHttpClient();
             services.AddControllers();
