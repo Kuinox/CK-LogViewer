@@ -8,7 +8,7 @@ using System.Threading.Channels;
 
 namespace CK.Monitoring.MQTT
 {
-    public class MQTT : AsyncBackgroundHandler
+    public class MQTT : IGrandOutputHandler
     {
         MQTTConfiguration _config;
         IMqtt3Client? _client;
@@ -21,7 +21,7 @@ namespace CK.Monitoring.MQTT
 
         bool _launchLogViewer = true;
 
-        protected override async Task DoHandleAsync( IActivityMonitor m, IMulticastLogEntry entry )
+        public async ValueTask HandleAsync( IActivityMonitor m, IMulticastLogEntry entry )
         {
             Task task;
             using( MemoryStream mem = new() )
@@ -52,7 +52,7 @@ namespace CK.Monitoring.MQTT
             }
         }
 
-        protected override bool DoActivate( IActivityMonitor m )
+        public async ValueTask<bool> ActivateAsync( IActivityMonitor m )
         {
             var splitted = _config.ConnectionString.Split( ':' );
             var channel = new TcpChannel( splitted[0], int.Parse( splitted[1] ) );
@@ -63,25 +63,23 @@ namespace CK.Monitoring.MQTT
                 Credentials = new MqttClientCredentials( Guid.NewGuid().ToString(), true )
             };
             _client = new MqttClientAgent( ( s ) => new LowLevelMqttClient( ProtocolConfiguration.Mqtt3, config, s, channel ) );
-            _client.ConnectAsync( null ).GetAwaiter().GetResult();
+            await _client.ConnectAsync( null );
             _launchLogViewer = _config.LaunchLogViewer;
             return true;
         }
 
-        public override bool ApplyConfiguration( IActivityMonitor m, IHandlerConfiguration c )
+        public ValueTask<bool> ApplyConfigurationAsync( IActivityMonitor m, IHandlerConfiguration c )
         {
-            if( c is not MQTTConfiguration cfg ) return false;
+            if( c is not MQTTConfiguration cfg ) return new ValueTask<bool>( false );
             _config = cfg; //TODO: reconnect to new broker
-            return true;
+            return new( true );
         }
 
-        protected override void DoDeactivate( IActivityMonitor m )
+        public async ValueTask DeactivateAsync( IActivityMonitor m )
         {
-            _client!.DisconnectAsync( true ).GetAwaiter().GetResult();
+            await _client!.DisconnectAsync( true );
         }
 
-        public override void OnTimer( IActivityMonitor m, TimeSpan timerSpan )
-        {
-        }
+        public ValueTask OnTimerAsync( IActivityMonitor m, TimeSpan timerSpan ) => new();
     }
 }

@@ -97,7 +97,7 @@ export class LogLineBaseElement extends HTMLElement {
             this.logviewerState.rulersColors[this.sliderClassName] = rulerColor;
         }
 
-        this.cssClassManager.requireClass(this.sliderClassName, `.${this.monitorClass} .slider {left: ${margin}px ;}
+        this.cssClassManager.requireClass(this.sliderClassName, `.${this.monitorClass} .slider {margin-left: ${margin}px ;}
 .${this.monitorClass} .slider div {box-shadow: -3px 0px 3px ${rulerColor};}` );
     };
 
@@ -125,7 +125,7 @@ export class LogLineBaseElement extends HTMLElement {
     }
 
     private get monitorClass() {
-        return monitorClass + this.logData.monitorId.replace("{", "").replace("}", "");
+        return monitorClass + encodeURI(this.logData.monitorId);
     }
 
     private static getRulerClassByOffset(groupOffset: number) {

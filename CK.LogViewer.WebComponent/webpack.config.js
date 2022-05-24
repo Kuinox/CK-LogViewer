@@ -27,6 +27,7 @@ module.exports = {
         fallback: {
             Buffer: require.resolve('buffer/'),
             process: require.resolve('process/'),
+            url: require.resolve("url/")
         }
     },
     output: {
